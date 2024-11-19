@@ -1,4 +1,4 @@
-name: Build
+name: Build Electron
 
 on:
   workflow_dispatch:

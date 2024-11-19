@@ -1,4 +1,4 @@
-name: Build rustc
+name: Build Electron Builder
 
 on:
   workflow_dispatch:
