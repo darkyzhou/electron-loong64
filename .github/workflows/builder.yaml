@@ -7,7 +7,7 @@ on:
         type: string
         required: true
         default: "1.27.1"
-        description: Version of rustup for installing host rustc
+        description: Version of rustup for host rustc
       hostRustVersion:
         type: string
         required: true
@@ -17,7 +17,7 @@ on:
         type: string
         required: true
         default: "beta"
-        description: Target rustc version
+        description: Target rustc branch
       gccVersion:
         type: string
         required: true
@@ -34,8 +34,6 @@ jobs:
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - name: Build libgcc
@@ -62,8 +60,6 @@ jobs:
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - name: Build rustc
@@ -90,11 +86,12 @@ jobs:
           path: dist/rustc.tar.gz
 
   builder:
+    needs:
+      - libgcc
+      - rustc
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - uses: actions/checkout@v4
       - name: Download artifacts

@@ -35,6 +35,7 @@ jobs:
           git -C src/electron apply repo/electron.patch
           npx e sync -vvvv
   build:
+    needs: prepare-src
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-builder:latest
