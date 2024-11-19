@@ -1,0 +1,24 @@
+FROM debian:bookworm-slim
+
+RUN groupadd --gid 1000 builduser && \
+    useradd --uid 1000 --gid builduser --shell /bin/bash --create-home builduser
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        xz-utils \
+        sudo
+
+RUN curl --silent --location https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get update && \
+    apt-get install -y nodejs && \
+    npm install -g npm@latest node-gyp yarn
+
+RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser
+
+USER builduser
+WORKDIR /home/builduser
+RUN npm install @electron/build-tools

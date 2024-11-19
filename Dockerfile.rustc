@@ -1,0 +1,40 @@
+FROM ghcr.io/darkyzhou/loong64-debian:latest
+
+ARG RUSTUP_VERSION="1.27.1" \
+    HOST_RUST_VERSION="1.82.0" \
+    TARGET_RUST_BRANCH="beta"
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        python3 \
+        ninja-build \
+        libffi-dev \
+        libssl-dev \
+        build-essential \
+        pkg-config
+
+WORKDIR /root
+ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+RUN curl "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/loongarch64-unknown-linux-gnu/rustup-init" -o rustup-init && \
+    chmod +x rustup-init && \
+    ./rustup-init -y --default-toolchain "${HOST_RUST_VERSION}" --profile minimal --no-modify-path && \
+    rm rustup-init
+
+RUN git clone --depth 1 --branch "${TARGET_RUST_BRANCH}" https://github.com/rust-lang/rust.git
+
+WORKDIR /root/rust
+ADD config.toml .
+ENV CFLAGS="-fPIC" \
+    CXXFLAGS="-fPIC" \
+    LDFLAGS="-fPIC" \
+    RUSTFLAGS="-C code-model=medium" \
+    LIBGIT2_NO_PKG_CONFIG=1 \
+    RUST_BACKTRACE=1
+RUN mkdir /root/target && \
+    ./x dist && \
+    ./x install && \
+    tar czf rustc.tar.gz --directory=/root/target .

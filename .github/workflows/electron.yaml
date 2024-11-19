@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      electronBranch:
+        type: string
+        required: true
+        default: "v32.2.5"
+        description: Branch of electron to build
+
+jobs:
+  prepare-src:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-buildtools:latest
+      volumes:
+        - /home/darkyzhou/data/build/electron-loong64:/home/builduser/buildroot
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+      - name: Sync sources
+        run: |
+          set -ex
+          cd /home/builduser/buildroot
+          if [ ! -d "src/electron" ]; then
+            npx e init -i release -r /home/builduser/buildroot electron-loong64
+            git clone -b ${{ inputs.electronBranch }} https://github.com/electron/electron src/electron
+          fi
+          git -C src clean -fd || true
+          git -C src am --abort || true
+          git -C src/electron fetch origin --tags
+          git -C src/electron switch --detach ${{ inputs.electronBranch }}
+          git -C src/electron apply repo/electron.patch
+          npx e sync -vvvv
+  build:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-builder:latest
+      volumes:
+        - /home/darkyzhou/data/build/electron-loong64:/home/builduser/buildroot
+    steps:
+      - name: Replace binaries
+        run: |
+          set -ex
+          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          cp /usr/local/bin/node /home/builduser/buildroot/src/third_party/node/linux/node-linux-x64/bin/node
+      - name: Generate ninja
+        run: |
+          set -ex
+          cd /home/builduser/buildroot/src
+          gn gen out/Release --args="import(\"//electron/build/args/release.gn\")" --script-executable=/usr/bin/python3
+        env:
+          CC: clang
+          CXX: clang++
+          AR: ar
+          NM: nm
+          RUSTC_BOOTSTRAP: 1
+      - name: Build electron
+        run: |
+          set -ex
+          cd /home/builduser/buildroot/src

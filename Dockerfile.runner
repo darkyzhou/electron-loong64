@@ -1,0 +1,26 @@
+FROM ghcr.io/darkyzhou/loong64-debian:latest
+
+ARG NODE_VERSION="18.20.5"
+ARG DOCKER_VERSION="27.3.1"
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        libatomic1
+        
+RUN curl -L -O https://github.com/loong64/node/releases/download/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
+    tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
+    cp -R node-v${NODE_VERSION}-linux-loong64/* /usr/local/ && \
+    rm -rf node-v${NODE_VERSION}-linux-loong64* && \
+    node --version
+
+RUN curl -L -O https://github.com/loong64/docker-ce-packaging/releases/download/v${DOCKER_VERSION}/docker-${DOCKER_VERSION}.tgz && \
+    tar -xzf docker-${DOCKER_VERSION}.tgz && \
+    cp -R docker/* /usr/local/bin/ && \
+    rm -rf docker* && \
+    docker --version
+
+WORKDIR /root

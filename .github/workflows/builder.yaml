@@ -1,0 +1,106 @@
+name: Build rustc
+
+on:
+  workflow_dispatch:
+    inputs:
+      rustupVersion:
+        type: string
+        required: true
+        default: "1.27.1"
+        description: Version of rustup for installing host rustc
+      hostRustVersion:
+        type: string
+        required: true
+        default: "18.2.0"
+        description: Host rustc version
+      targetRustBranch:
+        type: string
+        required: true
+        default: "beta"
+        description: Target rustc version
+      gccVersion:
+        type: string
+        required: true
+        default: "14.2.0"
+        description: Gcc version to compile
+      imageTag:
+        type: string
+        required: true
+        default: "electron-v32"
+        description: Tag of the builder image
+
+jobs:
+  libgcc:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-build-runner:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build libgcc
+        uses: docker/build-push-action@v5
+        with:
+          load: true
+          tags: libgcc:latest
+          file: Dockerfile.libgcc
+          build-args: |
+            GCC_VERSION=${{ inputs.gccVersion }}
+      - name: Extract libgcc artifact
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: libgcc:latest
+          path: /root/build/libgcc.tar.gz
+          destination: dist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libgcc
+          path: dist/libgcc.tar.gz
+
+  rustc:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-build-runner:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build rustc
+        uses: docker/build-push-action@v5
+        with:
+          load: true
+          tags: rustc:latest
+          file: Dockerfile.rustc
+          build-args: |
+            RUSTUP_VERSION=${{ inputs.rustupVersion }}
+            HOST_RUST_VERSION=${{ inputs.hostRustVersion }}
+            TARGET_RUST_BRANCH=${{ inputs.targetRustBranch }}
+      - name: Extract artifact
+        uses: shrink/actions-docker-extract@v3
+        id: extract
+        with:
+          image: rustc:latest
+          path: /root/rust/rustc.tar.gz
+          destination: dist
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustc
+          path: dist/rustc.tar.gz
+
+  builder:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-build-runner:latest
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+      - name: Build and push builder image
+        uses: docker/build-push-action@v6
+        with:
+          tags: darkyzhou/electron-loong64-builder:${{ inputs.imageTag }}
+          file: Dockerfile.builder

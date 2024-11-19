@@ -1,0 +1,20 @@
+[build]
+cargo = "/root/.cargo/bin/cargo"
+rustc = "/root/.cargo/bin/rustc"
+rustfmt = "/root/.cargo/bin/rustfmt"
+python = "/usr/bin/python3"
+extended = true
+tools = [ "cargo" ]
+verbose = 1
+sanitizers = false
+profiler = false
+docs = false
+print-step-timings = true
+
+[install]
+prefix = "/root/target"
+
+[rust]
+channel = "dev"
+codegen-units-std = 1
+debuginfo-level = 2
