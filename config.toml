@@ -6,8 +6,8 @@ python = "/usr/bin/python3"
 extended = true
 tools = [ "cargo" ]
 verbose = 1
-sanitizers = false
-profiler = false
+sanitizers = true
+profiler = true
 docs = false
 print-step-timings = true
 

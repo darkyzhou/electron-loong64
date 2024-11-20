@@ -3,62 +3,87 @@ name: Build Electron
 on:
   workflow_dispatch:
     inputs:
-      electronBranch:
+      builderImageTag:
         type: string
         required: true
-        default: "v32.2.5"
-        description: Branch of electron to build
+        default: "electron-v32"
+        description: Builder image tag
+      electronVersion:
+        type: string
+        required: true
+        default: "32.2.5"
+        description: Version of electron to build
 
 jobs:
-  prepare-src:
+  prepare:
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-buildtools:latest
       volumes:
-        - /home/darkyzhou/data/build/electron-loong64:/home/builduser/buildroot
+        - /home/darkyzhou/data/build/electron-loong64:/home/builduser
     steps:
       - uses: actions/checkout@v4
-        with:
-          path: repo
-      - name: Sync sources
+      - name: Patch Sources
         run: |
           set -ex
+          export REPO_PATH=`pwd`
           cd /home/builduser/buildroot
           if [ ! -d "src/electron" ]; then
             npx e init -i release -r /home/builduser/buildroot electron-loong64
-            git clone -b ${{ inputs.electronBranch }} https://github.com/electron/electron src/electron
+            git clone https://github.com/electron/electron.git src/electron
           fi
           git -C src clean -fd || true
           git -C src am --abort || true
+          git -C src/electron clean -fd
+          git -C src/electron reset --hard HEAD
           git -C src/electron fetch origin --tags
-          git -C src/electron switch --detach ${{ inputs.electronBranch }}
-          git -C src/electron apply repo/electron.patch
-          npx e sync -vvvv
-  build:
-    needs: prepare-src
-    runs-on: self-hosted
-    container:
-      image: ghcr.io/darkyzhou/electron-builder:latest
-      volumes:
-        - /home/darkyzhou/data/build/electron-loong64:/home/builduser/buildroot
-    steps:
-      - name: Replace binaries
+          git -C src/electron switch --detach v${{ inputs.electronVersion }}
+          git -C src/electron apply $REPO_PATH/electron.patch
+      - name: Sync Dependencies
         run: |
           set -ex
-          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          cd /home/builduser/buildroot
+          rm -rf src/build/linux/debian_bullseye*
+          npx e sync
+  build:
+    needs: prepare
+    runs-on: self-hosted
+    permissions:
+      contents: read
+      packages: write
+    container:
+      image: ghcr.io/darkyzhou/electron-builder:${{ inputs.builderImageTag }}
+      volumes:
+        - /home/darkyzhou/data/build/electron-loong64:/home/builduser
+    steps:
+      - name: Replace Binaries
+        run: |
+          set -ex
           cp /usr/local/bin/node /home/builduser/buildroot/src/third_party/node/linux/node-linux-x64/bin/node
-      - name: Generate ninja
+          chmod +w /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+      - name: Build Electron
         run: |
           set -ex
           cd /home/builduser/buildroot/src
           gn gen out/Release --args="import(\"//electron/build/args/release.gn\")" --script-executable=/usr/bin/python3
+          ninja -C out/Release/ electron
         env:
           CC: clang
           CXX: clang++
           AR: ar
           NM: nm
           RUSTC_BOOTSTRAP: 1
-      - name: Build electron
+      - name: Package Electron
         run: |
           set -ex
           cd /home/builduser/buildroot/src
+          ninja -C out/Release/ electron:electron_dist_zip
+      - name: Upload Artifact
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: /home/builduser/buildroot/src/out/Release/dist.zip
+          asset_name: electron-v${{ inputs.electronVersion }}-linux-loong64.zip
+          release_name: Electron v${{ inputs.electronVersion }} port for LoongArch64
+          overwrite: true
+          tag: v${{ inputs.electronVersion }}

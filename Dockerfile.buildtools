@@ -9,8 +9,8 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         git \
+        sudo \
         xz-utils \
-        sudo
 
 RUN curl --silent --location https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && \

@@ -10,6 +10,7 @@ RUN apt-get update && \
         ca-certificates \
         curl \
         git \
+        cmake \
         python3 \
         ninja-build \
         libffi-dev \

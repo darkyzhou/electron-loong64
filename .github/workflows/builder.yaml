@@ -11,7 +11,7 @@ on:
       hostRustVersion:
         type: string
         required: true
-        default: "18.2.0"
+        default: "1.82.0"
         description: Host rustc version
       targetRustBranch:
         type: string
@@ -44,13 +44,13 @@ jobs:
           file: Dockerfile.libgcc
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
-      - name: Extract libgcc artifact
+      - name: Extract libgcc Artifact
         uses: shrink/actions-docker-extract@v3
         with:
           image: libgcc:latest
           path: /root/build/libgcc.tar.gz
           destination: dist
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: libgcc
@@ -72,14 +72,14 @@ jobs:
             RUSTUP_VERSION=${{ inputs.rustupVersion }}
             HOST_RUST_VERSION=${{ inputs.hostRustVersion }}
             TARGET_RUST_BRANCH=${{ inputs.targetRustBranch }}
-      - name: Extract artifact
+      - name: Extract Artifact
         uses: shrink/actions-docker-extract@v3
         id: extract
         with:
           image: rustc:latest
           path: /root/rust/rustc.tar.gz
           destination: dist
-      - name: Upload artifact
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: rustc
@@ -92,12 +92,26 @@ jobs:
     runs-on: self-hosted
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
-      - name: Download artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
-      - name: Build and push builder image
+        with:
+          path: .
+          merge-multiple: true
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Builder Image
         uses: docker/build-push-action@v6
         with:
-          tags: darkyzhou/electron-loong64-builder:${{ inputs.imageTag }}
+          push: true
+          context: .
           file: Dockerfile.builder
+          tags: ghcr.io/darkyzhou/electron-builder:${{ inputs.imageTag }}

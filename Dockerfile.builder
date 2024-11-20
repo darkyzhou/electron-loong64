@@ -36,6 +36,8 @@ RUN apt-get update && \
         clang \
         llvm \
         llvm-dev \
+        generate-ninja \
+        ninja-build \
         lld \
         libclang-dev \
         libclang-rt-dev \
@@ -175,9 +177,7 @@ RUN apt-get update && \
         xcb \
         libdav1d-dev \
         libyuv-dev \
-
-        generate-ninja \
-        ninja-build
+        mesa-common-dev
 
 RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
     tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
@@ -185,15 +185,15 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
     rm -rf node-v${NODE_VERSION}-linux-loong64* && \
     npm i -g yarn @esbuild/linux-loong64@0.14.54
 
-ADD libgcc rustc .
+COPY libgcc.tar.gz rustc.tar.gz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 RUN mkdir libgcc && \
-    tar -xzvf libgcc -C libgcc && \
+    tar -xzvf libgcc.tar.gz -C libgcc && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
-    mv libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/*/ && \
-    rm -rf libgcc && \
-    tar -xzvf rustc -C /usr && \
-    cargo install bindgen-cli@0.69.1 --root /usr
+    cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/*/ && \
+    tar -xzvf rustc.tar.gz -C /usr && \
+    # Chromium seems to require that bindgen binary lives together with llvm
+    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-19
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
