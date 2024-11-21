@@ -1,0 +1,29 @@
+FROM ghcr.io/darkyzhou/loong64-debian:latest
+
+ARG LIBFFI_VERSION="3.4.6"
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        build-essential \
+        binutils \
+        autoconf \
+        automake \
+        libtool \
+        pkg-config
+
+WORKDIR /root
+RUN curl -LO https://github.com/libffi/libffi/releases/download/v${LIBFFI_VERSION}/libffi-${LIBFFI_VERSION}.tar.gz && \
+    tar xf libffi-${LIBFFI_VERSION}.tar.gz
+
+WORKDIR /root/build
+RUN /root/libffi-${LIBFFI_VERSION}/configure \
+        CFLAGS="-mcmodel=medium" \
+        --prefix=/root/build/out \
+        --enable-pax_emutramp \
+        --enable-static \
+        --disable-docs && \
+    make libffi_convenience.la && \
+    tar czf libffi.tar.gz --directory=.libs .

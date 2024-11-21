@@ -1,5 +1,10 @@
 name: Build Electron
 
+env:
+  ROOT_PATH: /home/builduser/buildroot
+  SRC_PATH: /home/builduser/buildroot/src
+  OUT_PATH: /home/builduser/buildroot/src/out/Release
+
 on:
   workflow_dispatch:
     inputs:
@@ -27,9 +32,9 @@ jobs:
         run: |
           set -ex
           export REPO_PATH=`pwd`
-          cd /home/builduser/buildroot
+          cd "$ROOT_PATH"
           if [ ! -d "src/electron" ]; then
-            npx e init -i release -r /home/builduser/buildroot electron-loong64
+            npx e init -i release -r "$ROOT_PATH" electron-loong64
             git clone https://github.com/electron/electron.git src/electron
           fi
           git -C src clean -fd || true
@@ -65,9 +70,10 @@ jobs:
       - name: Build Electron
         run: |
           set -ex
-          cd /home/builduser/buildroot/src
-          gn gen out/Release --args="import(\"//electron/build/args/release.gn\")" --script-executable=/usr/bin/python3
-          ninja -C out/Release/ electron
+          cd "$SRC_PATH"
+          rm -f "$OUT_PATH"/electron
+          gn gen "$OUT_PATH" --args="import(\"//electron/build/args/release.gn\")" --script-executable=/usr/bin/python3
+          ninja -C "$OUT_PATH" electron
         env:
           CC: clang
           CXX: clang++
@@ -77,12 +83,13 @@ jobs:
       - name: Package Electron
         run: |
           set -ex
-          cd /home/builduser/buildroot/src
-          ninja -C out/Release/ electron:electron_dist_zip
+          cd "$SRC_PATH"
+          electron/script/strip-binaries.py -d "$OUT_PATH"
+          ninja -C "$OUT_PATH" electron:electron_dist_zip
       - name: Upload Artifact
         uses: svenstaro/upload-release-action@v2
         with:
-          file: /home/builduser/buildroot/src/out/Release/dist.zip
+          file: ${{ env.OUT_PATH }}/dist.zip
           asset_name: electron-v${{ inputs.electronVersion }}-linux-loong64.zip
           release_name: Electron v${{ inputs.electronVersion }} port for LoongArch64
           overwrite: true

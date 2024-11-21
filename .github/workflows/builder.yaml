@@ -23,6 +23,11 @@ on:
         required: true
         default: "14.2.0"
         description: Gcc version to compile
+      libffiVersion:
+        type: string
+        required: true
+        default: "3.4.6"
+        description: Libffi version to compile
       imageTag:
         type: string
         required: true
@@ -56,6 +61,32 @@ jobs:
           name: libgcc
           path: dist/libgcc.tar.gz
 
+  libffi:
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/darkyzhou/electron-build-runner:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build libffi
+        uses: docker/build-push-action@v5
+        with:
+          load: true
+          tags: libffi:latest
+          file: Dockerfile.libffi
+          build-args: |
+            GCC_VERSION=${{ inputs.gccVersion }}
+      - name: Extract libffi Artifact
+        uses: shrink/actions-docker-extract@v3
+        with:
+          image: libffi:latest
+          path: /root/build/libffi.tar.gz
+          destination: dist
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libffi
+          path: dist/libffi.tar.gz
+
   rustc:
     runs-on: self-hosted
     container:
@@ -88,6 +119,7 @@ jobs:
   builder:
     needs:
       - libgcc
+      - libffi
       - rustc
     runs-on: self-hosted
     container:

@@ -185,12 +185,15 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
     rm -rf node-v${NODE_VERSION}-linux-loong64* && \
     npm i -g yarn @esbuild/linux-loong64@0.14.54
 
-COPY libgcc.tar.gz rustc.tar.gz .
+COPY libgcc.tar.gz libffi.tar.gz rustc.tar.gz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 RUN mkdir libgcc && \
     tar -xzvf libgcc.tar.gz -C libgcc && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
     cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/*/ && \
+    tar -xzvf libffi.tar.gz -C libffi && \
+    # Also hacky here
+    cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
     tar -xzvf rustc.tar.gz -C /usr && \
     # Chromium seems to require that bindgen binary lives together with llvm
     cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-19
