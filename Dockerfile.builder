@@ -187,7 +187,7 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
 
 COPY libgcc.tar.gz libffi.tar.gz rustc.tar.gz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-RUN mkdir libgcc && \
+RUN mkdir libgcc libffi && \
     tar -xzvf libgcc.tar.gz -C libgcc && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
     cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/*/ && \
