@@ -12,3 +12,7 @@ This project aims to build a version of Electron that supports the Loong64 archi
 ## Acknowledgments
 
 Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromium patches in [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64), which make this project possible.
+
+## Development
+
+The development guide is coming soon.
