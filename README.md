@@ -2,7 +2,7 @@
 
 This project aims to build a version of Electron that supports the Loong64 architecture.
 
-**Note:** This project is currently under development. Use it at your own risk.
+**Note:** The Electron binary requires `glibc >= 2.39`.
 
 ## Branches
 
