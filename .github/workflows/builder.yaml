@@ -36,7 +36,7 @@ on:
 
 jobs:
   libgcc:
-    runs-on: self-hosted
+    runs-on: [self-hosted, ryustation]
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
     steps:
@@ -62,7 +62,7 @@ jobs:
           path: dist/libgcc.tar.gz
 
   libffi:
-    runs-on: self-hosted
+    runs-on: [self-hosted, ryustation]
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
     steps:
@@ -88,7 +88,7 @@ jobs:
           path: dist/libffi.tar.gz
 
   rustc:
-    runs-on: self-hosted
+    runs-on: [self-hosted, ryustation]
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
     steps:
@@ -121,7 +121,7 @@ jobs:
       - libgcc
       - libffi
       - rustc
-    runs-on: self-hosted
+    runs-on: [self-hosted, ryustation]
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
     permissions:
