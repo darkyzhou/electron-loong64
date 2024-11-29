@@ -40,7 +40,7 @@ jobs:
           fi
           git -C src clean -fd || true
           git -C src am --abort || true
-          git -C src/electron clean -fd
+          git -C src/electron clean -fd || true
           git -C src/electron reset --hard HEAD
           git -C src/electron fetch origin --tags
           git -C src/electron switch --detach v${{ inputs.electronVersion }}
