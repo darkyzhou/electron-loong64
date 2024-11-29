@@ -71,7 +71,7 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
    git add .
    # Don't commit submodules
    git restore --staged $(git submodule status | cut -d' ' -f2)
-   git commit -m "loong64 support.
+   git commit -m "loong64 support
 
    Co-authored-by: Jiajie Chen <c@jia.je>"
    npx e patches chromium
