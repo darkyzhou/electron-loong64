@@ -11,6 +11,37 @@ index 8d7e6c0bac..0ee1f81297 100644
    'node_version':
      'v20.18.0',
    'nan_version':
+diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
+index 3ccd99d6be..4424f7c705 100644
+--- a/build/args/ffmpeg.gn
++++ b/build/args/ffmpeg.gn
+@@ -5,3 +5,25 @@ is_official_build = true
+ proprietary_codecs = false
+ ffmpeg_branding = "Chromium"
+ enable_dsyms = false
++
++chrome_pgo_phase = 0
++enable_widevine = false
++enable_nacl = false
++ffmpeg_branding = "Chrome"
++is_clang = true
++use_sysroot = false
++is_debug = false
++use_lld = true
++custom_toolchain = "//build/toolchain/linux/unbundle:default"
++host_toolchain = "//build/toolchain/linux/unbundle:default"
++clang_base_path = "/usr"
++clang_use_chrome_plugins = false
++rustc_version = "rustc dev"
++rust_sysroot_absolute = "/usr"
++rust_bindgen_root = "/usr/lib/llvm-19"
++proprietary_codecs = true
++treat_warnings_as_errors = false
++fatal_linker_warnings = false
++rtc_use_pipewire = false
++dcheck_always_on = false
++loongarch64_use_lsx=true
+\ No newline at end of file
 diff --git a/build/args/release.gn b/build/args/release.gn
 index e5017f6e16..0ffc234079 100644
 --- a/build/args/release.gn
@@ -90,6 +121,62 @@ index 0000000000..8778bdfd90
 + #else
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
+diff --git a/patches/breakpad/.patches b/patches/breakpad/.patches
+new file mode 100644
+index 0000000000..ea62e0c740
+--- /dev/null
++++ b/patches/breakpad/.patches
+@@ -0,0 +1 @@
++loong64_support.patch
+diff --git a/patches/breakpad/loong64_support.patch b/patches/breakpad/loong64_support.patch
+new file mode 100644
+index 0000000000..81eca14e30
+--- /dev/null
++++ b/patches/breakpad/loong64_support.patch
+@@ -0,0 +1,43 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: darkyzhou <me@zqy.io>
++Date: Fri, 29 Nov 2024 01:52:56 +0000
++Subject: loong64 support
++
++
++diff --git a/src/common/linux/dump_symbols.cc b/src/common/linux/dump_symbols.cc
++index 55fa98469d81798cab823343f17c3a21f2a9b86e..2d03c6c0e57b4dac5a0854e69d3b6cb5bdae93d5 100644
++--- a/src/common/linux/dump_symbols.cc
+++++ b/src/common/linux/dump_symbols.cc
++@@ -111,6 +111,10 @@ using google_breakpad::wasteful_vector;
++ #define EM_AARCH64      183
++ #endif
++ 
+++#ifdef EM_LOONGARCH
+++#define EM_LOONGARCH    258
+++#endif
+++
++ // Define ZStd compression if host machine does not include this define.
++ #ifndef ELFCOMPRESS_ZSTD
++ #define ELFCOMPRESS_ZSTD 2
++@@ -1119,6 +1123,7 @@ const char* ElfArchitecture(const typename ElfClass::Ehdr* elf_header) {
++     case EM_X86_64:     return "x86_64";
++     case EM_RISCV:      return "riscv";
++     case EM_NDS32:      return "nds32";
+++    case EM_LOONGARCH:  return "loongarch64";
++     default: return NULL;
++   }
++ }
++diff --git a/src/common/linux/memory_mapped_file.cc b/src/common/linux/memory_mapped_file.cc
++index a7b96eb591f741546005a53f9d8125df421ef881..6ad11042be8228e1a37f5b15377e9de1cca05cc2 100644
++--- a/src/common/linux/memory_mapped_file.cc
+++++ b/src/common/linux/memory_mapped_file.cc
++@@ -72,7 +72,8 @@ bool MemoryMappedFile::Map(const char* path, size_t offset) {
++ 
++ #if defined(__x86_64__) || defined(__aarch64__) || \
++    (defined(__mips__) && _MIPS_SIM == _ABI64) || \
++-   (defined(__riscv) && __riscv_xlen == 64)
+++   (defined(__riscv) && __riscv_xlen == 64) || \
+++   (defined(__loongarch__) && __loongarch_grlen == 64)
++ 
++   struct kernel_stat st;
++   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
 index 419fddab5b..f56945d996 100644
 --- a/patches/chromium/.patches
@@ -4149,16 +4236,17 @@ index c09e109ff4..9666da5611 100644
     virtual void WillStopWorkerThread() {}
     virtual void WorkerContextCreated(const v8::Local<v8::Context>& worker) {}
 diff --git a/patches/config.json b/patches/config.json
-index 60cfd3ff8e..27527f03f4 100644
+index 60cfd3ff8e..66470126fe 100644
 --- a/patches/config.json
 +++ b/patches/config.json
-@@ -13,5 +13,6 @@
+@@ -13,5 +13,7 @@
    { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
    { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
    { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
 -  { "patch_dir": "src/electron/patches/dawn", "repo": "src/third_party/dawn" }
 +  { "patch_dir": "src/electron/patches/dawn", "repo": "src/third_party/dawn" },
-+  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" }
++  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" },
++  { "patch_dir": "src/electron/patches/breakpad", "repo": "src/third_party/breakpad/breakpad" }
  ]
 diff --git a/patches/devtools_frontend/.patches b/patches/devtools_frontend/.patches
 index 3cf8d9fc4a..13c1c128d6 100644
