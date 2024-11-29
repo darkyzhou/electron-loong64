@@ -38,11 +38,9 @@ jobs:
             npx e init -i release -r "$ROOT_PATH" electron-loong64
             git clone https://github.com/electron/electron.git src/electron
           fi
-          git -C src clean -fd || true
-          git -C src am --abort || true
-          git -C src reset --hard HEAD
-          git -C src/electron clean -fd || true
-          git -C src/electron reset --hard HEAD
+          git -C src clean -fd || true; git -C src am --abort || true; git -C src reset --hard HEAD;
+          git -C src submodule foreach 'git clean -fd || true; git am --abort || true; git reset --hard HEAD';
+          git -C src/electron clean -fd || true; git -C src/electron reset --hard HEAD;
           git -C src/electron fetch origin --tags
           git -C src/electron switch --detach v${{ inputs.electronVersion }}
           git -C src/electron apply $REPO_PATH/electron.patch
