@@ -1,15 +1,15 @@
 diff --git a/DEPS b/DEPS
-index 8d7e6c0bac..0ee1f81297 100644
+index 080813c1d2..c173210f09 100644
 --- a/DEPS
 +++ b/DEPS
 @@ -2,7 +2,7 @@ gclient_gn_args_from = 'src'
  
  vars = {
    'chromium_version':
--    '128.0.6613.186',
-+    '128.0.6613.84',
+-    '130.0.6723.137',
++    '130.0.6723.58',
    'node_version':
-     'v20.18.0',
+     'v20.18.1',
    'nan_version':
 diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
 index 3ccd99d6be..4424f7c705 100644
@@ -178,241 +178,33 @@ index 0000000000..81eca14e30
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 419fddab5b..f56945d996 100644
+index 61fa76913e..54ff2332d3 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -141,3 +141,4 @@ editcontext_return_physical_pixels_from_firstrectforcharacterrange.patch
- cherry-pick-923797bac925.patch
- cherry-pick-e699ac35ac6c.patch
- ui_add_missing_shortcut_text_for_vkey_command_on_linux.patch
+@@ -136,3 +136,5 @@ osr_shared_texture_remove_keyed_mutex_on_win_dxgi.patch
+ refactor_unfilter_unresponsive_events.patch
+ wayland_support_outgoing_dnd_sessions_with_no_offered_mime_types.patch
+ support_bstr_pkey_appusermodel_id_in_windows_shortcuts.patch
 +loong64_support.patch
-diff --git a/patches/chromium/allow_disabling_blink_scheduler_throttling_per_renderview.patch b/patches/chromium/allow_disabling_blink_scheduler_throttling_per_renderview.patch
-index f7bd673353..02ed8e259d 100644
---- a/patches/chromium/allow_disabling_blink_scheduler_throttling_per_renderview.patch
-+++ b/patches/chromium/allow_disabling_blink_scheduler_throttling_per_renderview.patch
-@@ -51,7 +51,7 @@ index 779e90581cdfb2d1bdd904da038f7537d0477f5a..c85620ac2f30998d1b67f159e50ee722
-    void SendRendererPreferencesToRenderer(
-        const blink::RendererPreferences& preferences);
- diff --git a/content/browser/renderer_host/render_widget_host_view_aura.cc b/content/browser/renderer_host/render_widget_host_view_aura.cc
--index 59b67e1d0f00b25a1511c6daf3e081388b314206..97395274648caf79889547da019254eb7869a3c0 100644
-+index 07a0a672b51fe67083159a4133b0c36991092f00..a9719e074f750e955982f2f25bfbfb37f5d2f861 100644
- --- a/content/browser/renderer_host/render_widget_host_view_aura.cc
- +++ b/content/browser/renderer_host/render_widget_host_view_aura.cc
- @@ -580,8 +580,8 @@ void RenderWidgetHostViewAura::ShowImpl(PageVisibilityState page_visibility) {
-diff --git a/patches/chromium/build_do_not_depend_on_packed_resource_integrity.patch b/patches/chromium/build_do_not_depend_on_packed_resource_integrity.patch
-index 0147061509..12bd3b7995 100644
---- a/patches/chromium/build_do_not_depend_on_packed_resource_integrity.patch
-+++ b/patches/chromium/build_do_not_depend_on_packed_resource_integrity.patch
-@@ -46,10 +46,10 @@ index fe0452e8bd462ba44bf6b019720c7cd9a0143a5f..f0764bc70afc3ffb9f99b7d52c1e4b6b
-        sources += [ "certificate_viewer_stub.cc" ]
-      }
- diff --git a/chrome/test/BUILD.gn b/chrome/test/BUILD.gn
--index a26612b9c0bca53f130ce24a59863ea44108a503..d9edc7fe3784d175405cdb717b53a03c3daa6310 100644
-+index 18fad187e0c9c14be10296cdf045dbbc456d7229..3dbc18b142b453989e7794081676e6efef6d09ff 100644
- --- a/chrome/test/BUILD.gn
- +++ b/chrome/test/BUILD.gn
--@@ -7202,9 +7202,12 @@ test("unit_tests") {
-+@@ -7201,9 +7201,12 @@ test("unit_tests") {
-        "//chrome/browser/safe_browsing/incident_reporting/verifier_test:verifier_test_dll_2",
-      ]
-  
-@@ -63,7 +63,7 @@ index a26612b9c0bca53f130ce24a59863ea44108a503..d9edc7fe3784d175405cdb717b53a03c
-        "//chrome//services/util_win:unit_tests",
-        "//chrome/app:chrome_dll_resources",
-        "//chrome/app:win_unit_tests",
--@@ -8228,6 +8231,10 @@ test("unit_tests") {
-+@@ -8226,6 +8229,10 @@ test("unit_tests") {
-        "../browser/performance_manager/policies/background_tab_loading_policy_unittest.cc",
-      ]
-  
-@@ -74,7 +74,7 @@ index a26612b9c0bca53f130ce24a59863ea44108a503..d9edc7fe3784d175405cdb717b53a03c
-      sources += [
-        # The importer code is not used on Android.
-        "../common/importer/firefox_importer_utils_unittest.cc",
--@@ -8303,7 +8310,6 @@ test("unit_tests") {
-+@@ -8301,7 +8308,6 @@ test("unit_tests") {
-  
-      # Non-android deps for "unit_tests" target.
-      deps += [
-diff --git a/patches/chromium/cherry-pick-923797bac925.patch b/patches/chromium/cherry-pick-923797bac925.patch
-index 07ab8962e2..3bde287db0 100644
---- a/patches/chromium/cherry-pick-923797bac925.patch
-+++ b/patches/chromium/cherry-pick-923797bac925.patch
-@@ -1,7 +1,7 @@
- From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
- From: Yoshisato Yanagisawa <yyanagisawa@chromium.org>
- Date: Thu, 7 Nov 2024 10:14:59 +0000
--Subject: [M131] Make GetCacheIdentifier() respect GetSkipServiceWorker().
-+Subject: Make GetCacheIdentifier() respect GetSkipServiceWorker().
- 
- Since the current GetCacheIdentifier() ignores GetSkipServiceWorker(),
- GetCacheIdentifier() returns ServiceWorkerId even if GetSkipServiceWorker()
-diff --git a/patches/chromium/cherry-pick-e699ac35ac6c.patch b/patches/chromium/cherry-pick-e699ac35ac6c.patch
-index a62b27bab3..e7e9036553 100644
---- a/patches/chromium/cherry-pick-e699ac35ac6c.patch
-+++ b/patches/chromium/cherry-pick-e699ac35ac6c.patch
-@@ -1,7 +1,7 @@
--From e699ac35ac6c565f6cc24cb98719b922a319e600 Mon Sep 17 00:00:00 2001
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
- From: Reilly Grant <reillyg@chromium.org>
- Date: Tue, 29 Oct 2024 22:45:33 +0000
--Subject: [PATCH] [M-130] serial: Cancel mojo::SimpleWatcher when source/sink become garbage
-+Subject: serial: Cancel mojo::SimpleWatcher when source/sink become garbage
- 
- SerialPortUnderlyingSink and SerialPortUnderlyingSource need
- prefinalizers so that when they become garbage the mojo::SimpleWatcher
-@@ -20,13 +20,12 @@ Reviewed-on: https://chromium-review.googlesource.com/c/chromium/src/+/5976472
- Commit-Queue: Reilly Grant <reillyg@chromium.org>
- Cr-Commit-Position: refs/branch-heads/6723@{#1569}
- Cr-Branched-From: 985f2961df230630f9cbd75bd6fe463009855a11-refs/heads/main@{#1356013}
-----
- 
- diff --git a/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.cc b/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.cc
--index 6aefbb5..a469a00c 100644
-+index 6aefbb59425ff7fc9096deba9841d1e022cf8a05..a469a00c372499295bc947bfcc0230c9a1e911e7 100644
- --- a/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.cc
- +++ b/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.cc
--@@ -268,4 +268,10 @@
-+@@ -268,4 +268,10 @@ void SerialPortUnderlyingSink::PipeClosed() {
-    abort_handle_.Clear();
-  }
-  
-@@ -38,10 +37,10 @@ index 6aefbb5..a469a00c 100644
- +
-  }  // namespace blink
- diff --git a/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.h b/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.h
--index a32b0421..b4e664a 100644
-+index a32b04212f968479465a495e0cf402402d1b7e4d..b4e664a6debfd3b7c319ef3972774f693da48857 100644
- --- a/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.h
- +++ b/third_party/blink/renderer/modules/serial/serial_port_underlying_sink.h
--@@ -20,6 +20,8 @@
-+@@ -20,6 +20,8 @@ class SerialPort;
-  class WritableStreamDefaultController;
-  
-  class SerialPortUnderlyingSink final : public UnderlyingSinkBase {
-@@ -50,7 +49,7 @@ index a32b0421..b4e664a 100644
-   public:
-    SerialPortUnderlyingSink(SerialPort*, mojo::ScopedDataPipeProducerHandle);
-  
--@@ -46,6 +48,7 @@
-+@@ -46,6 +48,7 @@ class SerialPortUnderlyingSink final : public UnderlyingSinkBase {
-    void OnFlushOrDrain();
-    void WriteData();
-    void PipeClosed();
-@@ -59,10 +58,10 @@ index a32b0421..b4e664a 100644
-    mojo::ScopedDataPipeProducerHandle data_pipe_;
-    mojo::SimpleWatcher watcher_;
- diff --git a/third_party/blink/renderer/modules/serial/serial_port_underlying_source.cc b/third_party/blink/renderer/modules/serial/serial_port_underlying_source.cc
--index 6d2911c..6753be0 100644
-+index 13ffa6e40e4f4c3a4888100a70b78e39cd2a9768..fdc88308a8d668268822e05285da5f0a2701b50c 100644
- --- a/third_party/blink/renderer/modules/serial/serial_port_underlying_source.cc
- +++ b/third_party/blink/renderer/modules/serial/serial_port_underlying_source.cc
--@@ -224,4 +224,10 @@
-+@@ -224,4 +224,10 @@ void SerialPortUnderlyingSource::Close() {
-    data_pipe_.reset();
-  }
-  
-@@ -74,7 +73,7 @@ index 6d2911c..6753be0 100644
- +
-  }  // namespace blink
- diff --git a/third_party/blink/renderer/modules/serial/serial_port_underlying_source.h b/third_party/blink/renderer/modules/serial/serial_port_underlying_source.h
--index 4066e98..0de89d2d 100644
-+index 4066e9822197f1a94c58b4784d5dcbe73885ea04..0de89d2d991b364e700d756f48eea81f51e0f468 100644
- --- a/third_party/blink/renderer/modules/serial/serial_port_underlying_source.h
- +++ b/third_party/blink/renderer/modules/serial/serial_port_underlying_source.h
- @@ -12,6 +12,7 @@
-@@ -85,7 +84,7 @@ index 4066e98..0de89d2d 100644
-  
-  namespace blink {
-  
--@@ -20,6 +21,8 @@
-+@@ -20,6 +21,8 @@ class SerialPort;
-  
-  class SerialPortUnderlyingSource : public UnderlyingByteSourceBase,
-                                     ExecutionContextLifecycleObserver {
-@@ -94,7 +93,7 @@ index 4066e98..0de89d2d 100644
-   public:
-    SerialPortUnderlyingSource(ScriptState*,
-                               SerialPort*,
--@@ -47,6 +50,7 @@
-+@@ -47,6 +50,7 @@ class SerialPortUnderlyingSource : public UnderlyingByteSourceBase,
-    void OnFlush(ScriptPromiseResolver<IDLUndefined>*);
-    void PipeClosed();
-    void Close();
-diff --git a/patches/chromium/disable_hidden.patch b/patches/chromium/disable_hidden.patch
-index 3c926c78cf..29f543070f 100644
---- a/patches/chromium/disable_hidden.patch
-+++ b/patches/chromium/disable_hidden.patch
-@@ -34,7 +34,7 @@ index 6f4e44aba5c19fcc2865b070708ef310d6a78d18..b7daed50073b61bf9ceab2c001b52e32
-    // |routing_id| must not be MSG_ROUTING_NONE.
-    // If this object outlives |delegate|, DetachDelegate() must be called when
- diff --git a/content/browser/renderer_host/render_widget_host_view_aura.cc b/content/browser/renderer_host/render_widget_host_view_aura.cc
--index fec211fb0f224475da3653f501b90a733138fcde..59b67e1d0f00b25a1511c6daf3e081388b314206 100644
-+index 92ea6fb1bccffe8626f1656a1009cea4419c5602..07a0a672b51fe67083159a4133b0c36991092f00 100644
- --- a/content/browser/renderer_host/render_widget_host_view_aura.cc
- +++ b/content/browser/renderer_host/render_widget_host_view_aura.cc
- @@ -644,7 +644,7 @@ void RenderWidgetHostViewAura::HideImpl() {
-diff --git a/patches/chromium/editcontext_return_physical_pixels_from_firstrectforcharacterrange.patch b/patches/chromium/editcontext_return_physical_pixels_from_firstrectforcharacterrange.patch
-index cc3bf36f3c..0eee9cd6c2 100644
---- a/patches/chromium/editcontext_return_physical_pixels_from_firstrectforcharacterrange.patch
-+++ b/patches/chromium/editcontext_return_physical_pixels_from_firstrectforcharacterrange.patch
-@@ -17,7 +17,7 @@ Reviewed-by: Koji Ishii <kojii@chromium.org>
- Cr-Commit-Position: refs/heads/main@{#1337483}
- 
- diff --git a/third_party/blink/renderer/core/editing/ime/edit_context.cc b/third_party/blink/renderer/core/editing/ime/edit_context.cc
--index 6c7462ef353f23c8fdfdd9b874f08e506a5c27cd..b41b6c4a51dffde71df57a0dc34b325733c8f342 100644
-+index ebed20c2da249cffeaa2cbc61583ea928f16f7ad..a1f27170e351b2d05b885e77caaa2ca3170ffb87 100644
- --- a/third_party/blink/renderer/core/editing/ime/edit_context.cc
- +++ b/third_party/blink/renderer/core/editing/ime/edit_context.cc
- @@ -758,6 +758,9 @@ bool EditContext::GetCompositionCharacterBounds(WebVector<gfx::Rect>& bounds) {
-diff --git a/patches/chromium/editcontext_use_empty_control_and_selection_bounds_as_fallbacks.patch b/patches/chromium/editcontext_use_empty_control_and_selection_bounds_as_fallbacks.patch
-index b8a69f11c7..ae811de4cc 100644
---- a/patches/chromium/editcontext_use_empty_control_and_selection_bounds_as_fallbacks.patch
-+++ b/patches/chromium/editcontext_use_empty_control_and_selection_bounds_as_fallbacks.patch
-@@ -23,7 +23,7 @@ Commit-Queue: Dan Clark <daniec@microsoft.com>
- Cr-Commit-Position: refs/heads/main@{#1336717}
- 
- diff --git a/third_party/blink/renderer/core/editing/ime/edit_context.cc b/third_party/blink/renderer/core/editing/ime/edit_context.cc
--index 71efa75c49ccee79895e5eedf60ccc5d576ac2a3..6c7462ef353f23c8fdfdd9b874f08e506a5c27cd 100644
-+index 87950900298c232f1373bf99001e3c6c94f7bdcf..ebed20c2da249cffeaa2cbc61583ea928f16f7ad 100644
- --- a/third_party/blink/renderer/core/editing/ime/edit_context.cc
- +++ b/third_party/blink/renderer/core/editing/ime/edit_context.cc
- @@ -798,7 +798,7 @@ bool EditContext::FirstRectForCharacterRange(uint32_t location,
-diff --git a/patches/chromium/fix_on-screen-keyboard_hides_on_input_blur_in_webview.patch b/patches/chromium/fix_on-screen-keyboard_hides_on_input_blur_in_webview.patch
-index 2738bbf147..dcc4b3a275 100644
---- a/patches/chromium/fix_on-screen-keyboard_hides_on_input_blur_in_webview.patch
-+++ b/patches/chromium/fix_on-screen-keyboard_hides_on_input_blur_in_webview.patch
-@@ -9,10 +9,10 @@ focus node change via TextInputManager.
- chromium-bug: https://crbug.com/1369605
- 
- diff --git a/content/browser/renderer_host/render_widget_host_view_aura.cc b/content/browser/renderer_host/render_widget_host_view_aura.cc
--index 97395274648caf79889547da019254eb7869a3c0..e145cfde355624a6c908b9e5ac741f1251080ff9 100644
-+index a9719e074f750e955982f2f25bfbfb37f5d2f861..f0fe0240af9b717e851bfbd916c5946eb9dc766c 100644
- --- a/content/browser/renderer_host/render_widget_host_view_aura.cc
- +++ b/content/browser/renderer_host/render_widget_host_view_aura.cc
--@@ -2946,6 +2946,12 @@ void RenderWidgetHostViewAura::OnTextSelectionChanged(
-+@@ -2943,6 +2943,12 @@ void RenderWidgetHostViewAura::OnTextSelectionChanged(
-    }
-  }
-  
++loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..1bacb6b70b
+index 0000000000..8e4fd87eb0
 --- /dev/null
 +++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3673 @@
+@@ -0,0 +1,3634 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Tue, 19 Nov 2024 01:44:44 +0000
++Date: Tue, 3 Dec 2024 14:59:12 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
-+index 46cf090f852929d776b217dc973e1e8e792dcb9e..c87f455c4a36338b0f0dda98fd7d38ea03965f06 100644
++index 2b589ddd153214e237c1028f6be736351754a6f0..9f45a24dcd85736626e118dac464adedcc4928cc 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
 ++++ b/base/allocator/partition_allocator/partition_alloc.gni
-+@@ -242,7 +242,7 @@ declare_args() {
++@@ -272,7 +272,7 @@ declare_args() {
 + 
 + stack_scan_supported =
 +     current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
@@ -422,10 +214,10 @@ index 0000000000..1bacb6b70b
 + # We want to provide assertions that guard against inconsistent build
 + # args, but there is no point in having them fire if we're not building
 +diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+index f3e9c4c00fb7225b23e21745d969b3718e43f839..2ef0200f2181e86528ad0c3b98c2be200d4fa233 100644
++index 4451c4e2419323c98b58d41078290b157a998ff2..3dd6c37ba8b630d383f8773e017174266eeeded9 100644
 +--- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 ++++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+@@ -460,6 +460,9 @@ if (is_clang_or_gcc) {
++@@ -499,6 +499,9 @@ if (is_clang_or_gcc) {
 +     } else if (current_cpu == "riscv64") {
 +       assert(stack_scan_supported)
 +       sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
@@ -504,10 +296,10 @@ index 0000000000..1bacb6b70b
 +   return std::string();
 + #endif
 +diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
-+index e6d80a8d485f18c7882a484d325613fa36b1f9b7..335a19a654553c7ad90768bae6cc14a7c635efbd 100644
++index 9b8719a64ba7e76518554d22f0a9446582cbea22..840ca3cbb7562013c5b4b70e4dde5d7645a96405 100644
 +--- a/build/config/clang/BUILD.gn
 ++++ b/build/config/clang/BUILD.gn
-+@@ -190,14 +190,15 @@ template("clang_lib") {
++@@ -189,14 +189,15 @@ template("clang_lib") {
 +       } else if (is_apple) {
 +         _dir = "darwin"
 +       } else if (is_linux || is_chromeos) {
@@ -529,10 +321,10 @@ index 0000000000..1bacb6b70b
 +           assert(false)  # Unhandled cpu type
 +         }
 +diff --git a/build/config/rust.gni b/build/config/rust.gni
-+index fd4c6834429b9677defb93a7e51231e4776ccb04..983a18d15f5405c40f125d680eafe95e1dc55d85 100644
++index b7e3c8881b589472bd33c7256bd3d9234e6e7a34..e1ec82c04553a069d25349ee2fa4e37fbcd7cc22 100644
 +--- a/build/config/rust.gni
 ++++ b/build/config/rust.gni
-+@@ -204,6 +204,8 @@ if (is_linux || is_chromeos) {
++@@ -211,6 +211,8 @@ if (is_linux || is_chromeos) {
 +     }
 +   } else if (current_cpu == "riscv64") {
 +     rust_abi_target = "riscv64gc-unknown-linux-gnu"
@@ -541,7 +333,7 @@ index 0000000000..1bacb6b70b
 +   } else {
 +     # Best guess for other future platforms.
 +     rust_abi_target = current_cpu + "-unknown-linux-gnu"
-+@@ -292,6 +294,8 @@ if (current_cpu == "x86") {
++@@ -299,6 +301,8 @@ if (current_cpu == "x86") {
 +   rust_target_arch = "powerpc64"
 + } else if (current_cpu == "riscv64") {
 +   rust_target_arch = "riscv64"
@@ -570,7 +362,7 @@ index 0000000000..1bacb6b70b
 +         # No need to generate an object file for nocompile tests.
 +         "-Xclang",
 +diff --git a/build/rust/rust_bindgen.gni b/build/rust/rust_bindgen.gni
-+index bf110ca93cbb5e0216058675c57a6830ea0cfd15..3f37e15cda2da3be6b519d3251bad9484dca1ea8 100644
++index e4797dc2544c4c70474126bb6b3d0ac6b59f96b0..fbb4f4b7e5704a9230d472e9aa98308ff798095a 100644
 +--- a/build/rust/rust_bindgen.gni
 ++++ b/build/rust/rust_bindgen.gni
 +@@ -75,11 +75,11 @@ template("rust_bindgen") {
@@ -587,7 +379,7 @@ index 0000000000..1bacb6b70b
 + 
 +     output_dir = "$target_gen_dir"
 +     out_gen_rs = "$output_dir/${target_name}.rs"
-+@@ -130,10 +130,10 @@ template("rust_bindgen") {
++@@ -135,10 +135,10 @@ template("rust_bindgen") {
 + 
 +     args += [
 +       "--",
@@ -616,6 +408,28 @@ index 0000000000..1bacb6b70b
 +       rustenv = _rustenv
 + 
 +       if (_generate_crate_root) {
++diff --git a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
++index 18fd272c6a9d8ed1a2a8b4e1fe6f9d94de5f7cb8..20dc7d913e1c54c882dc35a378ce40729632bb61 100644
++--- a/components/media_router/common/providers/cast/channel/enum_table.h
+++++ b/components/media_router/common/providers/cast/channel/enum_table.h
++@@ -12,7 +12,6 @@
++ 
++ #include <cstdint>
++ #include <cstring>
++-#include <new>
++ #include <optional>
++ #include <ostream>
++ #include <string_view>
++@@ -368,7 +367,8 @@ class EnumTable {
++ 
++  private:
++ #ifdef ARCH_CPU_64_BITS
++-  alignas(std::hardware_destructive_interference_size)
+++  // Align the data on a cache line boundary.
+++  alignas(64)
++ #endif
++       std::initializer_list<Entry> data_;
++   bool is_sorted_;
 +diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
 +index 070658460eb74513b83e746f20d80af5b79a2df3..39bff2d78b1379dd1a26fa30106ef35243d2d8ef 100644
 +--- a/content/common/user_agent.cc
@@ -629,30 +443,6 @@ index 0000000000..1bacb6b70b
 +   }
 + #elif BUILDFLAG(IS_FUCHSIA)
 +   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
-+diff --git a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
-+index 58034dfdd2516d8d54e5a9c7a0ade0f37d237cab..600be2fb7a31c02fe625a0954c657e0233c89087 100644
-+--- a/extensions/common/api/runtime.json
-++++ b/extensions/common/api/runtime.json
-+@@ -98,7 +98,8 @@
-+             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
-+             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
-+             {"name": "mips", "description": "Specifies the processer architecture as mips."},
-+-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
-++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
-++            {"name": "loong64", "description": "Specifies the processer architecture as loong64."}
-+          ],
-+         "description": "The machine's processor architecture."
-+       },
-+@@ -111,7 +112,8 @@
-+           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
-+           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
-+           {"name": "mips", "description": "Specifies the native client architecture as mips."},
-+-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
-++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
-++          {"name": "loong64", "description": "Specifies the native client architecture as loong64."}
-+         ]
-+       },
-+       {
 +diff --git a/sandbox/features.gni b/sandbox/features.gni
 +index 8434144118b49c33a60fa455153a0e2d498a08a7..189bb35f8e4dadb6565f38a1a2fb70007f3ea680 100644
 +--- a/sandbox/features.gni
@@ -793,7 +583,7 @@ index 0000000000..1bacb6b70b
 +     return Allow();
 +   }
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
-+index 455fb78098113fb06be918366f1fb5ff419a3871..ddac5dd795ead022fc1fa23c5428a65a157b8125 100644
++index 420c9c80b7b0501a701b43c691a2d0183d214c65..725de63ad07d22feb4af160f90cb186210c72182 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/sigsys_handlers.cc
 +@@ -359,6 +359,7 @@ intptr_t SIGSYSSchedHandler(const struct arch_seccomp_data& args,
@@ -848,7 +638,7 @@ index 0000000000..1bacb6b70b
 + #if defined(__arm__)
 +                  PTRACE_GETVFPREGS,
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
-+index 4cde2837d47f8d1e1816f83b15388d5c650d4754..43589c8e246fe43234a5001eccb46e1259e45ad3 100644
++index 4f56b6e0d10db3f1822abb0d2b0df89fdaad53de..b8f7cabf7e32e5255187b0a3b935e4fe7974c928 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 +@@ -103,7 +103,7 @@ bool SyscallSets::IsUmask(int sysno) {
@@ -969,7 +759,15 @@ index 0000000000..1bacb6b70b
 +     case __NR_accept:
 +     case __NR_accept4:
 +     case __NR_bind:
-+@@ -553,7 +559,7 @@ bool SyscallSets::IsAllowedAddressSpaceAccess(int sysno) {
++@@ -548,13 +554,15 @@ bool SyscallSets::IsAllowedAddressSpaceAccess(int sysno) {
++     case __NR_mlock:
++     case __NR_munlock:
++     case __NR_munmap:
+++#if !defined(__loongarch__)
++     case __NR_mseal:
+++#endif
++       return true;
++     case __NR_madvise:
 +     case __NR_mincore:
 +     case __NR_mlockall:
 + #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -978,7 +776,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_mmap:
 + #endif
 + #if defined(__i386__) || defined(__arm__) || \
-+@@ -586,7 +592,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
++@@ -587,7 +595,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
 +     (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
 +     case __NR__llseek:
 + #endif
@@ -987,7 +785,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_poll:
 + #endif
 +     case __NR_ppoll:
-+@@ -607,7 +613,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
++@@ -608,7 +616,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
 +     case __NR_recv:
 + #endif
 + #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -996,7 +794,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_recvfrom:  // Could specify source.
 +     case __NR_recvmsg:   // Could specify source.
 + #endif
-+@@ -622,7 +628,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
++@@ -623,7 +631,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
 +     case __NR_send:
 + #endif
 + #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -1005,7 +803,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_sendmsg:  // Could specify destination.
 +     case __NR_sendto:   // Could specify destination.
 + #endif
-+@@ -671,7 +677,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
++@@ -672,7 +680,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
 + bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
 +   switch (sysno) {
 +     case __NR_sched_yield:
@@ -1014,7 +812,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_pause:
 + #endif
 +     case __NR_nanosleep:
-+@@ -755,7 +761,7 @@ bool SyscallSets::IsNuma(int sysno) {
++@@ -756,7 +764,7 @@ bool SyscallSets::IsNuma(int sysno) {
 +     case __NR_getcpu:
 +     case __NR_mbind:
 + #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -1023,7 +821,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_migrate_pages:
 + #endif
 +     case __NR_move_pages:
-+@@ -803,7 +809,9 @@ bool SyscallSets::IsGlobalProcessEnvironment(int sysno) {
++@@ -804,7 +812,9 @@ bool SyscallSets::IsGlobalProcessEnvironment(int sysno) {
 +     case __NR_getrusage:
 +     case __NR_personality:  // Can change its personality as well.
 +     case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -1033,7 +831,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_times:
 +       return true;
 +     default:
-+@@ -825,7 +833,7 @@ bool SyscallSets::IsDebug(int sysno) {
++@@ -826,7 +836,7 @@ bool SyscallSets::IsDebug(int sysno) {
 + 
 + bool SyscallSets::IsGlobalSystemStatus(int sysno) {
 +   switch (sysno) {
@@ -1042,7 +840,7 @@ index 0000000000..1bacb6b70b
 +     case __NR__sysctl:
 +     case __NR_sysfs:
 + #endif
-+@@ -843,7 +851,7 @@ bool SyscallSets::IsGlobalSystemStatus(int sysno) {
++@@ -844,7 +854,7 @@ bool SyscallSets::IsGlobalSystemStatus(int sysno) {
 + 
 + bool SyscallSets::IsEventFd(int sysno) {
 +   switch (sysno) {
@@ -1051,7 +849,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_eventfd:
 + #endif
 +     case __NR_eventfd2:
-+@@ -895,7 +903,7 @@ bool SyscallSets::IsKeyManagement(int sysno) {
++@@ -896,7 +906,7 @@ bool SyscallSets::IsKeyManagement(int sysno) {
 + }
 + 
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -1060,7 +858,7 @@ index 0000000000..1bacb6b70b
 + bool SyscallSets::IsSystemVSemaphores(int sysno) {
 +   switch (sysno) {
 +     case __NR_semctl:
-+@@ -915,7 +923,7 @@ bool SyscallSets::IsSystemVSemaphores(int sysno) {
++@@ -916,7 +926,7 @@ bool SyscallSets::IsSystemVSemaphores(int sysno) {
 + 
 + #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
 +     defined(__aarch64__) ||                                         \
@@ -1069,7 +867,7 @@ index 0000000000..1bacb6b70b
 + // These give a lot of ambient authority and bypass the setuid sandbox.
 + bool SyscallSets::IsSystemVSharedMemory(int sysno) {
 +   switch (sysno) {
-+@@ -931,7 +939,7 @@ bool SyscallSets::IsSystemVSharedMemory(int sysno) {
++@@ -932,7 +942,7 @@ bool SyscallSets::IsSystemVSharedMemory(int sysno) {
 + #endif
 + 
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -1078,7 +876,7 @@ index 0000000000..1bacb6b70b
 + bool SyscallSets::IsSystemVMessageQueue(int sysno) {
 +   switch (sysno) {
 +     case __NR_msgctl:
-+@@ -962,7 +970,7 @@ bool SyscallSets::IsSystemVIpc(int sysno) {
++@@ -963,7 +973,7 @@ bool SyscallSets::IsSystemVIpc(int sysno) {
 + 
 + bool SyscallSets::IsAnySystemV(int sysno) {
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -1087,7 +885,7 @@ index 0000000000..1bacb6b70b
 +   return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
 +          IsSystemVSharedMemory(sysno);
 + #elif defined(__i386__) || \
-+@@ -999,7 +1007,7 @@ bool SyscallSets::IsAdvancedScheduler(int sysno) {
++@@ -1000,7 +1010,7 @@ bool SyscallSets::IsAdvancedScheduler(int sysno) {
 + bool SyscallSets::IsInotify(int sysno) {
 +   switch (sysno) {
 +     case __NR_inotify_add_watch:
@@ -1096,7 +894,7 @@ index 0000000000..1bacb6b70b
 +     case __NR_inotify_init:
 + #endif
 +     case __NR_inotify_init1:
-+@@ -1134,7 +1142,7 @@ bool SyscallSets::IsMisc(int sysno) {
++@@ -1135,7 +1145,7 @@ bool SyscallSets::IsMisc(int sysno) {
 + #if defined(__x86_64__)
 +     case __NR_tuxcall:
 + #endif
@@ -1192,12 +990,12 @@ index 0000000000..1bacb6b70b
 + #error "Unimplemented architecture"
 + #endif
 +diff --git a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
-+index 5d1615d206dc3dfd8925deb384d76e6eab190e1c..8821c35aff2d7cbc8e200baed33be3fe1184b886 100644
++index 7f925cce83654d451f44696080b92d1f650e3086..ca189d72dc1c10abd57584d72ec658934958a877 100644
 +--- a/sandbox/linux/services/credentials.cc
 ++++ b/sandbox/linux/services/credentials.cc
-+@@ -85,7 +85,7 @@ bool ChrootToSafeEmptyDir() {
-+   pid_t pid = -1;
-+   alignas(16) char stack_buf[PTHREAD_STACK_MIN];
++@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
++   alignas(16) char stack_buf[PTHREAD_STACK_MIN_CONST];
++ 
 + #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
 +-    defined(ARCH_CPU_MIPS_FAMILY)
 ++    defined(ARCH_CPU_MIPS_FAMILY) || defined(ARCH_CPU_LOONGARCH_FAMILY)
@@ -2964,34 +2762,6 @@ index 0000000000..1bacb6b70b
 +   } else {
 +     return handle_via_broker;
 +   }
-+diff --git a/skia/BUILD.gn b/skia/BUILD.gn
-+index f1ff9895834669095145be9a60864b10ae2b2f0c..467788b920927dfbccb02d8a97c756776a3fa5dc 100644
-+--- a/skia/BUILD.gn
-++++ b/skia/BUILD.gn
-+@@ -682,6 +682,14 @@ if (current_cpu == "x86" || current_cpu == "x64") {
-+   }
-+ }
-+ 
-++if (current_cpu == "loong64") {
-++  skia_source_set("skia_opts_lasx") {
-++    sources = skia_opts.lasx_sources
-++    cflags = [ "-mlasx" ]
-++    visibility = [ ":skia_opts" ]
-++  }
-++}
-++
-+ skia_source_set("skia_opts") {
-+   cflags = []
-+   defines = []
-+@@ -720,7 +728,7 @@ skia_source_set("skia_opts") {
-+   } else if (current_cpu == "riscv64") {
-+     # Conditional and empty body needed to avoid assert() below.
-+   } else if (current_cpu == "loong64") {
-+-    # Conditional and empty body needed to avoid assert() below.
-++    deps += [ ":skia_opts_lasx" ]
-+   } else {
-+     assert(false, "Unknown cpu target")
-+   }
 +diff --git a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h b/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
 +index 114f3c112e8d597ce1a026172e80c1dcc2e3e1bd..1e2096f65104c32ae60b282749053143075e60b6 100644
 +--- a/third_party/blink/renderer/platform/graphics/cpu/loongarch64/webgl_image_conversion_lsx.h
@@ -3295,7 +3065,7 @@ index 0000000000..1bacb6b70b
 + 
 + #endif  // CRASHPAD_MINIDUMP_MINIDUMP_CONTEXT_WRITER_H_
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_extensions.h b/third_party/crashpad/crashpad/minidump/minidump_extensions.h
-+index a5f442bf5ebf0289cc81f512518a21d72c08de13..d981b961e7f7c9c16924dc29051e36cffe7ac821 100644
++index 55af5fa25b68e47ccabf0aa3fdc3162e8b5e7228..f8f9033880e728191e3aac90c8c94fe3f7dcc54d 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_extensions.h
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_extensions.h
 +@@ -213,6 +213,9 @@ enum MinidumpCPUArchitecture : uint16_t {
@@ -3322,7 +3092,7 @@ index 0000000000..1bacb6b70b
 + #error define kCPU for this CPU
 + #endif
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc b/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
-+index 9fe3ac0e6b20c4f8249ce7c1419f4a7ab9c44d07..29da4c8cd09da617d63d666f45df365fbf346b80 100644
++index e9e05124aa111fb044571a33833bc25aaade0157..7473663e768a4388e8a02fa34203de371e434ace 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_system_info_writer.cc
 +@@ -135,6 +135,9 @@ void MinidumpSystemInfoWriter::InitializeFromSnapshot(
@@ -3333,8 +3103,8 @@ index 0000000000..1bacb6b70b
 ++      cpu_architecture = kMinidumpCPUArchitectureLOONG64Breakpad;
 ++      break;
 +     default:
-+       NOTREACHED_IN_MIGRATION();
-+       cpu_architecture = kMinidumpCPUArchitectureUnknown;
++       NOTREACHED();
++   }
 +diff --git a/third_party/crashpad/crashpad/snapshot/capture_memory.cc b/third_party/crashpad/crashpad/snapshot/capture_memory.cc
 +index f2ff5d74bb96a9e65437d5d95c7e58dd62716f33..453fe37e1c806d803375cc8a61b14c8ecf61b605 100644
 +--- a/third_party/crashpad/crashpad/snapshot/capture_memory.cc
@@ -3366,7 +3136,7 @@ index 0000000000..1bacb6b70b
 + 
 + }  // namespace crashpad
 +diff --git a/third_party/crashpad/crashpad/snapshot/cpu_context.cc b/third_party/crashpad/crashpad/snapshot/cpu_context.cc
-+index 71bf4ace4c6d3d9fbf27d19dbd2467c27d424645..baf21e48d7d19b9404b6e1626c51f7187c35e510 100644
++index 6b69edefd532630ac5d2d9fc3dc1d43dab16eec8..86a374cecfcddd3bfef8d667675a13467653d26a 100644
 +--- a/third_party/crashpad/crashpad/snapshot/cpu_context.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/cpu_context.cc
 +@@ -173,6 +173,8 @@ uint64_t CPUContext::InstructionPointer() const {
@@ -3376,18 +3146,18 @@ index 0000000000..1bacb6b70b
 ++    case kCPUArchitectureLOONG64:
 ++      return loong64->csr_era;
 +     default:
-+       NOTREACHED_IN_MIGRATION();
-+       return ~0ull;
-+@@ -191,6 +193,8 @@ uint64_t CPUContext::StackPointer() const {
++       NOTREACHED();
++   }
++@@ -190,6 +192,8 @@ uint64_t CPUContext::StackPointer() const {
 +       return arm64->sp;
 +     case kCPUArchitectureRISCV64:
 +       return riscv64->regs[1];
 ++    case kCPUArchitectureLOONG64:
 ++      return loong64->regs[3];
 +     default:
-+       NOTREACHED_IN_MIGRATION();
-+       return ~0ull;
-+@@ -232,6 +236,7 @@ bool CPUContext::Is64Bit() const {
++       NOTREACHED();
++   }
++@@ -227,6 +231,7 @@ bool CPUContext::Is64Bit() const {
 +     case kCPUArchitectureARM64:
 +     case kCPUArchitectureMIPS64EL:
 +     case kCPUArchitectureRISCV64:
@@ -3703,7 +3473,7 @@ index 0000000000..1bacb6b70b
 + #error Port.
 + #endif  // ARCH_CPU_X86_FAMILY
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc b/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
-+index ce360e60f188dc3f28b34dc6fac74fc64e90b07f..2b2ff28c1bdad359e7d0474149be96c6f7b79fd8 100644
++index 67cd2b3af9e32112fe7d7c57b870b9fa79770544..fbfc97d916c490f174d1f13bf96d9cc337633ed5 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/system_snapshot_linux.cc
 +@@ -208,6 +208,8 @@ CPUArchitecture SystemSnapshotLinux::GetCPUArchitecture() const {
@@ -3735,7 +3505,7 @@ index 0000000000..1bacb6b70b
 + #else
 + #error port to your architecture
 + #endif
-+@@ -385,6 +393,9 @@ bool SystemSnapshotLinux::NXEnabled() const {
++@@ -380,6 +388,9 @@ bool SystemSnapshotLinux::NXEnabled() const {
 + #elif defined(ARCH_CPU_RISCV64)
 +   // Not implemented
 +   return false;
@@ -3811,7 +3581,7 @@ index 0000000000..1bacb6b70b
 +     // Architecture is listed as "unknown".
 +     DLOG(ERROR) << "Unknown architecture";
 +diff --git a/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc b/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
-+index cfdedadf2d81f690b956d4b3b8389fc6e2083afa..82ba77033c5e6770d8a2a51ba83ab6d58d3355e2 100644
++index b7c7bfd0a86642aa7f4fefe24734cd7442a2a933..07334e1b6d9388e1c9b93396797a78ef25145b67 100644
 +--- a/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
 ++++ b/third_party/crashpad/crashpad/snapshot/minidump/system_snapshot_minidump.cc
 +@@ -70,6 +70,8 @@ CPUArchitecture SystemSnapshotMinidump::GetCPUArchitecture() const {
@@ -4057,194 +3827,53 @@ index 0000000000..1bacb6b70b
 ++
 ++#define TRIM_DSP_FUNCTIONS 1
 ++
-+diff --git a/third_party/libpng/BUILD.gn b/third_party/libpng/BUILD.gn
-+index 81648e3b2a810d8a88a0da3f63052875eef330fc..253e9911d1e22d27fb8d9f393a091cd9de999a3d 100644
-+--- a/third_party/libpng/BUILD.gn
-++++ b/third_party/libpng/BUILD.gn
-+@@ -91,6 +91,12 @@ source_set("libpng_sources") {
-+       "mips/filter_msa_intrinsics.c",
-+       "mips/mips_init.c",
-+     ]
-++  } else if (current_cpu == "loong64") {
-++    sources += [
-++      "loongarch/loongarch_lsx_init.c",
-++      "loongarch/filter_lsx_intrinsics.c",
-++    ]
-++    defines += [ "PNG_LOONGARCH_LSX_OPT=1" ]
-+   }
-+ 
-+   configs -= [ "//build/config/compiler:chromium_code" ]
-diff --git a/patches/chromium/mas_avoid_private_macos_api_usage.patch.patch b/patches/chromium/mas_avoid_private_macos_api_usage.patch.patch
-index 9ad4d04b8a..84e5f23cc5 100644
---- a/patches/chromium/mas_avoid_private_macos_api_usage.patch.patch
-+++ b/patches/chromium/mas_avoid_private_macos_api_usage.patch.patch
-@@ -159,7 +159,7 @@ index 94a028be3c315edc0056408ab9ab41b6b001a1c1..0d830234edb5621f57e39f4a951d357a
-  
-  }  // namespace base
- diff --git a/components/os_crypt/sync/BUILD.gn b/components/os_crypt/sync/BUILD.gn
--index 3b81e00e1535ec729a521b83fe2471985d177e5c..b3706a4a0f77f8e5fbae3df97153b9cbed7d01f0 100644
-+index 4fe7a0bfaa5b3398372f55c6454e738f140efe6b..b1c70281c45aaca4ae483f1f28e9d21929d17815 100644
- --- a/components/os_crypt/sync/BUILD.gn
- +++ b/components/os_crypt/sync/BUILD.gn
- @@ -46,6 +46,7 @@ component("os_crypt") {
-@@ -303,7 +303,7 @@ index 945b01f2132547fa0f6a97ee4895994c500d1410..c01b2fdecf9b54fa01e5be9f45eaa234
-  // The NSWindow used by BridgedNativeWidget. Provides hooks into AppKit that
-  // can only be accomplished by overriding methods.
- diff --git a/components/remote_cocoa/app_shim/native_widget_mac_nswindow.mm b/components/remote_cocoa/app_shim/native_widget_mac_nswindow.mm
--index 02bd5710e0b54653cd298785245658e938a40d1f..aab09311e15b8081b7ce572e76f86021f2b0cf32 100644
-+index 8206b065e36ea5264ab01f0abb0c60c7f059cee5..219e2e73a986ed90585adc2baf1a91334c093c1a 100644
- --- a/components/remote_cocoa/app_shim/native_widget_mac_nswindow.mm
- +++ b/components/remote_cocoa/app_shim/native_widget_mac_nswindow.mm
- @@ -106,14 +106,18 @@ void OrderChildWindow(NSWindow* child_window,
-@@ -334,7 +334,7 @@ index 02bd5710e0b54653cd298785245658e938a40d1f..aab09311e15b8081b7ce572e76f86021
-  @implementation NativeWidgetMacNSWindowTitledFrame
-  - (void)mouseDown:(NSEvent*)event {
-    if (self.window.isMovable)
--@@ -179,6 +185,8 @@ - (BOOL)usesCustomDrawing {
-+@@ -214,6 +220,8 @@ - (BOOL)usesCustomDrawing {
-  }
-  @end
-  
-@@ -343,7 +343,7 @@ index 02bd5710e0b54653cd298785245658e938a40d1f..aab09311e15b8081b7ce572e76f86021
-  @implementation NativeWidgetMacNSWindow {
-   @private
-    CommandDispatcher* __strong _commandDispatcher;
--@@ -367,6 +375,8 @@ - (NSAccessibilityRole)accessibilityRole {
-+@@ -402,6 +410,8 @@ - (NSAccessibilityRole)accessibilityRole {
-  
-  // NSWindow overrides.
-  
-@@ -352,7 +352,7 @@ index 02bd5710e0b54653cd298785245658e938a40d1f..aab09311e15b8081b7ce572e76f86021
-  + (Class)frameViewClassForStyleMask:(NSWindowStyleMask)windowStyle {
-    if (windowStyle & NSWindowStyleMaskTitled) {
-      if (Class customFrame = [NativeWidgetMacNSWindowTitledFrame class])
--@@ -378,6 +388,8 @@ + (Class)frameViewClassForStyleMask:(NSWindowStyleMask)windowStyle {
-+@@ -413,6 +423,8 @@ + (Class)frameViewClassForStyleMask:(NSWindowStyleMask)windowStyle {
-    return [super frameViewClassForStyleMask:windowStyle];
-  }
-  
-diff --git a/patches/chromium/worker_context_will_destroy.patch b/patches/chromium/worker_context_will_destroy.patch
-index 7787d4eb22..b2d84298bc 100644
---- a/patches/chromium/worker_context_will_destroy.patch
-+++ b/patches/chromium/worker_context_will_destroy.patch
-@@ -10,10 +10,10 @@ An attempt to upstream this was made, but rejected:
- https://chromium-review.googlesource.com/c/chromium/src/+/1954347
- 
- diff --git a/content/public/renderer/content_renderer_client.h b/content/public/renderer/content_renderer_client.h
--index b0bfdb4f1263c32a4a5514c97b3e114d91a941e3..8d9dfec42304b610672bad524972775d9db01671 100644
-+index 6dff7d89d284279025548af45d3d0712476c5e89..b9a5f2becbd5401579b25e5f7ffd6ae69902c282 100644
- --- a/content/public/renderer/content_renderer_client.h
- +++ b/content/public/renderer/content_renderer_client.h
--@@ -412,6 +412,11 @@ class CONTENT_EXPORT ContentRendererClient {
-+@@ -407,6 +407,11 @@ class CONTENT_EXPORT ContentRendererClient {
-    virtual void DidInitializeWorkerContextOnWorkerThread(
-        v8::Local<v8::Context> context) {}
-  
-@@ -26,10 +26,10 @@ index b0bfdb4f1263c32a4a5514c97b3e114d91a941e3..8d9dfec42304b610672bad524972775d
-    // An empty URL is returned if the URL is not overriden.
-    virtual GURL OverrideFlashEmbedWithHTML(const GURL& url);
- diff --git a/content/renderer/renderer_blink_platform_impl.cc b/content/renderer/renderer_blink_platform_impl.cc
--index a59e3e52b9f9854c045fe9acd2536dde1f1bf24e..7848577452374e6aa7b5bae6fdc8526b5760dc8a 100644
-+index 06000a2c90989be3d58fcdd92237201ae199e6c9..4907d047aecb64ca36304881ded73c018fb89a00 100644
- --- a/content/renderer/renderer_blink_platform_impl.cc
- +++ b/content/renderer/renderer_blink_platform_impl.cc
--@@ -881,6 +881,12 @@ void RendererBlinkPlatformImpl::WillStopWorkerThread() {
-+@@ -875,6 +875,12 @@ void RendererBlinkPlatformImpl::WillStopWorkerThread() {
-    WorkerThreadRegistry::Instance()->WillStopCurrentWorkerThread();
-  }
-  
-@@ -43,10 +43,10 @@ index a59e3e52b9f9854c045fe9acd2536dde1f1bf24e..7848577452374e6aa7b5bae6fdc8526b
-      const v8::Local<v8::Context>& worker) {
-    GetContentClient()->renderer()->DidInitializeWorkerContextOnWorkerThread(
- diff --git a/content/renderer/renderer_blink_platform_impl.h b/content/renderer/renderer_blink_platform_impl.h
--index 69c52cb8333fc8e967631c2f9535e8f15a421ee0..937714ced2e73ae3950c35e012f633d916de6f5c 100644
-+index 75504bfc89cbe83828db7730e6e6ce2ad8c2b2a7..45af12ddbf7dd3ab5c82d810e330fd008b567448 100644
- --- a/content/renderer/renderer_blink_platform_impl.h
- +++ b/content/renderer/renderer_blink_platform_impl.h
--@@ -195,6 +195,7 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
-+@@ -193,6 +193,7 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
-    void DidStartWorkerThread() override;
-    void WillStopWorkerThread() override;
-    void WorkerContextCreated(const v8::Local<v8::Context>& worker) override;
-@@ -55,10 +55,10 @@ index 69c52cb8333fc8e967631c2f9535e8f15a421ee0..937714ced2e73ae3950c35e012f633d9
-        const blink::WebSecurityOrigin& script_origin) override;
-    blink::ProtocolHandlerSecurityLevel GetProtocolHandlerSecurityLevel(
- diff --git a/third_party/blink/public/platform/platform.h b/third_party/blink/public/platform/platform.h
--index 700e93a9ed053e4141658c86a26ec230aed42916..394b2f06501f52478614ba6565dfae47b3ce1e8f 100644
-+index 848edcdaf3a0169be0904e2fe081adb42d4b4242..73d35d10eeec0ba1851d186bcb13b65a97af2630 100644
- --- a/third_party/blink/public/platform/platform.h
- +++ b/third_party/blink/public/platform/platform.h
--@@ -662,6 +662,7 @@ class BLINK_PLATFORM_EXPORT Platform {
-+@@ -656,6 +656,7 @@ class BLINK_PLATFORM_EXPORT Platform {
-    virtual void DidStartWorkerThread() {}
-    virtual void WillStopWorkerThread() {}
-    virtual void WorkerContextCreated(const v8::Local<v8::Context>& worker) {}
-diff --git a/patches/chromium/worker_feat_add_hook_to_notify_script_ready.patch b/patches/chromium/worker_feat_add_hook_to_notify_script_ready.patch
-index c09e109ff4..9666da5611 100644
---- a/patches/chromium/worker_feat_add_hook_to_notify_script_ready.patch
-+++ b/patches/chromium/worker_feat_add_hook_to_notify_script_ready.patch
-@@ -19,10 +19,10 @@ that clearly establishes the worker script is ready for evaluation with the scop
- initialized.
- 
- diff --git a/content/public/renderer/content_renderer_client.h b/content/public/renderer/content_renderer_client.h
--index 8d9dfec42304b610672bad524972775d9db01671..f3c9c336472186b4bd61586c16ce5a68200b62de 100644
-+index b9a5f2becbd5401579b25e5f7ffd6ae69902c282..dd1cea53202ed0422466dfd463b81977c2e96b57 100644
- --- a/content/public/renderer/content_renderer_client.h
- +++ b/content/public/renderer/content_renderer_client.h
--@@ -412,6 +412,11 @@ class CONTENT_EXPORT ContentRendererClient {
-+@@ -407,6 +407,11 @@ class CONTENT_EXPORT ContentRendererClient {
-    virtual void DidInitializeWorkerContextOnWorkerThread(
-        v8::Local<v8::Context> context) {}
-  
-@@ -35,10 +35,10 @@ index 8d9dfec42304b610672bad524972775d9db01671..f3c9c336472186b4bd61586c16ce5a68
-    // from the worker thread.
-    virtual void WillDestroyWorkerContextOnWorkerThread(
- diff --git a/content/renderer/renderer_blink_platform_impl.cc b/content/renderer/renderer_blink_platform_impl.cc
--index 7848577452374e6aa7b5bae6fdc8526b5760dc8a..3c2af71c0b2ec13e71ece4bbb869aa76ba4b34ae 100644
-+index 4907d047aecb64ca36304881ded73c018fb89a00..babd21dc19ee329694d93c99c025822bca30ee6b 100644
- --- a/content/renderer/renderer_blink_platform_impl.cc
- +++ b/content/renderer/renderer_blink_platform_impl.cc
--@@ -893,6 +893,12 @@ void RendererBlinkPlatformImpl::WorkerContextCreated(
-+@@ -887,6 +887,12 @@ void RendererBlinkPlatformImpl::WorkerContextCreated(
-        worker);
-  }
-  
-@@ -52,10 +52,10 @@ index 7848577452374e6aa7b5bae6fdc8526b5760dc8a..3c2af71c0b2ec13e71ece4bbb869aa76
-      const blink::WebSecurityOrigin& script_origin) {
-    return GetContentClient()->renderer()->AllowScriptExtensionForServiceWorker(
- diff --git a/content/renderer/renderer_blink_platform_impl.h b/content/renderer/renderer_blink_platform_impl.h
--index 937714ced2e73ae3950c35e012f633d916de6f5c..811390014521eeeb98bb122d827d652d7230622d 100644
-+index 45af12ddbf7dd3ab5c82d810e330fd008b567448..1e4d14dac6398f3b81149d58ba13c021e7d0faff 100644
- --- a/content/renderer/renderer_blink_platform_impl.h
- +++ b/content/renderer/renderer_blink_platform_impl.h
--@@ -195,6 +195,8 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
-+@@ -193,6 +193,8 @@ class CONTENT_EXPORT RendererBlinkPlatformImpl : public BlinkPlatformImpl {
-    void DidStartWorkerThread() override;
-    void WillStopWorkerThread() override;
-    void WorkerContextCreated(const v8::Local<v8::Context>& worker) override;
-@@ -65,10 +65,10 @@ index 937714ced2e73ae3950c35e012f633d916de6f5c..811390014521eeeb98bb122d827d652d
-    bool AllowScriptExtensionForServiceWorker(
-        const blink::WebSecurityOrigin& script_origin) override;
- diff --git a/third_party/blink/public/platform/platform.h b/third_party/blink/public/platform/platform.h
--index 394b2f06501f52478614ba6565dfae47b3ce1e8f..46a8c958c0f896a42106f73ce13171eefbd0f662 100644
-+index 73d35d10eeec0ba1851d186bcb13b65a97af2630..bc503c4f89afd0036b5b7986d28502742893e44c 100644
- --- a/third_party/blink/public/platform/platform.h
- +++ b/third_party/blink/public/platform/platform.h
--@@ -662,6 +662,8 @@ class BLINK_PLATFORM_EXPORT Platform {
-+@@ -656,6 +656,8 @@ class BLINK_PLATFORM_EXPORT Platform {
-    virtual void DidStartWorkerThread() {}
-    virtual void WillStopWorkerThread() {}
-    virtual void WorkerContextCreated(const v8::Local<v8::Context>& worker) {}
+diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
+new file mode 100644
+index 0000000000..4b65bcd5e8
+--- /dev/null
++++ b/patches/chromium/loong64_support_for_runtime_json.patch
+@@ -0,0 +1,30 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: darkyzhou <me@zqy.io>
++Date: Wed, 4 Dec 2024 14:45:31 +0000
++Subject: loong64 support for runtime.json
++
++
++diff --git a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
++index befa22eec5004f82ea80d78dae7424d460468f82..a1811237810bdd446bff3acb0050839e3de4b173 100644
++--- a/extensions/common/api/runtime.json
+++++ b/extensions/common/api/runtime.json
++@@ -98,7 +98,8 @@
++             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
++             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
++             {"name": "mips", "description": "Specifies the processer architecture as mips."},
++-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
+++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
+++            {"name": "loong64", "description": "Specifies the processer architecture as loong64."}
++          ],
++         "description": "The machine's processor architecture."
++       },
++@@ -111,7 +112,8 @@
++           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
++           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
++           {"name": "mips", "description": "Specifies the native client architecture as mips."},
++-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
+++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
+++          {"name": "loong64", "description": "Specifies the native client architecture as loong64."}
++         ]
++       },
++       {
 diff --git a/patches/config.json b/patches/config.json
-index 60cfd3ff8e..66470126fe 100644
+index 8cf28d8d2b..1c49a3d9dd 100644
 --- a/patches/config.json
 +++ b/patches/config.json
-@@ -13,5 +13,7 @@
+@@ -11,5 +11,8 @@
+   { "patch_dir": "src/electron/patches/Mantle", "repo": "src/third_party/squirrel.mac/vendor/Mantle" },
+   { "patch_dir": "src/electron/patches/ReactiveObjC", "repo": "src/third_party/squirrel.mac/vendor/ReactiveObjC" },
    { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
-   { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
-   { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
--  { "patch_dir": "src/electron/patches/dawn", "repo": "src/third_party/dawn" }
-+  { "patch_dir": "src/electron/patches/dawn", "repo": "src/third_party/dawn" },
+-  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" }
++  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
++  { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
 +  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" },
 +  { "patch_dir": "src/electron/patches/breakpad", "repo": "src/third_party/breakpad/breakpad" }
  ]
@@ -4363,13 +3992,13 @@ index 31dc878c5b..f96d1acc1d 100644
 +loong64_support.patch
 diff --git a/patches/ffmpeg/loong64_support.patch b/patches/ffmpeg/loong64_support.patch
 new file mode 100644
-index 0000000000..511b644116
+index 0000000000..ea9923a9d3
 --- /dev/null
 +++ b/patches/ffmpeg/loong64_support.patch
 @@ -0,0 +1,6238 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 16:17:26 +0000
++Date: Wed, 4 Dec 2024 14:50:17 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
@@ -10574,10 +10203,10 @@ index 0000000000..511b644116
 ++#define FFMPEG_VERSION "n5.0.1"
 ++#endif /* AVUTIL_FFVERSION_H */
 +diff --git a/ffmpeg_generated.gni b/ffmpeg_generated.gni
-+index 37155be221758952c853e8d716ebfa644aedc2c4..5ec1097c1ad2d2f9ca4a182fb21c3323578a5221 100644
++index e282aa74801cfa5166482fa78eab3906ee8f4de5..43de5c72dc1b11c4da78758e231238d671f4c4aa 100644
 +--- a/ffmpeg_generated.gni
 ++++ b/ffmpeg_generated.gni
-+@@ -279,6 +279,7 @@ if ((is_apple && current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
++@@ -251,6 +251,7 @@ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
 + 
 + if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
 +     (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
@@ -10585,7 +10214,7 @@ index 0000000000..511b644116
 +     (is_android && current_cpu == "arm" && arm_use_neon &&
 +      ffmpeg_branding == "Chrome") ||
 +     (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-+@@ -363,6 +364,19 @@ if (current_cpu == "x64" || (is_android && current_cpu == "x86") ||
++@@ -360,6 +361,19 @@ if (current_cpu == "x64" || (is_android && current_cpu == "x86") ||
 +   ]
 + }
 + 
@@ -10606,12 +10235,13 @@ index 0000000000..511b644116
 +     (use_linux_config && current_cpu == "arm" && arm_use_neon) ||
 +     (use_linux_config && current_cpu == "arm")) {
 diff --git a/patches/skia/.patches b/patches/skia/.patches
-index 35c0761967..1b67584ff1 100644
---- a/patches/skia/.patches
+new file mode 100644
+index 0000000000..086c31cfef
+--- /dev/null
 +++ b/patches/skia/.patches
-@@ -1 +1,2 @@
- sksl_rp_prevent_overflow_when_computing_slot_allocation_size.patch
+@@ -0,0 +1 @@
 +loong64_support.patch
+\ No newline at end of file
 diff --git a/patches/skia/loong64_support.patch b/patches/skia/loong64_support.patch
 new file mode 100644
 index 0000000000..24ce65754b
@@ -10820,10 +10450,10 @@ index 0000000000..fb204b355e
 + #error "unknown architecture"
 + #endif
 diff --git a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
-index be69be338f..ebb86dbcf3 100644
+index d41b2acc27..6be2324770 100644
 --- a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
 +++ b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
-@@ -68,6 +68,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
+@@ -67,6 +67,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
      info->arch = extensions::api::runtime::PlatformArch::kX86_32;
    } else if (strcmp(arch, "x64") == 0) {
      info->arch = extensions::api::runtime::PlatformArch::kX86_64;
@@ -10832,7 +10462,7 @@ index be69be338f..ebb86dbcf3 100644
    } else {
      NOTREACHED();
    }
-@@ -79,6 +81,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
+@@ -78,6 +80,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_32;
    } else if (strcmp(nacl_arch, "x86-64") == 0) {
      info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_64;

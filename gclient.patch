@@ -1,0 +1,13 @@
+diff --git a/gclient.py b/gclient.py
+index 72ecf74a..5ec918fc 100755
+--- a/gclient.py
++++ b/gclient.py
+@@ -849,7 +849,7 @@ class Dependency(gclient_utils.WorkItem, DependencySettings):
+                     # exist.
+                     logging.warning(
+                         'GCS dependency %s new version, removing old.', name)
+-                    shutil.rmtree(gcs_deps[0].output_dir)
++                    os.system(f'rm -rf {gcs_deps[0].output_dir}')
+             else:
+                 url = dep_value.get('url')
+                 deps_to_add.append(

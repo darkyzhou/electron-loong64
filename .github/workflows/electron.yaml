@@ -11,11 +11,12 @@ on:
       electronVersion:
         type: string
         required: true
-        default: "32.2.5"
+        default: "33.2.1"
         description: Version of electron to build
 
 env:
   ROOT_PATH: /home/builduser/buildroot
+  DEPOT_PATH: /home/builduser/.electron_build_tools/third_party/depot_tools
   SRC_PATH: /home/builduser/buildroot/src
   OUT_PATH: /home/builduser/buildroot/src/out/Release
   RELEASE_PATH: /home/builduser/buildroot/release/${{ inputs.electronVersion }}
@@ -40,18 +41,20 @@ jobs:
           fi
           git -C src clean -fd || true; git -C src am --abort || true; git -C src reset --hard HEAD;
           git -C src submodule foreach 'git clean -fd || true; git am --abort || true; git reset --hard HEAD';
+          
           git -C src/electron clean -fd || true; git -C src/electron reset --hard HEAD;
+          git -C src/electron remote set-url origin https://github.com/electron/electron.git
           git -C src/electron fetch origin --tags
           git -C src/electron switch --detach v${{ inputs.electronVersion }}
-          git -C src/electron apply $REPO_PATH/electron.patch
+          git -C src/electron apply "$REPO_PATH"/electron.patch
+
+          # Workaround for a strange Python error: "Cannot call rmtree on a symbolic link"
+          git -C "$DEPOT_PATH" reset --hard HEAD
+          git -C "$DEPOT_PATH" apply "$REPO_PATH"/gclient.patch
       - name: Sync Dependencies
         run: |
           set -ex
           cd /home/builduser/buildroot
-
-          # Workaround for a strange Python error: "Cannot call rmtree on a symbolic link"
-          rm -rf src/build/linux/debian_bullseye*
-          
           npx e sync
   build:
     needs: prepare
