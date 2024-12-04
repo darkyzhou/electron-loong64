@@ -34,13 +34,6 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
    - Place it in `$BUILD_ROOT/src/electron` to match the Electron's requirement
    - Note: Do not apply `electron.patch` at this stage
 
-3. Initialize dependencies:
-   - Run `npx e sync` in `$BUILD_ROOT/src`
-   - This will apply all existing patches from the Electron repository
-
-4. Apply local patches:
-   - Apply `electron.patch` to the Electron repository using `git apply` in `$BUILD_ROOT/src/electron`
-
 ### Updating Chromium Patches
 
 1. Version alignment:
@@ -51,12 +44,16 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 
 3. Update dependencies:
    - Modify the `DEPS` file in `$BUILD_ROOT/src/electron` to reference the selected Chromium version
+   - Run `npx e sync` in `$BUILD_ROOT/src`. This will apply all existing patches from the Electron repository
+
+4. Apply existing patches:
+   - Apply `electron.patch` from the repository to `$BUILD_ROOT/src/electron` using `git apply` in `$BUILD_ROOT/src/electron`
 
 4. Apply Chromium patches:
-   - Apply the consolidated patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`
+   - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`
    - Resolve any conflicts if they occur
 
-5. Manage patches using Electron's `npx e patches` command:
+6. Manage patches using Electron's `npx e patches` command:
    > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`
 
    1. Commit changes in both the main repository and affected submodules
