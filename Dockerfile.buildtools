@@ -10,7 +10,7 @@ RUN apt-get update && \
         curl \
         git \
         sudo \
-        xz-utils \
+        xz-utils
 
 RUN curl --silent --location https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get update && \
