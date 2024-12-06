@@ -32,15 +32,12 @@ RUN apt-get update && \
         bison \
         python3-dbusmock \
         openjdk-8-jre \
-        build-essential \
-        clang \
-        llvm \
-        llvm-dev \
         generate-ninja \
         ninja-build \
-        lld \
-        libclang-dev \
-        libclang-rt-dev \
+        build-essential \
+        clang-18 \
+        llvm-18 \
+        lld-18 \
         libnotify-bin \
         libfuse2 \
         libdbus-1-dev \
@@ -196,7 +193,7 @@ RUN mkdir libgcc libffi && \
     cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
     tar -xzvf rustc.tar.gz -C /usr && \
     # Chromium seems to require that bindgen binary lives together with llvm
-    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-19
+    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
