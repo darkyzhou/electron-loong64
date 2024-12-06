@@ -38,6 +38,9 @@ RUN apt-get update && \
         clang-18 \
         llvm-18 \
         lld-18 \
+        llvm-18-dev \
+        libclang-18-dev \
+        libclang-rt-18-dev \
         libnotify-bin \
         libfuse2 \
         libdbus-1-dev \
