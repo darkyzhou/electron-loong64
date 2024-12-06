@@ -12,10 +12,10 @@ index 7bac303ca1..131fb10ab1 100644
      'v20.18.1',
    'nan_version':
 diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
-index 3ccd99d6be..4424f7c705 100644
+index 3ccd99d6be..c340ae7f47 100644
 --- a/build/args/ffmpeg.gn
 +++ b/build/args/ffmpeg.gn
-@@ -5,3 +5,25 @@ is_official_build = true
+@@ -5,3 +5,26 @@ is_official_build = true
  proprietary_codecs = false
  ffmpeg_branding = "Chromium"
  enable_dsyms = false
@@ -30,11 +30,12 @@ index 3ccd99d6be..4424f7c705 100644
 +use_lld = true
 +custom_toolchain = "//build/toolchain/linux/unbundle:default"
 +host_toolchain = "//build/toolchain/linux/unbundle:default"
++clang_version = "18"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
 +rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
-+rust_bindgen_root = "/usr/lib/llvm-19"
++rust_bindgen_root = "/usr/lib/llvm-18"
 +proprietary_codecs = true
 +treat_warnings_as_errors = false
 +fatal_linker_warnings = false
@@ -43,10 +44,10 @@ index 3ccd99d6be..4424f7c705 100644
 +loongarch64_use_lsx=true
 \ No newline at end of file
 diff --git a/build/args/release.gn b/build/args/release.gn
-index e5017f6e16..0ffc234079 100644
+index e5017f6e16..1610183000 100644
 --- a/build/args/release.gn
 +++ b/build/args/release.gn
-@@ -14,3 +14,25 @@ rtc_use_h264 = proprietary_codecs
+@@ -14,3 +14,26 @@ rtc_use_h264 = proprietary_codecs
  # who have an LGPL requirement to ship ffmpeg as a dynamically linked library,
  # we build ffmpeg as a shared library.
  is_component_ffmpeg = true
@@ -61,11 +62,12 @@ index e5017f6e16..0ffc234079 100644
 +use_lld = true
 +custom_toolchain = "//build/toolchain/linux/unbundle:default"
 +host_toolchain = "//build/toolchain/linux/unbundle:default"
++clang_version = "18"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
 +rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
-+rust_bindgen_root = "/usr/lib/llvm-19"
++rust_bindgen_root = "/usr/lib/llvm-18"
 +proprietary_codecs = true
 +treat_warnings_as_errors = false
 +fatal_linker_warnings = false
