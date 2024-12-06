@@ -81,8 +81,8 @@ jobs:
           gn gen "$OUT_PATH" --args="import(\"//electron/build/args/release.gn\")" --script-executable=/usr/bin/python3
           ninja -C "$OUT_PATH" electron
         env:
-          CC: clang-18
-          CXX: clang++-18
+          CC: clang
+          CXX: clang++
           AR: ar
           NM: nm
           RUSTC_BOOTSTRAP: 1
