@@ -32,7 +32,6 @@ env:
 
 jobs:
   prepare:
-    if: ${{ inputs.stage == 'full' }}
     runs-on: [self-hosted, ryustation]
     container:
       image: ghcr.io/darkyzhou/electron-buildtools:latest
@@ -41,6 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Patch Sources
+        if: ${{ inputs.stage == 'full' }}
         run: |
           set -ex
           REPO_PATH=`pwd`
@@ -62,6 +62,7 @@ jobs:
           git -C "$DEPOT_PATH" reset --hard HEAD
           git -C "$DEPOT_PATH" apply "$REPO_PATH"/gclient.patch
       - name: Sync Dependencies
+        if: ${{ inputs.stage == 'full' }}
         run: |
           set -ex
           cd /home/builduser/buildroot
