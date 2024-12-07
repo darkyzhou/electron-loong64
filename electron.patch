@@ -32,7 +32,7 @@ index 3ccd99d6be..4424f7c705 100644
 +host_toolchain = "//build/toolchain/linux/unbundle:default"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
-+rustc_version = "rustc dev"
++rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
 +rust_bindgen_root = "/usr/lib/llvm-19"
 +proprietary_codecs = true
@@ -64,7 +64,7 @@ index e5017f6e16..7f69266bcb 100644
 +clang_version = "19"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
-+rustc_version = "rustc dev"
++rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
 +rust_bindgen_root = "/usr/lib/llvm-19"
 +proprietary_codecs = true
