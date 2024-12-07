@@ -202,7 +202,8 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           file: ${{ env.RELEASE_PATH }}/*
-          file_glob: true
-          overwrite: true
           release_name: Electron v${{ inputs.electronVersion }} port for Loong64
           tag: v${{ inputs.electronVersion }}
+          file_glob: true
+          overwrite: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
