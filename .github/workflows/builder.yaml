@@ -11,12 +11,12 @@ on:
       hostRustVersion:
         type: string
         required: true
-        default: "1.82.0"
+        default: "1.80.1"
         description: Host rustc version
       targetRustBranch:
         type: string
         required: true
-        default: "beta"
+        default: "1.81.0"
         description: Target rustc branch
       gccVersion:
         type: string

@@ -1,8 +1,8 @@
 FROM ghcr.io/darkyzhou/loong64-debian:latest
 
 ARG RUSTUP_VERSION="1.27.1" \
-    HOST_RUST_VERSION="1.82.0" \
-    TARGET_RUST_BRANCH="beta"
+    HOST_RUST_VERSION="1.80.1" \
+    TARGET_RUST_BRANCH="1.81.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
