@@ -33,7 +33,7 @@ index 3ccd99d6be..c340ae7f47 100644
 +clang_version = "18"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
-+rustc_version = "rustc dev"
++rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
 +rust_bindgen_root = "/usr/lib/llvm-18"
 +proprietary_codecs = true
@@ -65,7 +65,7 @@ index e5017f6e16..1610183000 100644
 +clang_version = "18"
 +clang_base_path = "/usr"
 +clang_use_chrome_plugins = false
-+rustc_version = "rustc dev"
++rustc_version = "rustc 1.81.0-dev"
 +rust_sysroot_absolute = "/usr"
 +rust_bindgen_root = "/usr/lib/llvm-18"
 +proprietary_codecs = true
