@@ -21,7 +21,7 @@ on:
       gccVersion:
         type: string
         required: true
-        default: "14.2.0"
+        default: "13.3.0"
         description: Gcc version to compile
       libffiVersion:
         type: string
@@ -31,7 +31,7 @@ on:
       imageTag:
         type: string
         required: true
-        default: "electron-v32"
+        default: "deepin-23-glibc-238"
         description: Tag of the builder image
 
 jobs:

@@ -1,4 +1,4 @@
-FROM ghcr.io/darkyzhou/loong64-debian:latest
+FROM linuxdeepin/deepin:beige-loong64-v1.4.0
 
 ARG NODE_VERSION=20.16.0
 
@@ -8,8 +8,10 @@ RUN groupadd --gid 1000 builduser && \
 ENV TEMP=/tmp
 RUN chmod a+rwx /tmp
 
+# Omitted lighttpd, rpm, xcompmgr and xcb as deepin doesn't offer them. Fortunately we could compile without them somehow.
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -105,19 +107,16 @@ RUN apt-get update && \
         libxss-dev \
         libxt-dev \
         libxtst-dev \
-        lighttpd \
         locales \
         openbox \
         p7zip \
         patch \
         perl \
         pkgconf \
-        rpm \
         ruby \
         uuid-dev \
         wdiff \
         x11-utils \
-        xcompmgr \
         xz-utils \
         zip \
         libatk1.0-0 \
@@ -174,7 +173,6 @@ RUN apt-get update && \
         libx11-xcb-dev \
         libxcb-xkb-dev \
         libxkbcommon-x11-dev \
-        xcb \
         libdav1d-dev \
         libyuv-dev \
         mesa-common-dev

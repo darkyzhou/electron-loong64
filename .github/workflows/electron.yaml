@@ -15,7 +15,7 @@ on:
       builderImageTag:
         type: string
         required: true
-        default: "electron-v32"
+        default: "deepin-23-glibc-238"
         description: Builder image tag
       electronVersion:
         type: string

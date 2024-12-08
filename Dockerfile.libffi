@@ -1,14 +1,15 @@
-FROM ghcr.io/darkyzhou/loong64-debian:latest
+FROM linuxdeepin/deepin:beige-loong64-v1.4.0
 
 ARG LIBFFI_VERSION="3.4.6"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
-        build-essential \
-        binutils \
+        gcc-13 \
+        make \
         autoconf \
         automake \
         libtool \
@@ -17,6 +18,12 @@ RUN apt-get update && \
 WORKDIR /root
 RUN curl -LO https://github.com/libffi/libffi/releases/download/v${LIBFFI_VERSION}/libffi-${LIBFFI_VERSION}.tar.gz && \
     tar xf libffi-${LIBFFI_VERSION}.tar.gz
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 100 \
+        --slave /usr/bin/g++ g++ /usr/bin/g++-13 \
+        --slave /usr/bin/gcov gcov /usr/bin/gcov-13 \
+        --slave /usr/bin/gcc-ar gcc-ar /usr/bin/gcc-ar-13 \
+        --slave /usr/bin/gcc-ranlib gcc-ranlib /usr/bin/gcc-ranlib-13
 
 WORKDIR /root/build
 RUN /root/libffi-${LIBFFI_VERSION}/configure \

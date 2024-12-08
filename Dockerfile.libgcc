@@ -1,9 +1,10 @@
-FROM ghcr.io/darkyzhou/loong64-debian:latest
+FROM linuxdeepin/deepin:beige-loong64-v1.4.0
 
-ARG GCC_VERSION="14.2.0"
+ARG GCC_VERSION="13.3.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
