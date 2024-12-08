@@ -71,7 +71,7 @@ jobs:
     needs: prepare
     runs-on: [self-hosted, ryustation]
     permissions:
-      contents: read
+      contents: write
       packages: write
     container:
       image: ghcr.io/darkyzhou/electron-builder:${{ inputs.builderImageTag }}
