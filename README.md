@@ -2,16 +2,21 @@
 
 This project aims to build a version of Electron that supports the Loong64 architecture.
 
-**Note:** The Electron binary requires `glibc >= 2.39`.
+**Note:** The Electron binaries require `glibc >= 2.38`.
 
 ## Branches
 
 - `dev`: The development branch, containing the latest patches and build scripts.
-- `vX.Y.Z`: The release branches, corresponding to the release versions of Electron.
+- `X.Y.Z`: The release branches, corresponding to the release versions of Electron.
 
 ## Acknowledgments
 
 Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromium patches in [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64), which make this project possible.
+
+## How This Project Works
+
+1. This project builds upon the official Electron repository by applying custom patches. See `electron.patch` for details.
+2. The build process runs in a dedicated container environment that includes all necessary build tools and dependencies. See `Dockerfile.builder` for details.
 
 ## Development
 
