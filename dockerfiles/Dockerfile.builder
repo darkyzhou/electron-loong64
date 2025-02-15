@@ -37,12 +37,12 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         generate-ninja \
         ninja-build \
         build-essential \
-        clang \
-        llvm \
-        lld \
-        llvm-dev \
-        libclang-dev \
-        libclang-rt-dev \
+        clang-18 \
+        llvm-18 \
+        lld-18 \
+        llvm-18-dev \
+        libclang-18-dev \
+        libclang-rt-18-dev \
         libnotify-bin \
         libfuse2 \
         libdbus-1-dev \
