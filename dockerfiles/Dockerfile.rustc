@@ -1,8 +1,8 @@
 FROM linuxdeepin/deepin:beige-loong64-v1.4.0
 
 ARG RUSTUP_VERSION="1.27.1" \
-    HOST_RUST_VERSION="1.80.1" \
-    TARGET_RUST_BRANCH="1.81.0"
+    HOST_RUST_VERSION="1.83.0" \
+    TARGET_RUST_BRANCH="1.84.1"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
