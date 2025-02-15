@@ -188,7 +188,7 @@ ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
 RUN mkdir libgcc libffi && \
     tar -xzvf libgcc.tar.gz -C libgcc && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
-    cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/*/ && \
+    cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/12/ && \
     tar -xzvf libffi.tar.gz -C libffi && \
     # Also hacky here
     cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
