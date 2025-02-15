@@ -46,7 +46,7 @@ jobs:
         with:
           load: true
           tags: libgcc:latest
-          file: Dockerfile.libgcc
+          file: dockerfiles/Dockerfile.libgcc
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
       - name: Extract libgcc Artifact
@@ -72,7 +72,7 @@ jobs:
         with:
           load: true
           tags: libffi:latest
-          file: Dockerfile.libffi
+          file: dockerfiles/Dockerfile.libffi
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
       - name: Extract libffi Artifact
@@ -98,7 +98,7 @@ jobs:
         with:
           load: true
           tags: rustc:latest
-          file: Dockerfile.rustc
+          file: dockerfiles/Dockerfile.rustc
           build-args: |
             RUSTUP_VERSION=${{ inputs.rustupVersion }}
             HOST_RUST_VERSION=${{ inputs.hostRustVersion }}
@@ -145,5 +145,5 @@ jobs:
         with:
           push: true
           context: .
-          file: Dockerfile.builder
+          file: dockerfiles/Dockerfile.builder
           tags: ghcr.io/darkyzhou/electron-builder:${{ inputs.imageTag }}
