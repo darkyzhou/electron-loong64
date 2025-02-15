@@ -29,6 +29,8 @@ env:
   SRC_PATH: /home/builduser/buildroot/src
   OUT_PATH: /home/builduser/buildroot/src/out/Release
   RELEASE_PATH: /home/builduser/buildroot/release/${{ inputs.electronVersion }}
+  ELECTRON_REPO: https://github.com/electron/electron.git
+  REPO_PATH: ${{ github.workspace }}
 
 jobs:
   prepare:
@@ -39,34 +41,40 @@ jobs:
         - /mnt/data/build/electron-loong64:/home/builduser
     steps:
       - uses: actions/checkout@v4
+      - name: Update Sources
+        if: ${{ inputs.stage == 'full' }}
+        run: |
+          set -ex
+
+          pushd "$ROOT_PATH"
+          if [ ! -d "src/electron" ]; then
+            # If you encounter platform compatibility errors from depot_tools, apply `depot.patch` as below
+            npx e init -i release -r "$ROOT_PATH" electron-loong64
+            git clone "$ELECTRON_REPO" src/electron
+          fi
+          "$REPO_PATH"/scripts/update.sh
+          popd
+        env:
+          ROOT_PATH: ${{ env.ROOT_PATH }}
+          ELECTRON_REPO: ${{ env.ELECTRON_REPO }}
+          ELECTRON_VERSION: ${{ env.ELECTRON_VERSION }}
+          DEPOT_PATH: ${{ env.DEPOT_PATH }}
       - name: Patch Sources
         if: ${{ inputs.stage == 'full' }}
         run: |
-          set -ex
-          REPO_PATH=`pwd`
-          cd "$ROOT_PATH"
-          if [ ! -d "src/electron" ]; then
-            npx e init -i release -r "$ROOT_PATH" electron-loong64
-            git clone https://github.com/electron/electron.git src/electron
-          fi
-          git -C src clean -fd || true; git -C src am --abort || true; git -C src reset --hard HEAD;
-          git -C src submodule foreach 'git clean -fd || true; git am --abort || true; git reset --hard HEAD';
-          
-          git -C src/electron clean -fd || true; git -C src/electron reset --hard HEAD;
-          git -C src/electron remote set-url origin https://github.com/electron/electron.git
-          git -C src/electron fetch origin --tags
-          git -C src/electron switch --detach v${{ inputs.electronVersion }}
-          git -C src/electron apply "$REPO_PATH"/electron.patch
-
-          # Workaround for a strange Python error: "Cannot call rmtree on a symbolic link"
-          git -C "$DEPOT_PATH" reset --hard HEAD
-          git -C "$DEPOT_PATH" apply "$REPO_PATH"/gclient.patch
+          "$REPO_PATH"/scripts/patch.sh
+        env:
+          ROOT_PATH: ${{ env.ROOT_PATH }}
+          REPO_PATH: ${{ env.REPO_PATH }}
       - name: Sync Dependencies
         if: ${{ inputs.stage == 'full' }}
         run: |
-          set -ex
-          cd /home/builduser/buildroot
-          npx e sync
+          "$REPO_PATH"/scripts/sync.sh
+        env:
+          ROOT_PATH: ${{ env.ROOT_PATH }}
+          REPO_PATH: ${{ env.REPO_PATH }}
+          DEPOT_PATH: ${{ env.DEPOT_PATH }}
+
   build:
     needs: prepare
     runs-on: [self-hosted, ryustation]
@@ -82,9 +90,9 @@ jobs:
         if: ${{ inputs.stage != 'package' }}
         run: |
           set -ex
-          cp /usr/local/bin/node /home/builduser/buildroot/src/third_party/node/linux/node-linux-x64/bin/node
-          chmod +w /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
-          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild /home/builduser/buildroot/src/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          cp /usr/local/bin/node "$SRC_PATH"/third_party/node/linux/node-linux-x64/bin/node
+          chmod +w "$SRC_PATH"/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild "$SRC_PATH"/third_party/devtools-frontend/src/third_party/esbuild/esbuild
       - name: Build Electron
         if: ${{ inputs.stage != 'package' }}
         run: |

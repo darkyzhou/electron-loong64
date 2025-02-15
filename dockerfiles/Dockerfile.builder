@@ -37,12 +37,12 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         generate-ninja \
         ninja-build \
         build-essential \
-        clang-18 \
-        llvm-18 \
-        lld-18 \
-        llvm-18-dev \
-        libclang-18-dev \
-        libclang-rt-18-dev \
+        clang \
+        llvm \
+        lld \
+        llvm-dev \
+        libclang-dev \
+        libclang-rt-dev \
         libnotify-bin \
         libfuse2 \
         libdbus-1-dev \
@@ -181,7 +181,7 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
     tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
     cp -R node-v${NODE_VERSION}-linux-loong64/* /usr/local/ && \
     rm -rf node-v${NODE_VERSION}-linux-loong64* && \
-    npm i -g yarn @esbuild/linux-loong64@0.14.54
+    npm i -g yarn @esbuild/linux-loong64@0.24.0
 
 COPY libgcc.tar.gz libffi.tar.gz rustc.tar.gz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse

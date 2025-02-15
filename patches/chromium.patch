@@ -1,111 +1,22 @@
-diff --git a/DEPS b/DEPS
-index 080813c1d2..c173210f09 100644
---- a/DEPS
-+++ b/DEPS
-@@ -2,7 +2,7 @@ gclient_gn_args_from = 'src'
- 
- vars = {
-   'chromium_version':
--    '130.0.6723.137',
-+    '130.0.6723.58',
-   'node_version':
-     'v20.18.1',
-   'nan_version':
-diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
-index 3ccd99d6be..4424f7c705 100644
---- a/build/args/ffmpeg.gn
-+++ b/build/args/ffmpeg.gn
-@@ -5,3 +5,25 @@ is_official_build = true
- proprietary_codecs = false
- ffmpeg_branding = "Chromium"
- enable_dsyms = false
-+
-+chrome_pgo_phase = 0
-+enable_widevine = false
-+enable_nacl = false
-+ffmpeg_branding = "Chrome"
-+is_clang = true
-+use_sysroot = false
-+is_debug = false
-+use_lld = true
-+custom_toolchain = "//build/toolchain/linux/unbundle:default"
-+host_toolchain = "//build/toolchain/linux/unbundle:default"
-+clang_base_path = "/usr"
-+clang_use_chrome_plugins = false
-+rustc_version = "rustc 1.81.0-dev"
-+rust_sysroot_absolute = "/usr"
-+rust_bindgen_root = "/usr/lib/llvm-19"
-+proprietary_codecs = true
-+treat_warnings_as_errors = false
-+fatal_linker_warnings = false
-+rtc_use_pipewire = false
-+dcheck_always_on = false
-+loongarch64_use_lsx=true
-\ No newline at end of file
-diff --git a/build/args/release.gn b/build/args/release.gn
-index e5017f6e16..7f69266bcb 100644
---- a/build/args/release.gn
-+++ b/build/args/release.gn
-@@ -14,3 +14,26 @@ rtc_use_h264 = proprietary_codecs
- # who have an LGPL requirement to ship ffmpeg as a dynamically linked library,
- # we build ffmpeg as a shared library.
- is_component_ffmpeg = true
-+
-+chrome_pgo_phase = 0
-+enable_widevine = false
-+enable_nacl = false
-+ffmpeg_branding = "Chrome"
-+is_clang = true
-+use_sysroot = false
-+is_debug = false
-+use_lld = true
-+custom_toolchain = "//build/toolchain/linux/unbundle:default"
-+host_toolchain = "//build/toolchain/linux/unbundle:default"
-+clang_version = "19"
-+clang_base_path = "/usr"
-+clang_use_chrome_plugins = false
-+rustc_version = "rustc 1.81.0-dev"
-+rust_sysroot_absolute = "/usr"
-+rust_bindgen_root = "/usr/lib/llvm-19"
-+proprietary_codecs = true
-+treat_warnings_as_errors = false
-+fatal_linker_warnings = false
-+rtc_use_pipewire = false
-+dcheck_always_on = false
-+loongarch64_use_lsx=true
-\ No newline at end of file
-diff --git a/js2c_toolchain.gni b/js2c_toolchain.gni
-index b56590857c..d155291b04 100644
---- a/js2c_toolchain.gni
-+++ b/js2c_toolchain.gni
-@@ -58,6 +58,8 @@ if (electron_js2c_toolchain == "") {
-     } else if (is_win && current_cpu == "arm64") {
-       # cross compile Windows arm64 with host toolchain.
-       electron_js2c_toolchain = host_toolchain
-+    } else if (current_cpu == "loong64") {
-+      electron_js2c_toolchain = host_toolchain
-     }
-   } else if (host_cpu == "arm64" && current_cpu == "arm64" &&
-              host_os == "mac") {
 diff --git a/patches/boringssl/.patches b/patches/boringssl/.patches
-index 9dffabe3d9..981c833dd6 100644
+index 9dffabe3d9..d54598d744 100644
 --- a/patches/boringssl/.patches
 +++ b/patches/boringssl/.patches
 @@ -1,3 +1,4 @@
  expose_ripemd160.patch
  revert_track_ssl_error_zero_return_explicitly.patch
  feat_expose_several_extra_cipher_functions.patch
-+loong64_support.patch
-diff --git a/patches/boringssl/loong64_support.patch b/patches/boringssl/loong64_support.patch
++loong64_support_for_boringssl.patch
+diff --git a/patches/boringssl/loong64_support_for_boringssl.patch b/patches/boringssl/loong64_support_for_boringssl.patch
 new file mode 100644
-index 0000000000..8778bdfd90
+index 0000000000..f48ae4d481
 --- /dev/null
-+++ b/patches/boringssl/loong64_support.patch
++++ b/patches/boringssl/loong64_support_for_boringssl.patch
 @@ -0,0 +1,20 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 15:49:06 +0000
-+Subject: loong64 support
++Date: Sat, 15 Feb 2025 03:26:50 +0000
++Subject: loong64 support for boringssl
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
@@ -122,90 +33,107 @@ index 0000000000..8778bdfd90
 + #else
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
-diff --git a/patches/breakpad/.patches b/patches/breakpad/.patches
-new file mode 100644
-index 0000000000..ea62e0c740
---- /dev/null
-+++ b/patches/breakpad/.patches
-@@ -0,0 +1 @@
-+loong64_support.patch
-diff --git a/patches/breakpad/loong64_support.patch b/patches/breakpad/loong64_support.patch
-new file mode 100644
-index 0000000000..81eca14e30
---- /dev/null
-+++ b/patches/breakpad/loong64_support.patch
-@@ -0,0 +1,43 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Fri, 29 Nov 2024 01:52:56 +0000
-+Subject: loong64 support
-+
-+
-+diff --git a/src/common/linux/dump_symbols.cc b/src/common/linux/dump_symbols.cc
-+index 55fa98469d81798cab823343f17c3a21f2a9b86e..2d03c6c0e57b4dac5a0854e69d3b6cb5bdae93d5 100644
-+--- a/src/common/linux/dump_symbols.cc
-++++ b/src/common/linux/dump_symbols.cc
-+@@ -111,6 +111,10 @@ using google_breakpad::wasteful_vector;
-+ #define EM_AARCH64      183
-+ #endif
-+ 
-++#ifdef EM_LOONGARCH
-++#define EM_LOONGARCH    258
-++#endif
-++
-+ // Define ZStd compression if host machine does not include this define.
-+ #ifndef ELFCOMPRESS_ZSTD
-+ #define ELFCOMPRESS_ZSTD 2
-+@@ -1119,6 +1123,7 @@ const char* ElfArchitecture(const typename ElfClass::Ehdr* elf_header) {
-+     case EM_X86_64:     return "x86_64";
-+     case EM_RISCV:      return "riscv";
-+     case EM_NDS32:      return "nds32";
-++    case EM_LOONGARCH:  return "loongarch64";
-+     default: return NULL;
-+   }
-+ }
-+diff --git a/src/common/linux/memory_mapped_file.cc b/src/common/linux/memory_mapped_file.cc
-+index a7b96eb591f741546005a53f9d8125df421ef881..6ad11042be8228e1a37f5b15377e9de1cca05cc2 100644
-+--- a/src/common/linux/memory_mapped_file.cc
-++++ b/src/common/linux/memory_mapped_file.cc
-+@@ -72,7 +72,8 @@ bool MemoryMappedFile::Map(const char* path, size_t offset) {
-+ 
-+ #if defined(__x86_64__) || defined(__aarch64__) || \
-+    (defined(__mips__) && _MIPS_SIM == _ABI64) || \
-+-   (defined(__riscv) && __riscv_xlen == 64)
-++   (defined(__riscv) && __riscv_xlen == 64) || \
-++   (defined(__loongarch__) && __loongarch_grlen == 64)
-+ 
-+   struct kernel_stat st;
-+   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 61fa76913e..54ff2332d3 100644
+index fe0d2a0590..d8b425a64d 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -136,3 +136,5 @@ osr_shared_texture_remove_keyed_mutex_on_win_dxgi.patch
- refactor_unfilter_unresponsive_events.patch
- wayland_support_outgoing_dnd_sessions_with_no_offered_mime_types.patch
- support_bstr_pkey_appusermodel_id_in_windows_shortcuts.patch
-+loong64_support.patch
-+loong64_support_for_runtime_json.patch
-diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
+@@ -140,3 +140,4 @@ cherry-pick-3dc17c461b12.patch
+ ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
+ feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
+ feat_separate_content_settings_callback_for_sync_and_async_clipboard.patch
++loong64_support_for_chromium.patch
+diff --git a/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch b/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
+index a19135828c..e3fc337f16 100644
+--- a/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
++++ b/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
+@@ -25,7 +25,7 @@ Refs https://issues.chromium.org/issues/40210365 which is blocked
+ on https://issues.chromium.org/issues/42203693
+ 
+ diff --git a/gin/isolate_holder.cc b/gin/isolate_holder.cc
+-index 2be37976a1305f1deed561b3b829dbb5d7ae85e7..44eb16f17d272125e2b4a590f8962eb8144d9755 100644
++index e5ee2c6b3cb787ff9f8272d4344a1e18c44971e2..22469cf0ab1025eefcf94e2cd351087e52182130 100644
+ --- a/gin/isolate_holder.cc
+ +++ b/gin/isolate_holder.cc
+ @@ -34,6 +34,8 @@ v8::ArrayBuffer::Allocator* g_array_buffer_allocator = nullptr;
+@@ -37,7 +37,7 @@ index 2be37976a1305f1deed561b3b829dbb5d7ae85e7..44eb16f17d272125e2b4a590f8962eb8
+  
+  std::unique_ptr<v8::Isolate::CreateParams> getModifiedIsolateParams(
+      std::unique_ptr<v8::Isolate::CreateParams> params,
+-@@ -198,10 +200,26 @@ IsolateHolder::getDefaultIsolateParams() {
++@@ -194,10 +196,26 @@ IsolateHolder::getDefaultIsolateParams() {
+    return params;
+  }
+  
+@@ -65,10 +65,10 @@ index 2be37976a1305f1deed561b3b829dbb5d7ae85e7..44eb16f17d272125e2b4a590f8962eb8
+ +
+  }  // namespace gin
+ diff --git a/gin/public/isolate_holder.h b/gin/public/isolate_holder.h
+-index 52b8c1af58678b9fee684ff75340c98fcc73b552..f79407d741a30298d09efd53589f16dc9b26107f 100644
++index c22b0a7f9af621573e888a518ccdc22293ce07ef..d3e5ced425df54f42534cec5cc0c5bbfb9d79c6c 100644
+ --- a/gin/public/isolate_holder.h
+ +++ b/gin/public/isolate_holder.h
+-@@ -131,6 +131,8 @@ class GIN_EXPORT IsolateHolder {
++@@ -130,6 +130,8 @@ class GIN_EXPORT IsolateHolder {
+    // Should only be called after v8::IsolateHolder::Initialize() is invoked.
+    static std::unique_ptr<v8::Isolate::CreateParams> getDefaultIsolateParams();
+  
+@@ -77,7 +77,7 @@ index 52b8c1af58678b9fee684ff75340c98fcc73b552..f79407d741a30298d09efd53589f16dc
+    v8::Isolate* isolate() { return isolate_; }
+  
+    // This method returns if v8::Locker is needed to access isolate.
+-@@ -144,6 +146,9 @@ class GIN_EXPORT IsolateHolder {
++@@ -143,6 +145,9 @@ class GIN_EXPORT IsolateHolder {
+  
+    void EnableIdleTasks(std::unique_ptr<V8IdleTaskRunner> idle_task_runner);
+  
+diff --git a/patches/chromium/ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch b/patches/chromium/ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
+index f55532ec44..1c63e289b7 100644
+--- a/patches/chromium/ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
++++ b/patches/chromium/ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
+@@ -11,10 +11,10 @@ Bug: N/A
+ Change-Id: I9fc472212b2d3afac2c8e18a2159bc2d50bbdf98
+ 
+ diff --git a/AUTHORS b/AUTHORS
+-index 6008db66fcb0686046a5ca40d04bb2534cb0b04a..d5079e68cef38168c4c66833a53121930fa59afd 100644
++index 897b6678b6d583f3361c41f62b960e46165d288d..13afc62098608e79faf02d504b54d9d6326b8ed3 100644
+ --- a/AUTHORS
+ +++ b/AUTHORS
+-@@ -339,6 +339,7 @@ David Futcher <david.mike.futcher@gmail.com>
++@@ -336,6 +336,7 @@ David Futcher <david.mike.futcher@gmail.com>
+  David Jin <davidjin@amazon.com>
+  David Lechner <david@pybricks.com>
+  David Leen <davileen@amazon.com>
+@@ -23,10 +23,10 @@ index 6008db66fcb0686046a5ca40d04bb2534cb0b04a..d5079e68cef38168c4c66833a5312193
+  David McAllister <mcdavid@amazon.com>
+  David Michael Barr <david.barr@samsung.com>
+ diff --git a/base/win/shortcut.cc b/base/win/shortcut.cc
+-index 967e130e823f41c402411dfadb53b805e8a8c92b..3a9df7f31861ca69168fd24513ee554d0984798d 100644
++index 02f3e63d16c3324f546f6155d722900f0a81131a..1dfdb0c8dc5a7368382e73a0db1b4d135b4d2176 100644
+ --- a/base/win/shortcut.cc
+ +++ b/base/win/shortcut.cc
+-@@ -356,8 +356,9 @@ bool ResolveShortcutProperties(const FilePath& shortcut_path,
++@@ -342,8 +342,9 @@ bool ResolveShortcutProperties(const FilePath& shortcut_path,
+                *(pv_toast_activator_clsid.get().puuid));
+            break;
+          default:
+diff --git a/patches/chromium/loong64_support_for_chromium.patch b/patches/chromium/loong64_support_for_chromium.patch
 new file mode 100644
-index 0000000000..8e4fd87eb0
+index 0000000000..ba4c2ce10f
 --- /dev/null
-+++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3634 @@
++++ b/patches/chromium/loong64_support_for_chromium.patch
+@@ -0,0 +1,3685 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Tue, 3 Dec 2024 14:59:12 +0000
-+Subject: loong64 support
++Date: Sat, 15 Feb 2025 03:15:31 +0000
++Subject: loong64 support for chromium
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
-+index 2b589ddd153214e237c1028f6be736351754a6f0..9f45a24dcd85736626e118dac464adedcc4928cc 100644
++index 17da3298e761b666a13470042e8d09df8466e957..b58397dce427336653b1f2ad144c0f3e21f77dbd 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
 ++++ b/base/allocator/partition_allocator/partition_alloc.gni
-+@@ -272,7 +272,7 @@ declare_args() {
++@@ -304,7 +304,7 @@ declare_args() {
 + 
 + stack_scan_supported =
 +     current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
@@ -215,10 +143,10 @@ index 0000000000..8e4fd87eb0
 + # We want to provide assertions that guard against inconsistent build
 + # args, but there is no point in having them fire if we're not building
 +diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+index 4451c4e2419323c98b58d41078290b157a998ff2..3dd6c37ba8b630d383f8773e017174266eeeded9 100644
++index ec0b490a859d15cadb642e7f4ba0b579e326de1b..eff7e810fdbadb2e00cb942fb288b8eea7fa7278 100644
 +--- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 ++++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+@@ -499,6 +499,9 @@ if (is_clang_or_gcc) {
++@@ -500,6 +500,9 @@ if (is_clang_or_gcc) {
 +     } else if (current_cpu == "riscv64") {
 +       assert(stack_scan_supported)
 +       sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
@@ -283,11 +211,24 @@ index 0000000000..8e4fd87eb0
 ++    "  ld.d $fp, $sp, 72                                 \n"
 ++    "  addi.d $sp, $sp, 96                               \n"
 ++    "  jr $ra                                            \n");
++diff --git a/base/process/launch.h b/base/process/launch.h
++index 009d75093c7804d5c65f6149881efa3ac06892d8..d570b93740cda13599009dea8d762c5a177e7d09 100644
++--- a/base/process/launch.h
+++++ b/base/process/launch.h
++@@ -55,7 +55,7 @@ namespace base {
++ // defined as a constant.
++ 
++ // These constants are borrowed from glibc’s (arch)/bits/pthread_stack_min.h.
++-#if defined(ARCH_CPU_ARM64)
+++#if defined(ARCH_CPU_ARM64) || defined(ARCH_CPU_LOONGARCH64)
++ #define PTHREAD_STACK_MIN_CONST \
++   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
++ #else
 +diff --git a/base/system/sys_info.cc b/base/system/sys_info.cc
-+index b74d6550715dec595a3ac630b759ef36f7461c59..1ebbbd70cefc14144e57042acaf2f251dcefe80d 100644
++index 745d42ed400fd0f2dbf91d02f5e7dfd3e43d50e0..981c00f5990f42a67c6347cda94903422d7b379b 100644
 +--- a/base/system/sys_info.cc
 ++++ b/base/system/sys_info.cc
-+@@ -255,6 +255,8 @@ std::string SysInfo::ProcessCPUArchitecture() {
++@@ -261,6 +261,8 @@ std::string SysInfo::ProcessCPUArchitecture() {
 +   return "ARM_64";
 + #elif defined(ARCH_CPU_RISCV64)
 +   return "RISCV_64";
@@ -297,10 +238,10 @@ index 0000000000..8e4fd87eb0
 +   return std::string();
 + #endif
 +diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
-+index 9b8719a64ba7e76518554d22f0a9446582cbea22..840ca3cbb7562013c5b4b70e4dde5d7645a96405 100644
++index 44bd202d2b854a4f47012894f3a2dd34ad03b18d..fc8b27185a0aa14ce3c22c7d56c4797a60b224a6 100644
 +--- a/build/config/clang/BUILD.gn
 ++++ b/build/config/clang/BUILD.gn
-+@@ -189,14 +189,15 @@ template("clang_lib") {
++@@ -166,14 +166,15 @@ template("clang_lib") {
 +       } else if (is_apple) {
 +         _dir = "darwin"
 +       } else if (is_linux || is_chromeos) {
@@ -321,20 +262,47 @@ index 0000000000..8e4fd87eb0
 +         } else {
 +           assert(false)  # Unhandled cpu type
 +         }
++diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
++index f58320b88f207f0531c4358c9d0846552e830dfa..2c3237cf6d35224274afbfcf38884be6670a7b8f 100644
++--- a/build/config/compiler/BUILD.gn
+++++ b/build/config/compiler/BUILD.gn
++@@ -621,7 +621,7 @@ config("compiler") {
++     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
++     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
++         default_toolchain != "//build/toolchain/cros:target") {
++-      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
+++      # cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
++     }
++   }
++ 
++diff --git a/build/config/loongarch64.gni b/build/config/loongarch64.gni
++index 9a95ec915137e84fa418a86cfab893f2cb18a291..a9dc9d28dbeb45de1dfe32cf13222be3e82cc043 100644
++--- a/build/config/loongarch64.gni
+++++ b/build/config/loongarch64.gni
++@@ -7,7 +7,7 @@ import("//build/config/v8_target_cpu.gni")
++ if (current_cpu == "loong64") {
++   declare_args() {
++     # LOONGARCH64 SIMD Arch compilation flag.
++-    loongarch64_use_lsx = false
+++    loongarch64_use_lsx = true
++     loongarch64_use_lasx = false
++   }
++ }
 +diff --git a/build/config/rust.gni b/build/config/rust.gni
-+index b7e3c8881b589472bd33c7256bd3d9234e6e7a34..e1ec82c04553a069d25349ee2fa4e37fbcd7cc22 100644
++index 60856e609d08479d6193a690a98dd2692f619b02..141194588910eb6724b1f853c952ad95abb87fe8 100644
 +--- a/build/config/rust.gni
 ++++ b/build/config/rust.gni
-+@@ -211,6 +211,8 @@ if (is_linux || is_chromeos) {
-+     }
++@@ -200,6 +200,9 @@ if (is_linux || is_chromeos) {
 +   } else if (current_cpu == "riscv64") {
 +     rust_abi_target = "riscv64gc-unknown-linux-gnu"
++     cargo_target_abi = ""
 ++  } else if (current_cpu == "loong64") {
 ++    rust_abi_target = "loongarch64-unknown-linux-gnu"
+++    cargo_target_abi = ""
 +   } else {
 +     # Best guess for other future platforms.
 +     rust_abi_target = current_cpu + "-unknown-linux-gnu"
-+@@ -299,6 +301,8 @@ if (current_cpu == "x86") {
++@@ -320,6 +323,8 @@ if (current_cpu == "x86") {
 +   rust_target_arch = "powerpc64"
 + } else if (current_cpu == "riscv64") {
 +   rust_target_arch = "riscv64"
@@ -362,44 +330,11 @@ index 0000000000..8e4fd87eb0
 + 
 +         # No need to generate an object file for nocompile tests.
 +         "-Xclang",
-+diff --git a/build/rust/rust_bindgen.gni b/build/rust/rust_bindgen.gni
-+index e4797dc2544c4c70474126bb6b3d0ac6b59f96b0..fbb4f4b7e5704a9230d472e9aa98308ff798095a 100644
-+--- a/build/rust/rust_bindgen.gni
-++++ b/build/rust/rust_bindgen.gni
-+@@ -75,11 +75,11 @@ template("rust_bindgen") {
-+     sources = [ invoker.header ]
-+ 
-+     if (!defined(configs)) {
-+-      configs = []
-++      # configs = []
-+     }
-+ 
-+     # Several important compiler flags come from default_compiler_configs
-+-    configs += default_compiler_configs
-++    # configs += default_compiler_configs
-+ 
-+     output_dir = "$target_gen_dir"
-+     out_gen_rs = "$output_dir/${target_name}.rs"
-+@@ -135,10 +135,10 @@ template("rust_bindgen") {
-+ 
-+     args += [
-+       "--",
-+-      "{{defines}}",
-+-      "{{include_dirs}}",
-+-      "{{cflags}}",
-+-      "{{cflags_c}}",
-++      # "{{defines}}",
-++      # "{{include_dirs}}",
-++      # "{{cflags}}",
-++      # "{{cflags_c}}",
-+     ]
-+ 
-+     # libclang will run the system `clang` to find the "resource dir" which it
 +diff --git a/build/rust/rust_target.gni b/build/rust/rust_target.gni
-+index 10371f12c0a836d3e99f8fea4c1185198d4b7f0d..add7eb8a98dc50b2d959b5bb2670acf3bb9a747d 100644
++index 1a2f96337d43619b3facf74ff4f252e6ba3511cc..5450c592fd28f2c0f3bcaf104217b9374be3d4f8 100644
 +--- a/build/rust/rust_target.gni
 ++++ b/build/rust/rust_target.gni
-+@@ -399,6 +399,9 @@ template("rust_target") {
++@@ -434,6 +434,9 @@ template("rust_target") {
 +       if (_rustc_metadata != "") {
 +         rustflags += [ "-Cmetadata=${_rustc_metadata}" ]
 +       }
@@ -409,8 +344,25 @@ index 0000000000..8e4fd87eb0
 +       rustenv = _rustenv
 + 
 +       if (_generate_crate_root) {
++diff --git a/chromecast/browser/cast_browser_main_parts.cc b/chromecast/browser/cast_browser_main_parts.cc
++index bcd009335713b0abc279b6f4fd52456d3bbfd807..ec3b43ef4ef0326895e1293fe227acbb18e160bc 100644
++--- a/chromecast/browser/cast_browser_main_parts.cc
+++++ b/chromecast/browser/cast_browser_main_parts.cc
++@@ -315,11 +315,10 @@ const DefaultCommandLineSwitch kDefaultSwitches[] = {
++ #endif  // BUILDFLAG(IS_ANDROID)
++ #endif  // BUILDFLAG(IS_CAST_AUDIO_ONLY)
++ #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
++-#if defined(ARCH_CPU_X86_FAMILY)
++     // This is needed for now to enable the x11 Ozone platform to work with
++     // current Linux/NVidia OpenGL drivers.
++     {switches::kIgnoreGpuBlocklist, ""},
++-#elif defined(ARCH_CPU_ARM_FAMILY)
+++#if defined(ARCH_CPU_ARM_FAMILY)
++ #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
++     {switches::kEnableHardwareOverlays, "cast"},
++ #endif
 +diff --git a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
-+index 18fd272c6a9d8ed1a2a8b4e1fe6f9d94de5f7cb8..20dc7d913e1c54c882dc35a378ce40729632bb61 100644
++index fba9c05770fa8089ee617486ed9d14de0a4a9a8a..9cd7596443d1ed5faf9f380ae79c0a9e143c4cc4 100644
 +--- a/components/media_router/common/providers/cast/channel/enum_table.h
 ++++ b/components/media_router/common/providers/cast/channel/enum_table.h
 +@@ -12,7 +12,6 @@
@@ -421,7 +373,7 @@ index 0000000000..8e4fd87eb0
 + #include <optional>
 + #include <ostream>
 + #include <string_view>
-+@@ -368,7 +367,8 @@ class EnumTable {
++@@ -366,7 +365,8 @@ class EnumTable {
 + 
 +  private:
 + #ifdef ARCH_CPU_64_BITS
@@ -431,6 +383,33 @@ index 0000000000..8e4fd87eb0
 + #endif
 +       std::initializer_list<Entry> data_;
 +   bool is_sorted_;
++diff --git a/components/variations/proto/study.proto b/components/variations/proto/study.proto
++index 7ef5eb238e1a286902547bdfe722a11129009741..f2d1708e6c1cfc847fb1987b90e32c219d53761f 100644
++--- a/components/variations/proto/study.proto
+++++ b/components/variations/proto/study.proto
++@@ -262,6 +262,8 @@ message Study {
++     // A Mac-only value, indicating an x86-64 binary running on an arm64 host
++     // via "Rosetta 2" binary translation.
++     TRANSLATED_X86_64 = 4;
+++
+++    LOONGARCH64 = 5;
++   }
++ 
++   // Enum to pass as optional bool.
++diff --git a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
++index 73ff906e1b51a5c1fc0e899fb3bfe9936d0a3c44..da0aefab0728fea124d86a7bad2f595037603612 100644
++--- a/components/variations/service/variations_field_trial_creator_base.cc
+++++ b/components/variations/service/variations_field_trial_creator_base.cc
++@@ -107,6 +107,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
++   if (process_arch == "ARM") {
++     return Study::ARM32;
++   }
+++  if (process_arch == "LOONGARCH_64") {
+++    return Study::LOONGARCH64;
+++  }
++   if (process_arch == "x86") {
++     return Study::X86_32;
++   }
 +diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
 +index 070658460eb74513b83e746f20d80af5b79a2df3..39bff2d78b1379dd1a26fa30106ef35243d2d8ef 100644
 +--- a/content/common/user_agent.cc
@@ -604,7 +583,7 @@ index 0000000000..8e4fd87eb0
 +   CrashSIGSYS_Handler(args, fs_denied_errno);
 + 
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-+index bb0e13f4d2d9c85267ca790144f3898eb3cd3829..38beceaa6afe2df71766f742e6e4f7a6e8fe65be 100644
++index 83b855384d285a328758c3a17769a6551e34c815..9b5a89a58bde4862f85bcaa0a2d25da4a81e10be 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 +@@ -37,7 +37,7 @@
@@ -616,7 +595,7 @@ index 0000000000..8e4fd87eb0
 + // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
 + // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
 + // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
-+@@ -347,7 +347,7 @@ ResultExpr RestrictFutex() {
++@@ -346,7 +346,7 @@ ResultExpr RestrictFutex() {
 +       .Cases({FUTEX_WAIT, FUTEX_WAKE, FUTEX_REQUEUE, FUTEX_CMP_REQUEUE,
 + #if BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
 +               // Enable priority-inheritance operations.
@@ -625,7 +604,7 @@ index 0000000000..8e4fd87eb0
 +               FUTEX_WAIT_REQUEUE_PI, FUTEX_CMP_REQUEUE_PI,
 + #endif  // BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
 +               FUTEX_WAKE_OP, FUTEX_WAIT_BITSET, FUTEX_WAKE_BITSET},
-+@@ -464,8 +464,11 @@ ResultExpr RestrictPtrace() {
++@@ -462,8 +462,11 @@ ResultExpr RestrictPtrace() {
 +   return Switch(request)
 +       .Cases({
 + #if !defined(__aarch64__)
@@ -1214,10 +1193,10 @@ index 0000000000..8e4fd87eb0
 +       if (!message->ReadString(&requested_filename)) {
 +         return false;
 +diff --git a/sandbox/linux/syscall_broker/broker_process.cc b/sandbox/linux/syscall_broker/broker_process.cc
-+index a452430a906e59d830f121270412e1cf40d900ca..3144c80a2e00e2dc0561f7bf0d5713a9e121f8e7 100644
++index 049f72232e4790cec1b7e6dc2e3dec406b1681cd..bd544528363e118750d10bfe3943e84e21aa4bb3 100644
 +--- a/sandbox/linux/syscall_broker/broker_process.cc
 ++++ b/sandbox/linux/syscall_broker/broker_process.cc
-+@@ -122,44 +122,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -121,44 +121,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 +   // and are default disabled in Android. So, we should refuse to broker them
 +   // to be consistent with the platform's restrictions.
 +   switch (sysno) {
@@ -1271,7 +1250,7 @@ index 0000000000..8e4fd87eb0
 +     case __NR_stat:
 +     case __NR_lstat:
 + #endif
-+@@ -169,6 +171,9 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -168,6 +170,9 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 + #if defined(__NR_fstatat64)
 +     case __NR_fstatat64:
 + #endif
@@ -1281,7 +1260,7 @@ index 0000000000..8e4fd87eb0
 + #if defined(__x86_64__) || defined(__aarch64__)
 +     case __NR_newfstatat:
 + #endif
-+@@ -184,7 +189,7 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -183,7 +188,7 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 +       return !fast_check || policy_->allowed_command_set.test(COMMAND_STAT);
 + #endif
 + 
@@ -2720,10 +2699,10 @@ index 0000000000..8e4fd87eb0
 + #endif
 +     case __NR_getdents64:
 +diff --git a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-+index 2d00b768530aa481d21b059d26bcd6072a0d3079..1fce6c800e7f42d48b691e09f1e9ea6d57587a45 100644
++index e9de261ff65047ca88bf12cf3ec11f23a29ea23c..f12312183359d479ce7359231cc1d8c68108eb54 100644
 +--- a/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_screen_ai_policy_linux.cc
-+@@ -37,7 +37,7 @@ ResultExpr ScreenAIProcessPolicy::EvaluateSyscall(
++@@ -47,7 +47,7 @@ ResultExpr ScreenAIProcessPolicy::EvaluateSyscall(
 +       const Arg<int> op(1);
 +       return Switch(op & FUTEX_CMD_MASK)
 +           .Cases(
@@ -3828,179 +3807,23 @@ index 0000000000..8e4fd87eb0
 ++
 ++#define TRIM_DSP_FUNCTIONS 1
 ++
-diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
-new file mode 100644
-index 0000000000..4b65bcd5e8
---- /dev/null
-+++ b/patches/chromium/loong64_support_for_runtime_json.patch
-@@ -0,0 +1,30 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Wed, 4 Dec 2024 14:45:31 +0000
-+Subject: loong64 support for runtime.json
-+
-+
-+diff --git a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
-+index befa22eec5004f82ea80d78dae7424d460468f82..a1811237810bdd446bff3acb0050839e3de4b173 100644
-+--- a/extensions/common/api/runtime.json
-++++ b/extensions/common/api/runtime.json
-+@@ -98,7 +98,8 @@
-+             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
-+             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
-+             {"name": "mips", "description": "Specifies the processer architecture as mips."},
-+-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
-++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
-++            {"name": "loong64", "description": "Specifies the processer architecture as loong64."}
-+          ],
-+         "description": "The machine's processor architecture."
-+       },
-+@@ -111,7 +112,8 @@
-+           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
-+           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
-+           {"name": "mips", "description": "Specifies the native client architecture as mips."},
-+-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
-++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
-++          {"name": "loong64", "description": "Specifies the native client architecture as loong64."}
-+         ]
-+       },
-+       {
-diff --git a/patches/config.json b/patches/config.json
-index 8cf28d8d2b..1c49a3d9dd 100644
---- a/patches/config.json
-+++ b/patches/config.json
-@@ -11,5 +11,8 @@
-   { "patch_dir": "src/electron/patches/Mantle", "repo": "src/third_party/squirrel.mac/vendor/Mantle" },
-   { "patch_dir": "src/electron/patches/ReactiveObjC", "repo": "src/third_party/squirrel.mac/vendor/ReactiveObjC" },
-   { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
--  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" }
-+  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
-+  { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
-+  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" },
-+  { "patch_dir": "src/electron/patches/breakpad", "repo": "src/third_party/breakpad/breakpad" }
- ]
-diff --git a/patches/devtools_frontend/.patches b/patches/devtools_frontend/.patches
-index 3cf8d9fc4a..13c1c128d6 100644
---- a/patches/devtools_frontend/.patches
-+++ b/patches/devtools_frontend/.patches
-@@ -1 +1,3 @@
- chore_expose_ui_to_allow_electron_to_set_dock_side.patch
-+loong64_support.patch
-+patch_esbuild_version_for_loong64.patch
-diff --git a/patches/devtools_frontend/loong64_support.patch b/patches/devtools_frontend/loong64_support.patch
-new file mode 100644
-index 0000000000..2e7f3fafb1
---- /dev/null
-+++ b/patches/devtools_frontend/loong64_support.patch
-@@ -0,0 +1,20 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 16:34:13 +0000
-+Subject: loong64 support
-+
-+Co-authored-by: Jiajie Chen <c@jia.je>
-+
-+diff --git a/scripts/build/rollup.config.js b/scripts/build/rollup.config.js
-+index fd01fabf108341d086a2529d5b1d43613683bb86..f6bc03cc61bdf87e0c6da017d9a6235750e52a18 100644
-+--- a/scripts/build/rollup.config.js
-++++ b/scripts/build/rollup.config.js
-+@@ -19,7 +19,7 @@ export default commandLineArgs => ({
-+     sourcemap: Boolean(commandLineArgs.configSourcemaps),
-+   }],
-+   plugins: [
-+-    terser(),
-++    // terser(),
-+     {
-+       name: 'devtools-plugin',
-+       resolveId(source, importer) {
-diff --git a/patches/devtools_frontend/patch_esbuild_version_for_loong64.patch b/patches/devtools_frontend/patch_esbuild_version_for_loong64.patch
-new file mode 100644
-index 0000000000..cd0282d95a
---- /dev/null
-+++ b/patches/devtools_frontend/patch_esbuild_version_for_loong64.patch
-@@ -0,0 +1,66 @@
-+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-+From: darkyzhou <me@zqy.io>
-+Date: Tue, 19 Nov 2024 01:37:50 +0000
-+Subject: patch esbuild version for loong64
-+
-+
-+diff --git a/node_modules/esbuild/lib/main.js b/node_modules/esbuild/lib/main.js
-+index c0f1a991084741cae1644ca089c20ecc01470f2e..c641aad69883d9ccf52d0bb5b86c90b7ab5e5573 100644
-+--- a/node_modules/esbuild/lib/main.js
-++++ b/node_modules/esbuild/lib/main.js
-+@@ -717,8 +717,8 @@ function createChannel(streamIn) {
-+     if (isFirstPacket) {
-+       isFirstPacket = false;
-+       let binaryVersion = String.fromCharCode(...bytes);
-+-      if (binaryVersion !== "0.14.13") {
-+-        throw new Error(`Cannot start service: Host version "${"0.14.13"}" does not match binary version ${JSON.stringify(binaryVersion)}`);
-++      if (binaryVersion !== "0.14.54") {
-++        throw new Error(`Cannot start service: Host version "${"0.14.54"}" does not match binary version ${JSON.stringify(binaryVersion)}`);
-+       }
-+       return;
-+     }
-+@@ -1804,7 +1804,7 @@ if (process.env.ESBUILD_WORKER_THREADS !== "0") {
-+   }
-+ }
-+ var _a;
-+-var isInternalWorkerThread = ((_a = worker_threads == null ? void 0 : worker_threads.workerData) == null ? void 0 : _a.esbuildVersion) === "0.14.13";
-++var isInternalWorkerThread = ((_a = worker_threads == null ? void 0 : worker_threads.workerData) == null ? void 0 : _a.esbuildVersion) === "0.14.54";
-+ var esbuildCommandAndArgs = () => {
-+   if ((!ESBUILD_BINARY_PATH || false) && (path2.basename(__filename) !== "main.js" || path2.basename(__dirname) !== "lib")) {
-+     throw new Error(`The esbuild JavaScript API cannot be bundled. Please mark the "esbuild" package as external so it's not included in the bundle.
-+@@ -1863,7 +1863,7 @@ var fsAsync = {
-+     }
-+   }
-+ };
-+-var version = "0.14.13";
-++var version = "0.14.54";
-+ var build = (options) => ensureServiceIsRunning().build(options);
-+ var serve = (serveOptions, buildOptions) => ensureServiceIsRunning().serve(serveOptions, buildOptions);
-+ var transform = (input, options) => ensureServiceIsRunning().transform(input, options);
-+@@ -1972,7 +1972,7 @@ var ensureServiceIsRunning = () => {
-+   if (longLivedService)
-+     return longLivedService;
-+   let [command, args] = esbuildCommandAndArgs();
-+-  let child = child_process.spawn(command, args.concat(`--service=${"0.14.13"}`, "--ping"), {
-++  let child = child_process.spawn(command, args.concat(`--service=${"0.14.54"}`, "--ping"), {
-+     windowsHide: true,
-+     stdio: ["pipe", "pipe", "inherit"],
-+     cwd: defaultWD
-+@@ -2081,7 +2081,7 @@ var runServiceSync = (callback) => {
-+     esbuild: node_exports
-+   });
-+   callback(service);
-+-  let stdout = child_process.execFileSync(command, args.concat(`--service=${"0.14.13"}`), {
-++  let stdout = child_process.execFileSync(command, args.concat(`--service=${"0.14.54"}`), {
-+     cwd: defaultWD,
-+     windowsHide: true,
-+     input: stdin,
-+@@ -2097,7 +2097,7 @@ var workerThreadService = null;
-+ var startWorkerThreadService = (worker_threads2) => {
-+   let { port1: mainPort, port2: workerPort } = new worker_threads2.MessageChannel();
-+   let worker = new worker_threads2.Worker(__filename, {
-+-    workerData: { workerPort, defaultWD, esbuildVersion: "0.14.13" },
-++    workerData: { workerPort, defaultWD, esbuildVersion: "0.14.54" },
-+     transferList: [workerPort],
-+     execArgv: []
-+   });
 diff --git a/patches/ffmpeg/.patches b/patches/ffmpeg/.patches
-index 31dc878c5b..f96d1acc1d 100644
+index 31dc878c5b..71432de3e1 100644
 --- a/patches/ffmpeg/.patches
 +++ b/patches/ffmpeg/.patches
 @@ -1 +1,2 @@
  link_with_loader_path.patch
-+loong64_support.patch
-diff --git a/patches/ffmpeg/loong64_support.patch b/patches/ffmpeg/loong64_support.patch
++loong64_support_for_ffmpeg.patch
+diff --git a/patches/ffmpeg/loong64_support_for_ffmpeg.patch b/patches/ffmpeg/loong64_support_for_ffmpeg.patch
 new file mode 100644
-index 0000000000..ea9923a9d3
+index 0000000000..069e22549d
 --- /dev/null
-+++ b/patches/ffmpeg/loong64_support.patch
++++ b/patches/ffmpeg/loong64_support_for_ffmpeg.patch
 @@ -0,0 +1,6238 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Wed, 4 Dec 2024 14:50:17 +0000
-+Subject: loong64 support
++Date: Sat, 15 Feb 2025 03:28:22 +0000
++Subject: loong64 support for ffmpeg
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
@@ -10204,10 +10027,10 @@ index 0000000000..ea9923a9d3
 ++#define FFMPEG_VERSION "n5.0.1"
 ++#endif /* AVUTIL_FFVERSION_H */
 +diff --git a/ffmpeg_generated.gni b/ffmpeg_generated.gni
-+index e282aa74801cfa5166482fa78eab3906ee8f4de5..43de5c72dc1b11c4da78758e231238d671f4c4aa 100644
++index a392f50cbd08d41f383585e02e855497b2d31e9c..4836d5686adf15e9aa2ee8161d709665ec406b58 100644
 +--- a/ffmpeg_generated.gni
 ++++ b/ffmpeg_generated.gni
-+@@ -251,6 +251,7 @@ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
++@@ -253,6 +253,7 @@ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
 + 
 + if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
 +     (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
@@ -10215,7 +10038,7 @@ index 0000000000..ea9923a9d3
 +     (is_android && current_cpu == "arm" && arm_use_neon &&
 +      ffmpeg_branding == "Chrome") ||
 +     (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-+@@ -360,6 +361,19 @@ if (current_cpu == "x64" || (is_android && current_cpu == "x86") ||
++@@ -382,6 +383,19 @@ if (current_cpu == "x64" || (is_android && current_cpu == "x86") ||
 +   ]
 + }
 + 
@@ -10237,24 +10060,23 @@ index 0000000000..ea9923a9d3
 +     (use_linux_config && current_cpu == "arm")) {
 diff --git a/patches/skia/.patches b/patches/skia/.patches
 new file mode 100644
-index 0000000000..086c31cfef
+index 0000000000..91bb953cf6
 --- /dev/null
 +++ b/patches/skia/.patches
 @@ -0,0 +1 @@
-+loong64_support.patch
-\ No newline at end of file
-diff --git a/patches/skia/loong64_support.patch b/patches/skia/loong64_support.patch
++loong64_support_for_skia.patch
+diff --git a/patches/skia/loong64_support_for_skia.patch b/patches/skia/loong64_support_for_skia.patch
 new file mode 100644
-index 0000000000..24ce65754b
+index 0000000000..53412dc2f2
 --- /dev/null
-+++ b/patches/skia/loong64_support.patch
++++ b/patches/skia/loong64_support_for_skia.patch
 @@ -0,0 +1,23 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 16:20:14 +0000
-+Subject: loong64 support
++Date: Sat, 15 Feb 2025 03:29:06 +0000
++Subject: loong64 support for skia
 +
-+Co-authored-by: Jiajie Chen <c@jia.je>
++  Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/src/opts/SkOpts_SetTarget.h b/src/opts/SkOpts_SetTarget.h
 +index 525cfcb862ae96bf8573d00b67dc9e5e23c10d22..5f72a27db99d2b1e1ef6f7c54198f7bbfb9380e3 100644
@@ -10274,26 +10096,26 @@ index 0000000000..24ce65754b
 +     #else
 diff --git a/patches/swiftshader/.patches b/patches/swiftshader/.patches
 new file mode 100644
-index 0000000000..ea62e0c740
+index 0000000000..774d335e56
 --- /dev/null
 +++ b/patches/swiftshader/.patches
 @@ -0,0 +1 @@
-+loong64_support.patch
-diff --git a/patches/swiftshader/loong64_support.patch b/patches/swiftshader/loong64_support.patch
++loong64_support_for_swiftshader.patch
+diff --git a/patches/swiftshader/loong64_support_for_swiftshader.patch b/patches/swiftshader/loong64_support_for_swiftshader.patch
 new file mode 100644
-index 0000000000..fb204b355e
+index 0000000000..9005c64a15
 --- /dev/null
-+++ b/patches/swiftshader/loong64_support.patch
-@@ -0,0 +1,165 @@
++++ b/patches/swiftshader/loong64_support_for_swiftshader.patch
+@@ -0,0 +1,177 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Mon, 18 Nov 2024 15:49:06 +0000
-+Subject: loong64 support
++Date: Sat, 15 Feb 2025 03:33:40 +0000
++Subject: loong64 support for swiftshader
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/src/Reactor/BUILD.gn b/src/Reactor/BUILD.gn
-+index 67dfeb0ec..c9683912e 100644
++index 67dfeb0ec886da072ad8b0aae84685aebcc68e23..c9683912e75d9cf2fb66d1a779bc86b900f89085 100644
 +--- a/src/Reactor/BUILD.gn
 ++++ b/src/Reactor/BUILD.gn
 +@@ -307,7 +307,11 @@ if (supports_subzero) {
@@ -10309,8 +10131,20 @@ index 0000000000..fb204b355e
 + 
 +     deps = [
 +       ":swiftshader_reactor_base",
++diff --git a/src/Vulkan/BUILD.gn b/src/Vulkan/BUILD.gn
++index 852068cade0a9d3f400bd18cce29e909193fc8d6..fb6618f9d3a9c983a397196c726823f2c400a72d 100644
++--- a/src/Vulkan/BUILD.gn
+++++ b/src/Vulkan/BUILD.gn
++@@ -229,6 +229,7 @@ swiftshader_shared_library("swiftshader_libvulkan") {
++   }
++ 
++   deps = [ ":_swiftshader_libvulkan" ]
+++  libs = [ "m" ]
++ }
++ 
++ swiftshader_static_library("swiftshader_libvulkan_static") {
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
-+index 2af3e28e8..521454bdf 100644
++index 2af3e28e82fe48cb804afb1da775524b49f086d9..521454bdff8cc87d2521e08a2d87c5d74257a14f 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 +@@ -45,6 +45,9 @@ LLVM_ASM_PARSER(PowerPC)
@@ -10324,7 +10158,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_ASM_PARSER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
-+index 2f675be26..28eb68ec4 100644
++index 2f675be26f3dd3846a645e5617308d8f93a029d7..28eb68ec4911ffbbcea0ca3a9477ac559770d27e 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmPrinters.def
 +@@ -45,6 +45,9 @@ LLVM_ASM_PRINTER(PowerPC)
@@ -10338,7 +10172,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_ASM_PRINTER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
-+index 80e3a1374..26ff566ff 100644
++index 80e3a1374d4ea89f886e0355147a2c12d709a317..26ff566ff645728fc1b3e9e7d43ce3ed05c4e731 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Disassemblers.def
 +@@ -45,6 +45,9 @@ LLVM_DISASSEMBLER(PowerPC)
@@ -10352,7 +10186,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_DISASSEMBLER
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
-+index d34b0eaee..91e9c2778 100644
++index d34b0eaee7559f99f4c9e0b8528b3dfa5a382a2b..91e9c2778178418c9edb25bb179500c6ad7fdd9f 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/Targets.def
 +@@ -44,6 +44,9 @@ LLVM_TARGET(PowerPC)
@@ -10366,7 +10200,7 @@ index 0000000000..fb204b355e
 + 
 + #undef LLVM_TARGET
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h b/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
-+index d9cce40e4..1be6ba950 100644
++index d9cce40e4e3186a8b7eb4bb0b30b8a6f9d53a608..1be6ba9507da38256543349494ba1faf7dafd9da 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
 ++++ b/third_party/llvm-16.0/configs/linux/include/llvm/Config/llvm-config.h
 +@@ -47,6 +47,8 @@
@@ -10450,25 +10284,3 @@ index 0000000000..fb204b355e
 + #else
 + #error "unknown architecture"
 + #endif
-diff --git a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
-index d41b2acc27..6be2324770 100644
---- a/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
-+++ b/shell/browser/extensions/api/runtime/electron_runtime_api_delegate.cc
-@@ -67,6 +67,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
-     info->arch = extensions::api::runtime::PlatformArch::kX86_32;
-   } else if (strcmp(arch, "x64") == 0) {
-     info->arch = extensions::api::runtime::PlatformArch::kX86_64;
-+  } else if (strcmp(arch, "loong64") == 0) {
-+    info->arch = extensions::api::runtime::PlatformArch::kLoong64;
-   } else {
-     NOTREACHED();
-   }
-@@ -78,6 +80,8 @@ bool ElectronRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
-     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_32;
-   } else if (strcmp(nacl_arch, "x86-64") == 0) {
-     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kX86_64;
-+  } else if (strcmp(nacl_arch, "loong64") == 0) {
-+    info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kLoong64;
-   } else {
-     NOTREACHED();
-   }
