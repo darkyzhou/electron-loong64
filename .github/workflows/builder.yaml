@@ -11,12 +11,12 @@ on:
       hostRustVersion:
         type: string
         required: true
-        default: "1.83.0"
+        default: "1.84.1"
         description: Host rustc version
       targetRustBranch:
         type: string
         required: true
-        default: "1.84.1"
+        default: "1.85.0"
         description: Target rustc branch
       gccVersion:
         type: string
@@ -46,7 +46,8 @@ jobs:
         with:
           load: true
           tags: libgcc:latest
-          file: dockerfiles/Dockerfile.libgcc
+          file: Dockerfile.libgcc
+          context: dockerfiles
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
       - name: Extract libgcc Artifact
@@ -72,7 +73,8 @@ jobs:
         with:
           load: true
           tags: libffi:latest
-          file: dockerfiles/Dockerfile.libffi
+          file: Dockerfile.libffi
+          context: dockerfiles
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
       - name: Extract libffi Artifact
@@ -98,7 +100,8 @@ jobs:
         with:
           load: true
           tags: rustc:latest
-          file: dockerfiles/Dockerfile.rustc
+          file: Dockerfile.rustc
+          context: dockerfiles
           build-args: |
             RUSTUP_VERSION=${{ inputs.rustupVersion }}
             HOST_RUST_VERSION=${{ inputs.hostRustVersion }}
