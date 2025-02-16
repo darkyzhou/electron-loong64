@@ -2,7 +2,7 @@ FROM linuxdeepin/deepin:beige-loong64-v1.4.0
 
 ARG RUSTUP_VERSION="1.27.1" \
     HOST_RUST_VERSION="1.84.1" \
-    TARGET_RUST_BRANCH="1.85.0"
+    TARGET_RUST_BRANCH="beta"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
@@ -33,7 +33,7 @@ ADD config.toml .
 ENV CFLAGS="-fPIC" \
     CXXFLAGS="-fPIC" \
     LDFLAGS="-fPIC" \
-    RUSTFLAGS="-C code-model=large" \
+    RUSTFLAGS="-C code-model=medium" \
     LIBGIT2_NO_PKG_CONFIG=1 \
     RUST_BACKTRACE=1
 RUN mkdir /root/target && \

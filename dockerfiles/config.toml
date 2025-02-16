@@ -16,5 +16,6 @@ prefix = "/root/target"
 
 [rust]
 channel = "dev"
+download-rustc = false
 codegen-units-std = 1
 debuginfo-level = 2

@@ -16,7 +16,7 @@ on:
       targetRustBranch:
         type: string
         required: true
-        default: "1.85.0"
+        default: "beta"
         description: Target rustc branch
       gccVersion:
         type: string
@@ -46,7 +46,7 @@ jobs:
         with:
           load: true
           tags: libgcc:latest
-          file: Dockerfile.libgcc
+          file: dockerfiles/Dockerfile.libgcc
           context: dockerfiles
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
@@ -73,7 +73,7 @@ jobs:
         with:
           load: true
           tags: libffi:latest
-          file: Dockerfile.libffi
+          file: dockerfiles/Dockerfile.libffi
           context: dockerfiles
           build-args: |
             GCC_VERSION=${{ inputs.gccVersion }}
@@ -100,7 +100,7 @@ jobs:
         with:
           load: true
           tags: rustc:latest
-          file: Dockerfile.rustc
+          file: dockerfiles/Dockerfile.rustc
           context: dockerfiles
           build-args: |
             RUSTUP_VERSION=${{ inputs.rustupVersion }}
