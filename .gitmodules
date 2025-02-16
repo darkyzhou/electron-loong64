@@ -1,3 +1,0 @@
-[submodule "chromium-loongarch64"]
-	path = chromium-loongarch64
-	url = git@github.com:AOSC-Dev/chromium-loongarch64.git
