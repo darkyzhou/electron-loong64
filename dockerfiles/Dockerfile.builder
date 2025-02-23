@@ -190,7 +190,7 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
     rm -rf node-v${NODE_VERSION}-linux-loong64* && \
     npm i -g yarn @esbuild/linux-loong64@0.24.0
 
-COPY config.toml /root/.cargo/
+ADD config.toml /root/.cargo/
 
 COPY libgcc.tar.gz libffi.tar.gz .
 ADD --checksum=sha256:f8dba8a33b51fd3c2ee3ab1132f21b4f9ce35bd12e42c55dbc45b56f6f400fe2 \
