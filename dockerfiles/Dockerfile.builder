@@ -187,16 +187,16 @@ COPY libgcc.tar.gz libffi.tar.gz .
 ADD --checksum=sha256:f8dba8a33b51fd3c2ee3ab1132f21b4f9ce35bd12e42c55dbc45b56f6f400fe2 \
     https://github.com/darkyzhou/rust/releases/download/beta-loongarch-fix-2-23/rust-beta-loongarch64-unknown-linux-gnu.tar.xz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-RUN mkdir libgcc libffi rust && \
+RUN mkdir libgcc libffi && \
     tar -xzvf libgcc.tar.gz -C libgcc && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
     cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/12/ && \
     tar -xzvf libffi.tar.gz -C libffi && \
     # Also hacky here
     cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
-    tar -xvf rust-*.tar.xz -C rust && \
-    cp -r rust/rust-*/{rustc,cargo}/* /usr && \
-    rm -rf libgcc.tar.gz libffi.tar.gz rust-*.tar.xz libgcc libffi rust && \
+    tar -xvf rust-*.tar.xz && \
+    cp -r rust-*/{rustc,cargo}/* /usr && \
+    rm -rf libgcc.tar.gz libffi.tar.gz rust-*.tar.xz libgcc libffi rust-* && \
     # Chromium seems to require that bindgen binary lives together with llvm
     cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
 
