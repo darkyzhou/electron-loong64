@@ -193,8 +193,8 @@ RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VER
 ADD config.toml /root/.cargo/
 
 COPY libgcc.tar.gz libffi.tar.gz .
-ADD --checksum=sha256:f8dba8a33b51fd3c2ee3ab1132f21b4f9ce35bd12e42c55dbc45b56f6f400fe2 \
-    https://github.com/darkyzhou/rust/releases/download/beta-loongarch-fix-2-23/rust-beta-loongarch64-unknown-linux-gnu.tar.xz .
+ADD --checksum=sha256:3b4be9da1b9184af1b6301352294ec7fe21d90bb3bc273a2351f2e41c6a8a76e \
+    https://github.com/darkyzhou/rust/releases/download/1.85.0-loongarch/rust-1.85.0-loongarch64-unknown-linux-gnu.tar.xz .
 ADD --checksum=sha256:66d88c86dde9f9ecd2bb62b17b849df13e1fe4b7fb294eac41aede768d70c5ec \
     https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-loongarch64-linux.tar.gz .
 ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
