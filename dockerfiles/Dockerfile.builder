@@ -177,38 +177,49 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libyuv-dev \
         mesa-common-dev
 
-RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
-    tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
-    cp -R node-v${NODE_VERSION}-linux-loong64/* /usr/local/ && \
-    rm -rf node-v${NODE_VERSION}-linux-loong64* && \
-    npm i -g yarn @esbuild/linux-loong64@0.24.0
-
-COPY libgcc.tar.gz libffi.tar.gz .
-ADD --checksum=sha256:f8dba8a33b51fd3c2ee3ab1132f21b4f9ce35bd12e42c55dbc45b56f6f400fe2 \
-    https://github.com/darkyzhou/rust/releases/download/beta-loongarch-fix-2-23/rust-beta-loongarch64-unknown-linux-gnu.tar.xz .
-ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-RUN mkdir libgcc libffi && \
-    tar -xzvf libgcc.tar.gz -C libgcc && \
-    # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
-    cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/12/ && \
-    tar -xzvf libffi.tar.gz -C libffi && \
-    # Also hacky here
-    cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
-    tar -xvf rust-*.tar.xz && \
-    cp -r rust-*/{rustc,cargo}/* /usr && \
-    rm -rf libgcc.tar.gz libffi.tar.gz rust-*.tar.xz libgcc libffi rust-* && \
-    # Chromium seems to require that bindgen binary lives together with llvm
-    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
-
-RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
-    echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
-
 RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100 && \
     update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 && \
     update-alternatives --install /usr/bin/clang-cpp clang-cpp /usr/bin/clang-cpp-18 100 && \
     update-alternatives --install /usr/bin/lld lld /usr/bin/lld-18 100 && \
     update-alternatives --install /usr/bin/lld-link lld-link /usr/bin/lld-link-18 100 && \
     update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-18 100
+
+RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
+    tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
+    cp -R node-v${NODE_VERSION}-linux-loong64/* /usr/local/ && \
+    rm -rf node-v${NODE_VERSION}-linux-loong64* && \
+    npm i -g yarn @esbuild/linux-loong64@0.24.0
+
+COPY config.toml /root/.cargo/
+
+COPY libgcc.tar.gz libffi.tar.gz .
+ADD --checksum=sha256:f8dba8a33b51fd3c2ee3ab1132f21b4f9ce35bd12e42c55dbc45b56f6f400fe2 \
+    https://github.com/darkyzhou/rust/releases/download/beta-loongarch-fix-2-23/rust-beta-loongarch64-unknown-linux-gnu.tar.xz .
+ADD --checksum=66d88c86dde9f9ecd2bb62b17b849df13e1fe4b7fb294eac41aede768d70c5ec \
+    https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-loongarch64-linux.tar.gz .
+ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
+
+RUN mkdir libgcc libffi && \
+    # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
+    tar -xzvf libgcc.tar.gz -C libgcc && \
+    cp libgcc/gcc/loongarch64-unknown-linux-gnu/*/crtbeginS.o /usr/lib/gcc/loongarch64-linux-gnu/12/ && \
+    # Replacing libffi: Also hacky here
+    tar -xzvf libffi.tar.gz -C libffi && \
+    cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
+    # Install rust components
+    tar -xvf rust-*.tar.xz && \
+    bash rust-*/install.sh && \
+    # Install mold
+    tar -xzvf mold-*.tar.gz && \
+    cp -r mold-*/* /usr && \
+    # Clean up
+    rm -rf *.tar.gz *.tar.xz libgcc libffi rust-* mold-*
+
+# Chromium seems to require that bindgen binary lives together with llvm
+RUN cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
+
+RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
+    echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
 
 USER builduser
 WORKDIR /home/builduser
