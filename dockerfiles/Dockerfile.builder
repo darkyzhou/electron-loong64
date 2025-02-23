@@ -194,9 +194,9 @@ RUN mkdir libgcc libffi rust && \
     tar -xzvf libffi.tar.gz -C libffi && \
     # Also hacky here
     cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
-    tar -xzvf rust-*.tar.gz -C rust && \
+    tar -xvf rust-*.tar.xz -C rust && \
     cp -r rust/{rustc}/* /usr && \
-    rm -rf libgcc.tar.gz libffi.tar.gz rust-*.tar.gz libgcc libffi rust && \
+    rm -rf libgcc.tar.gz libffi.tar.gz rust-*.tar.xz libgcc libffi rust && \
     # Chromium seems to require that bindgen binary lives together with llvm
     cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
 
