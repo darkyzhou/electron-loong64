@@ -86,13 +86,13 @@ jobs:
       volumes:
         - /mnt/data/build/electron-loong64:/home/builduser
     steps:
-      - name: Replace Binaries
+      - name: Prepare Files
         if: ${{ inputs.stage != 'package' }}
         run: |
-          set -ex
-          cp /usr/local/bin/node "$SRC_PATH"/third_party/node/linux/node-linux-x64/bin/node
-          chmod +w "$SRC_PATH"/third_party/devtools-frontend/src/third_party/esbuild/esbuild
-          cp /usr/local/lib/node_modules/@esbuild/linux-loong64/bin/esbuild "$SRC_PATH"/third_party/devtools-frontend/src/third_party/esbuild/esbuild
+          "$REPO_PATH"/scripts/binaries.sh
+          "$REPO_PATH"/scripts/rollup.sh
+        env:
+          ROOT_PATH: ${{ env.ROOT_PATH }}
       - name: Build Electron
         if: ${{ inputs.stage != 'package' }}
         run: |

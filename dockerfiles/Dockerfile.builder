@@ -55,6 +55,10 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libxss1 \
         libnss3-dev \
 
+        # Tools needed by our scripts
+        jq \
+        rsync \
+
         # From https://chromium.googlesource.com/chromium/src/+/HEAD/build/install-build-deps.py
         binutils \
         bison \
