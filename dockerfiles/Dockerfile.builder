@@ -37,12 +37,6 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         generate-ninja \
         ninja-build \
         build-essential \
-        clang-18 \
-        llvm-18 \
-        lld-18 \
-        llvm-18-dev \
-        libclang-18-dev \
-        libclang-rt-18-dev \
         libnotify-bin \
         libfuse2 \
         libdbus-1-dev \
@@ -179,14 +173,23 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libxkbcommon-x11-dev \
         libdav1d-dev \
         libyuv-dev \
-        mesa-common-dev
+        mesa-common-dev && \
+    apt-get install -y deepin-unstable-source && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        clang-19 \
+        llvm-19 \
+        lld-19 \
+        llvm-19-dev \
+        libclang-19-dev \
+        libclang-rt-19-dev
 
-RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100 && \
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100 && \
-    update-alternatives --install /usr/bin/clang-cpp clang-cpp /usr/bin/clang-cpp-18 100 && \
-    update-alternatives --install /usr/bin/lld lld /usr/bin/lld-18 100 && \
-    update-alternatives --install /usr/bin/lld-link lld-link /usr/bin/lld-link-18 100 && \
-    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-18 100
+RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100 && \
+    update-alternatives --install /usr/bin/clang-cpp clang-cpp /usr/bin/clang-cpp-19 100 && \
+    update-alternatives --install /usr/bin/lld lld /usr/bin/lld-19 100 && \
+    update-alternatives --install /usr/bin/lld-link lld-link /usr/bin/lld-link-19 100 && \
+    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-19 100
 
 RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
     tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
@@ -220,7 +223,7 @@ RUN mkdir libgcc libffi && \
     rm -rf *.tar.gz *.tar.xz libgcc libffi rust-* mold-*
 
 # Chromium seems to require that bindgen binary lives together with llvm
-RUN cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-18
+RUN cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-19
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
