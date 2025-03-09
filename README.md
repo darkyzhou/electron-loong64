@@ -25,7 +25,7 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 - Linux host machine with Loong64 architecture
 - Docker with [docker-buildx](https://github.com/docker/buildx) installed
 - [LATX](https://github.com/deuso/latx-build) version 1.4.4 (required for running `ghcr.io/darkyzhou/electron-buildtools` image)
-- System resources: minimum 16GB RAM and 100GB free disk space
+- System resources: minimum 32GiB RAM and 200GiB free disk space
 
 ### Source Code Preparation
 
@@ -48,16 +48,13 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 2. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
 
 3. Update dependencies:
-   - Modify the `DEPS` file in `$BUILD_ROOT/src/electron` to reference the selected Chromium version
    - Run `npx e sync` in `$BUILD_ROOT/src`. This will apply all existing patches from the Electron repository
 
-4. Apply Chromium patches:
+4. Apply patches:
    - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`
    - Resolve any conflicts if they occur
 
-5. Update patches:
-
-6. Manage patches using Electron's `npx e patches` command:
+5. Manage patches using Electron's `npx e patches` command:
    > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`
 
    1. Commit changes in both the main repository and affected submodules
