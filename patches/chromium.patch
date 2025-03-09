@@ -34,13 +34,13 @@ index 0000000000..f48ae4d481
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index fe0d2a0590..d8b425a64d 100644
+index 405828b38e..2bbd0184cb 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -140,3 +140,4 @@ cherry-pick-3dc17c461b12.patch
- ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
+@@ -141,3 +141,4 @@ ignore_parse_errors_for_pkey_appusermodel_toastactivatorclsid.patch
  feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
  feat_separate_content_settings_callback_for_sync_and_async_clipboard.patch
+ cherry-pick-dd8e2822e507.patch
 +loong64_support_for_chromium.patch
 diff --git a/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch b/patches/chromium/feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
 index a19135828c..e3fc337f16 100644

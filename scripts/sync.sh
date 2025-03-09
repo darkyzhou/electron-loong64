@@ -11,7 +11,7 @@ pushd "$ROOT_PATH"
 git -C "$DEPOT_PATH" reset --hard HEAD
 
 if ! npx e sync --three-way -f; then
-    git -C "$DEPOT_PATH" apply "$REPO_PATH/depot.patch"
+    git -C "$DEPOT_PATH" apply "$REPO_PATH/patches/depot.patch"
     npx e sync --three-way -f
 fi
 

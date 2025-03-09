@@ -4,7 +4,7 @@ set -ex
 
 ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
 ELECTRON_REPO=${ELECTRON_REPO:-"https://github.com/electron/electron.git"}
-ELECTRON_VERSION=${ELECTRON_VERSION:-"34.1.0"}
+ELECTRON_VERSION=${ELECTRON_VERSION:-"34.2.0"}
 DEPOT_PATH=${DEPOT_PATH:-"/home/builduser/.electron_build_tools/third_party/depot_tools"}
 
 pushd "$ROOT_PATH"

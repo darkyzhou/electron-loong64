@@ -1,16 +1,3 @@
-diff --git a/DEPS b/DEPS
-index bc97c9392f..00a216ab04 100644
---- a/DEPS
-+++ b/DEPS
-@@ -2,7 +2,7 @@ gclient_gn_args_from = 'src'
- 
- vars = {
-   'chromium_version':
--    '132.0.6834.194',
-+    '132.0.6834.83',
-   'node_version':
-     'v20.18.1',
-   'nan_version':
 diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
 index 3ccd99d6be..4907471b35 100644
 --- a/build/args/ffmpeg.gn
@@ -143,6 +130,15 @@ index 0000000000..fef779454c
 + 
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
+diff --git a/patches/chromium/.patches b/patches/chromium/.patches
+index 2bbd0184cb..dd12d9a47a 100644
+--- a/patches/chromium/.patches
++++ b/patches/chromium/.patches
+@@ -142,3 +142,4 @@ feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
+ feat_separate_content_settings_callback_for_sync_and_async_clipboard.patch
+ cherry-pick-dd8e2822e507.patch
+ loong64_support_for_chromium.patch
++loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
 new file mode 100644
 index 0000000000..4b65bcd5e8
