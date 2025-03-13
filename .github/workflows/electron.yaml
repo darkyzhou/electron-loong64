@@ -113,7 +113,6 @@ jobs:
         env:
           ROOT_PATH: ${{ env.ROOT_PATH }}
           OUT_PATH: ${{ env.OUT_PATH }}
-          RELEASE_PATH: ${{ env.RELEASE_PATH }}
       - name: Upload Artifact
         uses: svenstaro/upload-release-action@v2
         with:

@@ -1,5 +1,5 @@
 diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
-index 3ccd99d6be..4907471b35 100644
+index 3ccd99d6be..b7e3a6e166 100644
 --- a/build/args/ffmpeg.gn
 +++ b/build/args/ffmpeg.gn
 @@ -5,3 +5,25 @@ is_official_build = true
@@ -30,7 +30,7 @@ index 3ccd99d6be..4907471b35 100644
 +loongarch64_use_lsx=true
 \ No newline at end of file
 diff --git a/build/args/release.gn b/build/args/release.gn
-index e5017f6e16..c67e013065 100644
+index e5017f6e16..a738d77a32 100644
 --- a/build/args/release.gn
 +++ b/build/args/release.gn
 @@ -14,3 +14,26 @@ rtc_use_h264 = proprietary_codecs
@@ -131,12 +131,12 @@ index 0000000000..fef779454c
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 2bbd0184cb..dd12d9a47a 100644
+index 4598042a0d..9862fbacc4 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -142,3 +142,4 @@ feat_add_signals_when_embedder_cleanup_callbacks_run_for.patch
- feat_separate_content_settings_callback_for_sync_and_async_clipboard.patch
- cherry-pick-dd8e2822e507.patch
+@@ -147,3 +147,4 @@ fix_drag_and_drop_icons_on_windows.patch
+ cherry-pick-521faebc8a7c.patch
+ cherry-pick-9dacf5694dfd.patch
  loong64_support_for_chromium.patch
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
