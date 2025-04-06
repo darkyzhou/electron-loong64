@@ -8,7 +8,7 @@ DEPOT_PATH=${DEPOT_PATH:-"/home/builduser/.electron_build_tools/third_party/depo
 
 pushd "$ROOT_PATH/src/electron"
 
-git clean -fd && git reset --hard HEAD
+git clean -fd && git checkout v$ELECTRON_VERSION
 git apply --reject "$REPO_PATH"/patches/chromium.patch
 git add .
 git commit -m "chromium.patch" --no-verify

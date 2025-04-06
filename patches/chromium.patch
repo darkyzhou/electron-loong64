@@ -34,13 +34,13 @@ index 0000000000..f48ae4d481
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index c53e19ca7d..4598042a0d 100644
+index 1d588abfc2..75b1251535 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -146,3 +146,4 @@ reland_lzma_sdk_update_to_24_09.patch
- fix_drag_and_drop_icons_on_windows.patch
- cherry-pick-521faebc8a7c.patch
- cherry-pick-9dacf5694dfd.patch
+@@ -152,3 +152,4 @@ allow_denormal_flushing_to_outlive_scoped_object.patch
+ fix_take_snapped_status_into_account_when_showing_a_window.patch
+ chore_modify_chromium_handling_of_mouse_events.patch
+ cherry-pick-b8f80176b163.patch
 +loong64_support_for_chromium.patch
 diff --git a/patches/chromium/loong64_support_for_chromium.patch b/patches/chromium/loong64_support_for_chromium.patch
 new file mode 100644

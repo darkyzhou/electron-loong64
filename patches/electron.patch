@@ -131,12 +131,12 @@ index 0000000000..fef779454c
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 4598042a0d..9862fbacc4 100644
+index 75b1251535..cd1ee4948a 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -147,3 +147,4 @@ fix_drag_and_drop_icons_on_windows.patch
- cherry-pick-521faebc8a7c.patch
- cherry-pick-9dacf5694dfd.patch
+@@ -153,3 +153,4 @@ fix_take_snapped_status_into_account_when_showing_a_window.patch
+ chore_modify_chromium_handling_of_mouse_events.patch
+ cherry-pick-b8f80176b163.patch
  loong64_support_for_chromium.patch
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
