@@ -9,7 +9,9 @@ This project aims to build a version of Electron that supports the Loong64 archi
 1. Check [releases](https://github.com/darkyzhou/electron-loong64/releases) for available versions.
 2. Install the `electron` npm package with corresponding version and specify the download mirror like this:
 
-   > ELECTRON_MIRROR="https://github.com/darkyzhou/electron-loong64/releases/download/" electron_use_remote_checksums=1 npm install electron@THE_VERSION
+```
+ELECTRON_MIRROR="https://github.com/darkyzhou/electron-loong64/releases/download/" electron_use_remote_checksums=1 npm install electron@THE_VERSION
+```
 
 You may also refer to [darkyzhou/electron-builder-loong64](https://github.com/darkyzhou/electron-builder-loong64) for insturctions on how to build your Electron project with [electron-builder](https://github.com/electron-userland/electron-builder).
 
