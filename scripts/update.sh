@@ -2,12 +2,15 @@
 
 set -ex
 
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
-ELECTRON_REPO=${ELECTRON_REPO:-"https://github.com/electron/electron.git"}
-ELECTRON_VERSION=${ELECTRON_VERSION:-"34.2.0"}
-DEPOT_PATH=${DEPOT_PATH:-"/home/builduser/.electron_build_tools/third_party/depot_tools"}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 pushd "$ROOT_PATH"
+
+if [ ! -d "src/electron" ]; then
+   npx e init -i release -r "$ROOT_PATH" electron-loong64
+   git clone "$ELECTRON_REPO" src/electron
+fi
 
 git -C src clean -fd || true; git -C src am --abort || true; git -C src reset --hard HEAD;
 git -C src submodule foreach 'git clean -fd || true; git am --abort || true; git reset --hard HEAD';

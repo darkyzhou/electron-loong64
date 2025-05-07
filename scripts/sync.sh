@@ -2,9 +2,8 @@
 
 set -ex
 
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
-REPO_PATH=${REPO_PATH:-"/home/builduser/electron-loong64"}
-DEPOT_PATH=${DEPOT_PATH:-"/home/builduser/.electron_build_tools/third_party/depot_tools"}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 pushd "$ROOT_PATH"
 

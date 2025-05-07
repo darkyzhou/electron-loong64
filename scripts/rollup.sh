@@ -2,8 +2,8 @@
 
 set -ex
 
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
-ROLLUP_VERSION=4.32.0
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 # Shamelessly copied from https://github.com/lcpu-club/loongarch-packages/blob/master/electron34/loong.patch
 

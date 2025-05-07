@@ -131,12 +131,12 @@ index 0000000000..fef779454c
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 75b1251535..cd1ee4948a 100644
+index 35f93a98de..ebe1b44f27 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -153,3 +153,4 @@ fix_take_snapped_status_into_account_when_showing_a_window.patch
- chore_modify_chromium_handling_of_mouse_events.patch
- cherry-pick-b8f80176b163.patch
+@@ -156,3 +156,4 @@ fix_false_activation_logic_for_context_menu.patch
+ mac_fix_check_on_ime_reconversion_due_to_invalid_replacement_range.patch
+ cherry-pick-0333ecde9142.patch
  loong64_support_for_chromium.patch
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch

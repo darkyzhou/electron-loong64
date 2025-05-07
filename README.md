@@ -38,17 +38,39 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 - [LATX](https://github.com/deuso/latx-build) version 1.4.4 (required for running `ghcr.io/darkyzhou/electron-buildtools` image)
 - System resources: minimum 32GiB RAM and 200GiB free disk space
 
-### Source Code Preparation
+### Bulding from Source
 
-> For detailed reference, check the `prepare` job in `.github/workflows/electron.yaml`
+1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container.
+2. Change the variables inside `./scripts/env.sh` according to your environment and needs.
+3. Run following scripts in sequence.
 
-1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
+```bash
+# Clone or update the local electron repository
+./scripts/update.sh
 
-2. Set up the Electron repository:
-   - Clone or update the official Electron repository
-   - Switch to your target branch, e.g. `v33.2.0`
-   - Place it in `$BUILD_ROOT/src/electron` to match the Electron's requirement
-   - Note: Do not apply `electron.patch` at this stage
+# Apply patches from electron-loong64
+./scripts/patch.sh
+
+# Fetch or update the dependencies of electron
+# Note: This could take a really long time, grab your coffee or take a sleep!
+./scripts/sync.sh
+```
+
+4. Launch a `ghcr.io/darkyzhou/electron-builder:deepin-23-glibc-238` container. All subsequent steps should be executed inside this container.
+5. Run following scripts in sequence.
+
+```bash
+# Replace binaries with native ones
+./scripts/binaries.sh
+./scripts/rollup.sh
+
+# Build the electron
+# Note: This could also take a long time, better get some sleep.
+./scripts/build.sh
+
+# Package the electron
+./scripts/package.sh
+```
 
 ### Updating Chromium Patches
 

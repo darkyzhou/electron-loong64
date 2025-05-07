@@ -2,7 +2,8 @@
 
 set -ex
 
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 pushd "$ROOT_PATH"/src
   cp /usr/local/bin/node third_party/node/linux/node-linux-x64/bin/node

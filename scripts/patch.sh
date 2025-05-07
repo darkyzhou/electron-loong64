@@ -2,13 +2,12 @@
 
 set -ex
 
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
-REPO_PATH=${REPO_PATH:-"/home/builduser/electron-loong64"}
-DEPOT_PATH=${DEPOT_PATH:-"/home/builduser/.electron_build_tools/third_party/depot_tools"}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 pushd "$ROOT_PATH/src/electron"
 
-git clean -fd && git checkout v$ELECTRON_VERSION
+git reset --hard HEAD && git clean -fd && git checkout v$ELECTRON_VERSION
 git apply --reject "$REPO_PATH"/patches/chromium.patch
 git add .
 git commit -m "chromium.patch" --no-verify

@@ -2,19 +2,11 @@
 
 set -ex
 
-VERSION="$1"
-ROOT_PATH=${ROOT_PATH:-"/home/builduser/buildroot"}
-OUT_PATH=${OUT_PATH:-"/home/builduser/buildroot/src/out/Release"}
-RELEASE_PATH=${RELEASE_PATH:-"/home/builduser/buildroot/release/$VERSION"}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 function main() {
-    if [[ -z "$1" ]]; then
-        echo "Error: Version parameter is required"
-        echo "Usage: $0 <version> [function_name]"
-        exit 1
-    fi
-
-    local function_name=${2:-package}
+    local function_name=${1:-package}
 
     if [[ "$(type -t ${function_name})" != "function" ]]; then
         echo "Error: Function '${function_name}' not found"
@@ -40,13 +32,13 @@ function package() {
 
     rm -rf "$RELEASE_PATH"
     mkdir -p "$RELEASE_PATH"
-    mv "$OUT_PATH"/debug.zip "$RELEASE_PATH"/electron-v$VERSION-linux-loong64-debug.zip
-    mv "$OUT_PATH"/symbols.zip "$RELEASE_PATH"/electron-v$VERSION-linux-loong64-symbols.zip
+    mv "$OUT_PATH"/debug.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-debug.zip
+    mv "$OUT_PATH"/symbols.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-symbols.zip
 
     echo ">>> Package Electron <<<"
 
     ninja -C "$OUT_PATH" electron:electron_dist_zip
-    mv "$OUT_PATH"/dist.zip "$RELEASE_PATH"/electron-v$VERSION-linux-loong64.zip
+    mv "$OUT_PATH"/dist.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
 
@@ -69,7 +61,7 @@ function build_mksnapshot() {
     ninja -C "$OUT_PATH" electron:electron_mksnapshot_zip
     cd "$OUT_PATH"
     zip mksnapshot.zip mksnapshot_args gen/v8/embedded.S
-    mv "$OUT_PATH"/mksnapshot.zip "$RELEASE_PATH"/mksnapshot-v$VERSION-linux-loong64.zip
+    mv "$OUT_PATH"/mksnapshot.zip "$RELEASE_PATH"/mksnapshot-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
 
@@ -85,7 +77,7 @@ function chromedriver() {
 
     ninja -C "$OUT_PATH" electron:electron_chromedriver
     ninja -C "$OUT_PATH" electron:electron_chromedriver_zip
-    mv "$OUT_PATH"/chromedriver.zip "$RELEASE_PATH"/chromedriver-v$VERSION-linux-loong64.zip
+    mv "$OUT_PATH"/chromedriver.zip "$RELEASE_PATH"/chromedriver-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
     nodejs
@@ -96,7 +88,7 @@ function nodejs() {
 
     echo ">>> Build Node.js headers <<<"
     ninja -C "$OUT_PATH" electron:node_headers
-    mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$VERSION-headers.tar.gz
+    mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
 
     popd
     ffmpeg
@@ -111,7 +103,7 @@ function ffmpeg() {
     # export CC=clang CXX=clang++ AR=ar NM=nm RUSTC_BOOTSTRAP=1
     # gn gen "$OUT_PATH"/ffmpeg --args="import(\"//electron/build/args/ffmpeg.gn\")" --script-executable=/usr/bin/python3
     # ninja -C "$OUT_PATH"/ffmpeg electron:electron_ffmpeg_zip
-    # mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$VERSION-linux-loong64.zip
+    # mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
     popd
     hunspell
 }
@@ -137,7 +129,7 @@ function libcxx() {
     ninja -C "$OUT_PATH" electron:libcxx_objects_zip
     mv "$OUT_PATH"/libcxx_headers.zip "$RELEASE_PATH"/libcxx-headers.zip
     mv "$OUT_PATH"/libcxxabi_headers.zip "$RELEASE_PATH"/libcxxabi-headers.zip
-    mv "$OUT_PATH"/libcxx_objects.zip "$RELEASE_PATH"/libcxx-objects-v$VERSION-linux-loong64.zip
+    mv "$OUT_PATH"/libcxx_objects.zip "$RELEASE_PATH"/libcxx-objects-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
     shasum256
