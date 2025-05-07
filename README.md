@@ -38,7 +38,7 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 - [LATX](https://github.com/deuso/latx-build) version 1.4.4 (required for running `ghcr.io/darkyzhou/electron-buildtools` image)
 - System resources: minimum 32GiB RAM and 200GiB free disk space
 
-### Bulding from Source
+### Building from Source
 
 1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container.
 2. Change the variables inside `./scripts/env.sh` according to your environment and needs.
@@ -113,17 +113,6 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
    ```
 
 6. Run `npx e sync` again to sync the sources and apply our new patches.
-
-### Building
-
-1. Container setup:
-   - Launch a `ghcr.io/darkyzhou/electron-builder` container. Check [available tags](https://github.com/darkyzhou/electron-loong64/pkgs/container/electron-builder) for the latest image
-   - Note: You may need to create a custom image for specific Electron versions if the latest image runs into compilation issues
-
-2. Build process:
-   - Follow the steps in the `build` job from `.github/workflows/electron.yaml`
-   - Ensure all environment variables from the `env` section are set
-   - Note: The build process is time-intensive, typically requiring around 10 hours on a 3A6000 processor
 
 ### Troubleshooting
 
