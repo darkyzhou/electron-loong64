@@ -1,11 +1,11 @@
 diff --git a/build/args/ffmpeg.gn b/build/args/ffmpeg.gn
-index 3ccd99d6be..b7e3a6e166 100644
+index c25abfd25f..33ce4e3fae 100644
 --- a/build/args/ffmpeg.gn
 +++ b/build/args/ffmpeg.gn
 @@ -5,3 +5,25 @@ is_official_build = true
- proprietary_codecs = false
  ffmpeg_branding = "Chromium"
  enable_dsyms = false
+ proprietary_codecs = false
 +
 +chrome_pgo_phase = 0
 +enable_widevine = false
@@ -30,10 +30,10 @@ index 3ccd99d6be..b7e3a6e166 100644
 +loongarch64_use_lsx=true
 \ No newline at end of file
 diff --git a/build/args/release.gn b/build/args/release.gn
-index e5017f6e16..a738d77a32 100644
+index 77351cc181..b8dca413fa 100644
 --- a/build/args/release.gn
 +++ b/build/args/release.gn
-@@ -14,3 +14,26 @@ rtc_use_h264 = proprietary_codecs
+@@ -7,3 +7,26 @@ is_official_build = true
  # who have an LGPL requirement to ship ffmpeg as a dynamically linked library,
  # we build ffmpeg as a shared library.
  is_component_ffmpeg = true
@@ -131,13 +131,13 @@ index 0000000000..fef779454c
 +   struct kernel_stat st;
 +   if (sys_fstat(fd, &st) == -1 || st.st_size < 0) {
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index 35f93a98de..ebe1b44f27 100644
+index e20f5ac641..9f2a29c108 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -156,3 +156,4 @@ fix_false_activation_logic_for_context_menu.patch
- mac_fix_check_on_ime_reconversion_due_to_invalid_replacement_range.patch
- cherry-pick-0333ecde9142.patch
- loong64_support_for_chromium.patch
+@@ -152,3 +152,4 @@ do_not_check_the_order_of_display_id_order_on_windows.patch
+ add_linux_window_controls_menu.patch
+ make_focus_methods_in_webcontentsviewchildframe_notimplemented.patch
+ loong64_support.patch
 +loong64_support_for_runtime_json.patch
 diff --git a/patches/chromium/loong64_support_for_runtime_json.patch b/patches/chromium/loong64_support_for_runtime_json.patch
 new file mode 100644
@@ -176,16 +176,14 @@ index 0000000000..4b65bcd5e8
 +       },
 +       {
 diff --git a/patches/config.json b/patches/config.json
-index 8cf28d8d2b..1c49a3d9dd 100644
+index 1db1fde541..10ebf9ec67 100644
 --- a/patches/config.json
 +++ b/patches/config.json
-@@ -11,5 +11,8 @@
-   { "patch_dir": "src/electron/patches/Mantle", "repo": "src/third_party/squirrel.mac/vendor/Mantle" },
-   { "patch_dir": "src/electron/patches/ReactiveObjC", "repo": "src/third_party/squirrel.mac/vendor/ReactiveObjC" },
-   { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
--  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" }
-+  { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
-+  { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
+@@ -14,5 +14,6 @@
+   { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
+   { "patch_dir": "src/electron/patches/sqlite", "repo": "src/third_party/sqlite/src" },
+   { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
+-  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" }
 +  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" },
 +  { "patch_dir": "src/electron/patches/breakpad", "repo": "src/third_party/breakpad/breakpad" }
  ]

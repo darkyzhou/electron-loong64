@@ -86,9 +86,11 @@ function chromedriver() {
 function nodejs() {
     pushd "$ROOT_PATH"/src
 
-    echo ">>> Build Node.js headers <<<"
-    ninja -C "$OUT_PATH" electron:node_headers
-    mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
+    # FIXME:
+    # FileNotFoundError: [Errno 2] No such file or directory: '/home/builduser/buildroot/src/out/Testing/gen/config.gypi'
+    # echo ">>> Build Node.js headers <<<"
+    # ninja -C "$OUT_PATH" electron:node_headers
+    # mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
 
     popd
     ffmpeg
@@ -118,7 +120,6 @@ function hunspell() {
     popd
     libcxx
 }
-
 
 function libcxx() {
     pushd "$ROOT_PATH"/src

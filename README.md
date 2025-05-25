@@ -22,7 +22,7 @@ You may also refer to [darkyzhou/electron-builder-loong64](https://github.com/da
 
 ## Acknowledgments
 
-Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromium patches in [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64), which make this project possible.
+Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their invaluable Chromium patches in [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64), which make this project possible.
 
 ## How This Project Works
 
@@ -74,20 +74,20 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
 
 ### Updating Chromium Patches
 
-1. Version alignment:
-   - Check [chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64) and [Electron Releases](https://www.electronjs.org/docs/latest/tutorial/electron-timelines)
-   - Identify the latest compatible Chromium version with available patches for your target Electron version
+1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
 
-2. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
+2. Update versions and sync sources:
+   - Edit `ELECTRON_VERSION` to point to the new version to build in `env.sh`.
+   - Run `scripts/update.sh`
 
 3. Update dependencies:
-   - Run `npx e sync` in `$BUILD_ROOT/src`. This will apply all existing patches from the Electron repository
+   - Run `npx e sync` in `$BUILD_ROOT/src`. This will apply all original patches from the Electron repository
 
 4. Apply patches:
    - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`
    - Resolve any conflicts if they occur
 
-5. Manage patches using Electron's `npx e patches` command:
+5. Manage patches using `npx e patches` command:
    > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`
 
    1. Commit changes in both the main repository and affected submodules
@@ -100,15 +100,16 @@ Special thanks to [@jiegec](https://github.com/jiegec) for his invaluable Chromi
    ```sh
    cd $BUILD_ROOT/src
    git add .
-   # Don't commit submodules
+   # Exclude submodules since electron build tools might ignore them
    git restore --staged $(git submodule status | cut -d' ' -f2)
    git commit -m "loong64 support
 
    Co-authored-by: Jiajie Chen <c@jia.je>"
    npx e patches chromium
 
-   # Then, we do the same thing for the submodules
-   git submodule foreach git add .
+   # We do the same thing for the submodules
+   # List the submodules that has changes
+   git submodule foreach git status
    # ...
    ```
 

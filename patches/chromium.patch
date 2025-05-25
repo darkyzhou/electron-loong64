@@ -1,27 +1,27 @@
 diff --git a/patches/boringssl/.patches b/patches/boringssl/.patches
-index 9dffabe3d9..d54598d744 100644
+index 9dffabe3d9..981c833dd6 100644
 --- a/patches/boringssl/.patches
 +++ b/patches/boringssl/.patches
 @@ -1,3 +1,4 @@
  expose_ripemd160.patch
  revert_track_ssl_error_zero_return_explicitly.patch
  feat_expose_several_extra_cipher_functions.patch
-+loong64_support_for_boringssl.patch
-diff --git a/patches/boringssl/loong64_support_for_boringssl.patch b/patches/boringssl/loong64_support_for_boringssl.patch
++loong64_support.patch
+diff --git a/patches/boringssl/loong64_support.patch b/patches/boringssl/loong64_support.patch
 new file mode 100644
-index 0000000000..f48ae4d481
+index 0000000000..83781283ad
 --- /dev/null
-+++ b/patches/boringssl/loong64_support_for_boringssl.patch
++++ b/patches/boringssl/loong64_support.patch
 @@ -0,0 +1,20 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 15 Feb 2025 03:26:50 +0000
-+Subject: loong64 support for boringssl
++Date: Sat, 24 May 2025 07:34:18 +0000
++Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/include/openssl/target.h b/include/openssl/target.h
-+index 2760f52ce8ef92f6b8c9800568f096ce8e551b35..c53990fe8eb11a691876f1370d7e047b71996cee 100644
++index 147ab31fe0e3ba75a2d9fe531da7616e3dd1e584..22cdbbc3e9b6c62583dfc4bd72d82b5fb1a8a77d 100644
 +--- a/include/openssl/target.h
 ++++ b/include/openssl/target.h
 +@@ -54,6 +54,8 @@
@@ -34,32 +34,32 @@ index 0000000000..f48ae4d481
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index ffa0d94599..35f93a98de 100644
+index f66e610510..e20f5ac641 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -155,3 +155,4 @@ cherry-pick-b8f80176b163.patch
- fix_false_activation_logic_for_context_menu.patch
- mac_fix_check_on_ime_reconversion_due_to_invalid_replacement_range.patch
- cherry-pick-0333ecde9142.patch
-+loong64_support_for_chromium.patch
-diff --git a/patches/chromium/loong64_support_for_chromium.patch b/patches/chromium/loong64_support_for_chromium.patch
+@@ -151,3 +151,4 @@ windows_retrieve_primary_monitor_information_early.patch
+ do_not_check_the_order_of_display_id_order_on_windows.patch
+ add_linux_window_controls_menu.patch
+ make_focus_methods_in_webcontentsviewchildframe_notimplemented.patch
++loong64_support.patch
+diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..ba4c2ce10f
+index 0000000000..f3dac69013
 --- /dev/null
-+++ b/patches/chromium/loong64_support_for_chromium.patch
-@@ -0,0 +1,3685 @@
++++ b/patches/chromium/loong64_support.patch
+@@ -0,0 +1,3694 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 15 Feb 2025 03:15:31 +0000
-+Subject: loong64 support for chromium
++Date: Sat, 24 May 2025 07:32:14 +0000
++Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
-+index 17da3298e761b666a13470042e8d09df8466e957..b58397dce427336653b1f2ad144c0f3e21f77dbd 100644
++index f2a5edc535cb2d31813a2d70430331f2d7220fa9..97fc8865d02dbcb08148d05250e9feeebea18b7d 100644
 +--- a/base/allocator/partition_allocator/partition_alloc.gni
 ++++ b/base/allocator/partition_allocator/partition_alloc.gni
-+@@ -304,7 +304,7 @@ declare_args() {
++@@ -362,7 +362,7 @@ declare_args() {
 + 
 + stack_scan_supported =
 +     current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
@@ -69,10 +69,10 @@ index 0000000000..ba4c2ce10f
 + # We want to provide assertions that guard against inconsistent build
 + # args, but there is no point in having them fire if we're not building
 +diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+index ec0b490a859d15cadb642e7f4ba0b579e326de1b..eff7e810fdbadb2e00cb942fb288b8eea7fa7278 100644
++index 7f443128f758d91b7cfb526ee3795f036703ec01..5e540c7845b785a89d6d96d726d2af4153db861e 100644
 +--- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
 ++++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+@@ -500,6 +500,9 @@ if (is_clang_or_gcc) {
++@@ -502,6 +502,9 @@ if (is_clang_or_gcc) {
 +     } else if (current_cpu == "riscv64") {
 +       assert(stack_scan_supported)
 +       sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
@@ -138,7 +138,7 @@ index 0000000000..ba4c2ce10f
 ++    "  addi.d $sp, $sp, 96                               \n"
 ++    "  jr $ra                                            \n");
 +diff --git a/base/process/launch.h b/base/process/launch.h
-+index 009d75093c7804d5c65f6149881efa3ac06892d8..d570b93740cda13599009dea8d762c5a177e7d09 100644
++index e0322f879d8e961d568b8349ee4587f7da0d4811..bb60d00f0615b6a321b13007e26f99ffccc3bff9 100644
 +--- a/base/process/launch.h
 ++++ b/base/process/launch.h
 +@@ -55,7 +55,7 @@ namespace base {
@@ -151,10 +151,10 @@ index 0000000000..ba4c2ce10f
 +   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
 + #else
 +diff --git a/base/system/sys_info.cc b/base/system/sys_info.cc
-+index 745d42ed400fd0f2dbf91d02f5e7dfd3e43d50e0..981c00f5990f42a67c6347cda94903422d7b379b 100644
++index 000604bcb883cebde672d452673c1ae69196218a..8b08fcc46c571ef95a52d741f7e6128271c5bc49 100644
 +--- a/base/system/sys_info.cc
 ++++ b/base/system/sys_info.cc
-+@@ -261,6 +261,8 @@ std::string SysInfo::ProcessCPUArchitecture() {
++@@ -256,6 +256,8 @@ std::string SysInfo::ProcessCPUArchitecture() {
 +   return "ARM_64";
 + #elif defined(ARCH_CPU_RISCV64)
 +   return "RISCV_64";
@@ -164,7 +164,7 @@ index 0000000000..ba4c2ce10f
 +   return std::string();
 + #endif
 +diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
-+index 44bd202d2b854a4f47012894f3a2dd34ad03b18d..fc8b27185a0aa14ce3c22c7d56c4797a60b224a6 100644
++index f27d52c3b6812c1cc7ca47fc20d2b7385d22062e..df314f53a007f77c578be99739a3eae52813c57b 100644
 +--- a/build/config/clang/BUILD.gn
 ++++ b/build/config/clang/BUILD.gn
 +@@ -166,14 +166,15 @@ template("clang_lib") {
@@ -189,10 +189,10 @@ index 0000000000..ba4c2ce10f
 +           assert(false)  # Unhandled cpu type
 +         }
 +diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-+index f58320b88f207f0531c4358c9d0846552e830dfa..2c3237cf6d35224274afbfcf38884be6670a7b8f 100644
++index ffbd381f00929465e5fd02d75c43e93476dbf0ab..dd0cc90a74964d94da1c57cefae26462feb78055 100644
 +--- a/build/config/compiler/BUILD.gn
 ++++ b/build/config/compiler/BUILD.gn
-+@@ -621,7 +621,7 @@ config("compiler") {
++@@ -631,7 +631,7 @@ config("compiler") {
 +     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
 +     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
 +         default_toolchain != "//build/toolchain/cros:target") {
@@ -215,10 +215,10 @@ index 0000000000..ba4c2ce10f
 +   }
 + }
 +diff --git a/build/config/rust.gni b/build/config/rust.gni
-+index 60856e609d08479d6193a690a98dd2692f619b02..141194588910eb6724b1f853c952ad95abb87fe8 100644
++index 5b9e3e1e65b8d08f926fdf76133b72795ca34ebb..e71e4083943cb420a0aec087e29c89a110055abc 100644
 +--- a/build/config/rust.gni
 ++++ b/build/config/rust.gni
-+@@ -200,6 +200,9 @@ if (is_linux || is_chromeos) {
++@@ -199,6 +199,9 @@ if (is_linux || is_chromeos) {
 +   } else if (current_cpu == "riscv64") {
 +     rust_abi_target = "riscv64gc-unknown-linux-gnu"
 +     cargo_target_abi = ""
@@ -228,7 +228,7 @@ index 0000000000..ba4c2ce10f
 +   } else {
 +     # Best guess for other future platforms.
 +     rust_abi_target = current_cpu + "-unknown-linux-gnu"
-+@@ -320,6 +323,8 @@ if (current_cpu == "x86") {
++@@ -319,6 +322,8 @@ if (current_cpu == "x86") {
 +   rust_target_arch = "powerpc64"
 + } else if (current_cpu == "riscv64") {
 +   rust_target_arch = "riscv64"
@@ -238,7 +238,7 @@ index 0000000000..ba4c2ce10f
 + 
 + assert(!toolchain_has_rust || rust_target_arch != "")
 +diff --git a/build/nocompile.gni b/build/nocompile.gni
-+index 242e9104fc10ab17468e208bea0e72a6eb606018..8d152bd8adb4313f0b1f7d7d38dbb822d3c6ff3f 100644
++index 2d9991bee00ae27419e97db8e50f810efced189a..bd3fa29bad0a7b69366c88baba622db805d5b8e7 100644
 +--- a/build/nocompile.gni
 ++++ b/build/nocompile.gni
 +@@ -119,10 +119,10 @@ if (enable_nocompile_tests) {
@@ -270,25 +270,21 @@ index 0000000000..ba4c2ce10f
 +       rustenv = _rustenv
 + 
 +       if (_generate_crate_root) {
-+diff --git a/chromecast/browser/cast_browser_main_parts.cc b/chromecast/browser/cast_browser_main_parts.cc
-+index bcd009335713b0abc279b6f4fd52456d3bbfd807..ec3b43ef4ef0326895e1293fe227acbb18e160bc 100644
-+--- a/chromecast/browser/cast_browser_main_parts.cc
-++++ b/chromecast/browser/cast_browser_main_parts.cc
-+@@ -315,11 +315,10 @@ const DefaultCommandLineSwitch kDefaultSwitches[] = {
-+ #endif  // BUILDFLAG(IS_ANDROID)
-+ #endif  // BUILDFLAG(IS_CAST_AUDIO_ONLY)
-+ #if BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS)
-+-#if defined(ARCH_CPU_X86_FAMILY)
-+     // This is needed for now to enable the x11 Ozone platform to work with
-+     // current Linux/NVidia OpenGL drivers.
-+     {switches::kIgnoreGpuBlocklist, ""},
-+-#elif defined(ARCH_CPU_ARM_FAMILY)
-++#if defined(ARCH_CPU_ARM_FAMILY)
-+ #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
-+     {switches::kEnableHardwareOverlays, "cast"},
-+ #endif
++diff --git a/build/rust/std/BUILD.gn b/build/rust/std/BUILD.gn
++index 6b996aa1fe3865187d02c017e56c0918bcc9b8f4..68b085be200fa4f116aa709b9157c4d2efdf7d6a 100644
++--- a/build/rust/std/BUILD.gn
+++++ b/build/rust/std/BUILD.gn
++@@ -89,7 +89,7 @@ if (toolchain_has_rust) {
++     # These are no longer present in the Windows toolchain.
++     stdlib_files += [
++       "addr2line",
++-      "adler2",
+++      "adler",
++       "gimli",
++       "libc",
++       "memchr",
 +diff --git a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
-+index fba9c05770fa8089ee617486ed9d14de0a4a9a8a..9cd7596443d1ed5faf9f380ae79c0a9e143c4cc4 100644
++index fdf8941c32236231cd166be3e9fad94a72473f2c..9340ba285738c0d6b0a5748b786eb21f8d2fc90b 100644
 +--- a/components/media_router/common/providers/cast/channel/enum_table.h
 ++++ b/components/media_router/common/providers/cast/channel/enum_table.h
 +@@ -12,7 +12,6 @@
@@ -299,7 +295,7 @@ index 0000000000..ba4c2ce10f
 + #include <optional>
 + #include <ostream>
 + #include <string_view>
-+@@ -366,7 +365,8 @@ class EnumTable {
++@@ -368,7 +367,8 @@ class EnumTable {
 + 
 +  private:
 + #ifdef ARCH_CPU_64_BITS
@@ -309,6 +305,19 @@ index 0000000000..ba4c2ce10f
 + #endif
 +       std::initializer_list<Entry> data_;
 +   bool is_sorted_;
++diff --git a/components/metrics/debug/metrics_internals_utils.cc b/components/metrics/debug/metrics_internals_utils.cc
++index 69d3709fcd41bd9e4f6847c8b49371d9233fd917..654f7ee0e37c8a786296acc8490ebb2d5d23ff88 100644
++--- a/components/metrics/debug/metrics_internals_utils.cc
+++++ b/components/metrics/debug/metrics_internals_utils.cc
++@@ -69,6 +69,8 @@ std::string CpuArchitectureToString(
++       return "arm32";
++     case variations::Study::TRANSLATED_X86_64:
++       return "translated_x86_64";
+++    case variations::Study::LOONGARCH64:
+++      return "loongarch64";
++   }
++   NOTREACHED();
++ }
 +diff --git a/components/variations/proto/study.proto b/components/variations/proto/study.proto
 +index 7ef5eb238e1a286902547bdfe722a11129009741..f2d1708e6c1cfc847fb1987b90e32c219d53761f 100644
 +--- a/components/variations/proto/study.proto
@@ -323,10 +332,10 @@ index 0000000000..ba4c2ce10f
 + 
 +   // Enum to pass as optional bool.
 +diff --git a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
-+index 73ff906e1b51a5c1fc0e899fb3bfe9936d0a3c44..da0aefab0728fea124d86a7bad2f595037603612 100644
++index e91cfc139cd5bd875b0feedbedc58dcc88a7dc06..a80d868ccb84cf9029b8c743b99d43a20519444b 100644
 +--- a/components/variations/service/variations_field_trial_creator_base.cc
 ++++ b/components/variations/service/variations_field_trial_creator_base.cc
-+@@ -107,6 +107,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
++@@ -112,6 +112,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
 +   if (process_arch == "ARM") {
 +     return Study::ARM32;
 +   }
@@ -337,10 +346,10 @@ index 0000000000..ba4c2ce10f
 +     return Study::X86_32;
 +   }
 +diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
-+index 070658460eb74513b83e746f20d80af5b79a2df3..39bff2d78b1379dd1a26fa30106ef35243d2d8ef 100644
++index 761d0650f514b71c7a0de32254ac39dc711253e1..cba042949bfd8baf14a263fcd19c3f7338faaad8 100644
 +--- a/content/common/user_agent.cc
 ++++ b/content/common/user_agent.cc
-+@@ -174,6 +174,8 @@ std::string GetCpuArchitecture() {
++@@ -179,6 +179,8 @@ std::string GetCpuArchitecture() {
 +               cpu_info.substr(2, 2) == "86") ||
 +              base::StartsWith(cpu_info, "x86")) {
 +     return "x86";
@@ -896,7 +905,7 @@ index 0000000000..ba4c2ce10f
 + #error "Unimplemented architecture"
 + #endif
 +diff --git a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
-+index 7f925cce83654d451f44696080b92d1f650e3086..ca189d72dc1c10abd57584d72ec658934958a877 100644
++index 1dc91d70aa39e0f668c10360f4c3abf01e2f075f..806f2ea6e6a3cd1938e17b001db0b77d62ca2d5f 100644
 +--- a/sandbox/linux/services/credentials.cc
 ++++ b/sandbox/linux/services/credentials.cc
 +@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
@@ -909,10 +918,10 @@ index 0000000000..ba4c2ce10f
 +   void* stack = stack_buf + sizeof(stack_buf);
 + #else
 +diff --git a/sandbox/linux/services/syscall_wrappers.cc b/sandbox/linux/services/syscall_wrappers.cc
-+index 74d48f1f91490620b4ce6a693eea78bd75acef59..e2c8a0a2dbeb0187a88cc529b671d9a98a20ee84 100644
++index df4a991be825abaf1a732544683d5c99bf7d6b56..e0105db6a8a3ff893a0c32ae62e2d24ba579b5c6 100644
 +--- a/sandbox/linux/services/syscall_wrappers.cc
 ++++ b/sandbox/linux/services/syscall_wrappers.cc
-+@@ -5,6 +5,7 @@
++@@ -10,6 +10,7 @@
 + #include "sandbox/linux/services/syscall_wrappers.h"
 + 
 + #include <fcntl.h>
@@ -920,7 +929,7 @@ index 0000000000..ba4c2ce10f
 + #include <pthread.h>
 + #include <sched.h>
 + #include <setjmp.h>
-+@@ -58,7 +59,7 @@ long sys_clone(unsigned long flags,
++@@ -63,7 +64,7 @@ long sys_clone(unsigned long flags,
 +   if (ctid) MSAN_UNPOISON(ctid, sizeof(*ctid));
 +   // See kernel/fork.c in Linux. There is different ordering of sys_clone
 +   // parameters depending on CONFIG_CLONE_BACKWARDS* configuration options.
@@ -929,7 +938,7 @@ index 0000000000..ba4c2ce10f
 +   return syscall(__NR_clone, flags, child_stack, ptid, ctid, tls);
 + #elif defined(ARCH_CPU_X86) || defined(ARCH_CPU_ARM_FAMILY) || \
 +     defined(ARCH_CPU_MIPS_FAMILY)
-+@@ -163,9 +164,53 @@ int sys_sigaction(int signum,
++@@ -168,9 +169,53 @@ int sys_sigaction(int signum,
 +   return sigaction(signum, act, oldact);
 + }
 + 
@@ -984,7 +993,7 @@ index 0000000000..ba4c2ce10f
 +   res = syscall(__NR_newfstatat, AT_FDCWD, path, stat_buf, 0);
 + #else
 +   res = syscall(__NR_stat, path, stat_buf);
-+@@ -177,7 +222,12 @@ int sys_stat(const char* path, struct kernel_stat* stat_buf) {
++@@ -182,7 +227,12 @@ int sys_stat(const char* path, struct kernel_stat* stat_buf) {
 + 
 + int sys_lstat(const char* path, struct kernel_stat* stat_buf) {
 +   int res;
@@ -1071,7 +1080,7 @@ index 0000000000..ba4c2ce10f
 +   COMMAND_INOTIFY_ADD_WATCH,
 + 
 +diff --git a/sandbox/linux/syscall_broker/broker_file_permission.h b/sandbox/linux/syscall_broker/broker_file_permission.h
-+index 7771ae1521d017db68ef6c75c87ad1c45921538d..a4c0089dbe0acc46529567bc2051b49b2a97c949 100644
++index 0b9fb9c04ee8cf14fb1511853c6c3db34f1c5cbe..4202dc1889c5bd4a66a72dba21e587ac61883a3b 100644
 +--- a/sandbox/linux/syscall_broker/broker_file_permission.h
 ++++ b/sandbox/linux/syscall_broker/broker_file_permission.h
 +@@ -5,6 +5,7 @@
@@ -1083,7 +1092,7 @@ index 0000000000..ba4c2ce10f
 + #include <cstdint>
 + #include <string>
 +diff --git a/sandbox/linux/syscall_broker/broker_host.cc b/sandbox/linux/syscall_broker/broker_host.cc
-+index 7afa8b2395c15a2cfc5cad7c9ee718cd6679665e..21a10f20e74c87f86aabc419fe944fe012966699 100644
++index bf1339b06112ac439599b6b1c31447f2ec8600ae..ca5793ecc0907a2cc832c9f78bcf1145d9d042db 100644
 +--- a/sandbox/linux/syscall_broker/broker_host.cc
 ++++ b/sandbox/linux/syscall_broker/broker_host.cc
 +@@ -302,6 +302,21 @@ void BrokerHost::StatFileForIPC(BrokerCommand command_type,
@@ -2638,10 +2647,10 @@ index 0000000000..ba4c2ce10f
 +               Allow())
 +           // Sending ENOSYS tells the Futex backend to use another approach if
 +diff --git a/sandbox/policy/linux/sandbox_linux.cc b/sandbox/policy/linux/sandbox_linux.cc
-+index c7313416e6183130bbbe4b89d0b4192664d01351..2ca106c1e3e077173d204dcef4b73b6999309efc 100644
++index 6249a61685332eab7cb56fd09dc0a6a52cd86c4a..71fdd83ada5f87112acf6c3979b12067b8f33aeb 100644
 +--- a/sandbox/policy/linux/sandbox_linux.cc
 ++++ b/sandbox/policy/linux/sandbox_linux.cc
-+@@ -595,6 +595,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
++@@ -584,6 +584,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
 +   const bpf_dsl::ResultExpr handle_via_broker =
 +       bpf_dsl::Trap(syscall_broker::BrokerClient::SIGSYS_Handler,
 +                     broker_process_->GetBrokerClientSignalBased());
@@ -2649,7 +2658,7 @@ index 0000000000..ba4c2ce10f
 +   if (sysno == __NR_fstatat_default) {
 +     // This may be an fstatat(fd, "", stat_buf, AT_EMPTY_PATH), which should be
 +     // rewritten as fstat(fd, stat_buf). This should be consistent with how the
-+@@ -605,6 +606,18 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
++@@ -594,6 +595,18 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
 +     return bpf_dsl::If((flags & AT_EMPTY_PATH) == AT_EMPTY_PATH,
 +                        RewriteFstatatSIGSYS(BPFBasePolicy::GetFSDeniedErrno()))
 +         .Else(handle_via_broker);
@@ -2799,10 +2808,10 @@ index 0000000000..ba4c2ce10f
 +     bgra_01 = __lsx_vpickev_b(bgra_1, bgra_0);
 +     bgra_23 = __lsx_vpickev_b(bgra_3, bgra_2);
 +diff --git a/third_party/crashpad/crashpad/minidump/minidump_context.h b/third_party/crashpad/crashpad/minidump/minidump_context.h
-+index 12413de02b6624873668f5806618ee53e7f10e01..54bf2627089dbe60a8143b0b1f3b759bf0191849 100644
++index 9dcbcb468cbf120aad208caf0c4e486c223cf8aa..4649a890d6d92f0250548efb058dffaae50923be 100644
 +--- a/third_party/crashpad/crashpad/minidump/minidump_context.h
 ++++ b/third_party/crashpad/crashpad/minidump/minidump_context.h
-+@@ -687,6 +687,56 @@ struct MinidumpContextRISCV64 {
++@@ -686,6 +686,56 @@ struct MinidumpContextRISCV64 {
 +   uint32_t fcsr;
 + };
 + 
@@ -3302,10 +3311,10 @@ index 0000000000..ba4c2ce10f
 +         !ReadSiginfo<Traits32>(process_reader, siginfo_address)) {
 +       return false;
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-+index f931d33002a7b55bcd6e2aa29c280fa2e3393bb8..c5acf661f829bb1371951194ba2e70fa67c88cbb 100644
++index e08fce59a172146e9a87728e2b3a78d87d7e8594..9962e3c3ec80fadd0c720f4807376c6454d8178c 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/exception_snapshot_linux.h
-+@@ -91,6 +91,8 @@ class ExceptionSnapshotLinux final : public ExceptionSnapshot {
++@@ -94,6 +94,8 @@ class ExceptionSnapshotLinux final : public ExceptionSnapshot {
 +     CPUContextMIPS64 mips64;
 + #elif defined(ARCH_CPU_RISCV64)
 +     CPUContextRISCV64 riscv64;
@@ -3328,7 +3337,7 @@ index 0000000000..ba4c2ce10f
 + #error Port.
 + #endif
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/signal_context.h b/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
-+index 89e697a08bad013a0d91e036310b9f91b1ad3f48..ab04f3a40db2e21b401ca9002892372635e4413a 100644
++index a76852e20edfac46d0ef8af0531b0d31421ca49f..7b0c2d4624ccf3825274b582313e7f5ce9edeb57 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/signal_context.h
 +@@ -456,6 +456,46 @@ static_assert(offsetof(UContext<ContextTraits64>, mcontext.fpregs) ==
@@ -3439,10 +3448,10 @@ index 0000000000..ba4c2ce10f
 + #error Port.
 + #endif
 +diff --git a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-+index 5795bfb985a2512310e1785c06d7ae3567f9aef8..78f14e1208481889261cfdbd1f71b144bb5b9d32 100644
++index 66d8c3e1d0c30051971287e8d71ddacc1ec56175..fef21458897a3182b50b55a36898dc1d3d1d4989 100644
 +--- a/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
 ++++ b/third_party/crashpad/crashpad/snapshot/linux/thread_snapshot_linux.h
-+@@ -76,6 +76,8 @@ class ThreadSnapshotLinux final : public ThreadSnapshot {
++@@ -79,6 +79,8 @@ class ThreadSnapshotLinux final : public ThreadSnapshot {
 +     CPUContextMIPS64 mips64;
 + #elif defined(ARCH_CPU_RISCV64)
 +     CPUContextRISCV64 riscv64;
@@ -3733,23 +3742,69 @@ index 0000000000..ba4c2ce10f
 ++
 ++#define TRIM_DSP_FUNCTIONS 1
 ++
+diff --git a/patches/config.json b/patches/config.json
+index 8d297c0fd3..1db1fde541 100644
+--- a/patches/config.json
++++ b/patches/config.json
+@@ -12,5 +12,7 @@
+   { "patch_dir": "src/electron/patches/ReactiveObjC", "repo": "src/third_party/squirrel.mac/vendor/ReactiveObjC" },
+   { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
+   { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
+-  { "patch_dir": "src/electron/patches/sqlite", "repo": "src/third_party/sqlite/src" }
++  { "patch_dir": "src/electron/patches/sqlite", "repo": "src/third_party/sqlite/src" },
++  { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
++  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" }
+ ]
+diff --git a/patches/devtools_frontend/.patches b/patches/devtools_frontend/.patches
+index 3cf8d9fc4a..55569bfe8e 100644
+--- a/patches/devtools_frontend/.patches
++++ b/patches/devtools_frontend/.patches
+@@ -1 +1,2 @@
+ chore_expose_ui_to_allow_electron_to_set_dock_side.patch
++loong64_support.patch
+diff --git a/patches/devtools_frontend/loong64_support.patch b/patches/devtools_frontend/loong64_support.patch
+new file mode 100644
+index 0000000000..52c5876355
+--- /dev/null
++++ b/patches/devtools_frontend/loong64_support.patch
+@@ -0,0 +1,20 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: darkyzhou <me@zqy.io>
++Date: Sat, 24 May 2025 07:35:22 +0000
++Subject: loong64 support
++
++Co-authored-by: Jiajie Chen <c@jia.je>
++
++diff --git a/scripts/build/rollup.config.mjs b/scripts/build/rollup.config.mjs
++index 3cf10ad38cf8a4e9fb0abd047839b5cfe4da4fe6..71e4f898567d406d2343cd51b5b2ded86a03388a 100644
++--- a/scripts/build/rollup.config.mjs
+++++ b/scripts/build/rollup.config.mjs
++@@ -19,7 +19,7 @@ export default commandLineArgs => ({
++     sourcemap: Boolean(commandLineArgs.configSourcemaps),
++   }],
++   plugins: [
++-    terser(),
+++    // terser(),
++     {
++       name: 'devtools-plugin',
++       resolveId(source, importer) {
 diff --git a/patches/ffmpeg/.patches b/patches/ffmpeg/.patches
-index 31dc878c5b..71432de3e1 100644
+index 31dc878c5b..f96d1acc1d 100644
 --- a/patches/ffmpeg/.patches
 +++ b/patches/ffmpeg/.patches
 @@ -1 +1,2 @@
  link_with_loader_path.patch
-+loong64_support_for_ffmpeg.patch
-diff --git a/patches/ffmpeg/loong64_support_for_ffmpeg.patch b/patches/ffmpeg/loong64_support_for_ffmpeg.patch
++loong64_support.patch
+diff --git a/patches/ffmpeg/loong64_support.patch b/patches/ffmpeg/loong64_support.patch
 new file mode 100644
-index 0000000000..069e22549d
+index 0000000000..e8894b573f
 --- /dev/null
-+++ b/patches/ffmpeg/loong64_support_for_ffmpeg.patch
++++ b/patches/ffmpeg/loong64_support.patch
 @@ -0,0 +1,6238 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 15 Feb 2025 03:28:22 +0000
-+Subject: loong64 support for ffmpeg
++Date: Sat, 24 May 2025 07:36:02 +0000
++Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
@@ -9986,23 +10041,23 @@ index 0000000000..069e22549d
 +     (use_linux_config && current_cpu == "arm")) {
 diff --git a/patches/skia/.patches b/patches/skia/.patches
 new file mode 100644
-index 0000000000..91bb953cf6
+index 0000000000..ea62e0c740
 --- /dev/null
 +++ b/patches/skia/.patches
 @@ -0,0 +1 @@
-+loong64_support_for_skia.patch
-diff --git a/patches/skia/loong64_support_for_skia.patch b/patches/skia/loong64_support_for_skia.patch
++loong64_support.patch
+diff --git a/patches/skia/loong64_support.patch b/patches/skia/loong64_support.patch
 new file mode 100644
-index 0000000000..53412dc2f2
+index 0000000000..ec237c0f99
 --- /dev/null
-+++ b/patches/skia/loong64_support_for_skia.patch
++++ b/patches/skia/loong64_support.patch
 @@ -0,0 +1,23 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 15 Feb 2025 03:29:06 +0000
-+Subject: loong64 support for skia
++Date: Sat, 24 May 2025 07:44:09 +0000
++Subject: loong64 support
 +
-+  Co-authored-by: Jiajie Chen <c@jia.je>
++Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/src/opts/SkOpts_SetTarget.h b/src/opts/SkOpts_SetTarget.h
 +index 525cfcb862ae96bf8573d00b67dc9e5e23c10d22..5f72a27db99d2b1e1ef6f7c54198f7bbfb9380e3 100644
@@ -10022,21 +10077,21 @@ index 0000000000..53412dc2f2
 +     #else
 diff --git a/patches/swiftshader/.patches b/patches/swiftshader/.patches
 new file mode 100644
-index 0000000000..774d335e56
+index 0000000000..ea62e0c740
 --- /dev/null
 +++ b/patches/swiftshader/.patches
 @@ -0,0 +1 @@
-+loong64_support_for_swiftshader.patch
-diff --git a/patches/swiftshader/loong64_support_for_swiftshader.patch b/patches/swiftshader/loong64_support_for_swiftshader.patch
++loong64_support.patch
+diff --git a/patches/swiftshader/loong64_support.patch b/patches/swiftshader/loong64_support.patch
 new file mode 100644
-index 0000000000..9005c64a15
+index 0000000000..7c2926c327
 --- /dev/null
-+++ b/patches/swiftshader/loong64_support_for_swiftshader.patch
-@@ -0,0 +1,177 @@
++++ b/patches/swiftshader/loong64_support.patch
+@@ -0,0 +1,301 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 15 Feb 2025 03:33:40 +0000
-+Subject: loong64 support for swiftshader
++Date: Sat, 24 May 2025 07:45:03 +0000
++Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
@@ -10210,3 +10265,127 @@ index 0000000000..9005c64a15
 + #else
 + #error "unknown architecture"
 + #endif
++diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h b/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
++index a8c45785c461d9881a724e056179b11723148cf0..4f02e81dba151e01f48f3f7eacfa264f7143d6b7 100644
++--- a/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
+++++ b/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
++@@ -20,7 +20,10 @@ namespace llvm {
++ /// A suitably aligned and sized character array member which can hold elements
++ /// of any type.
++ template <typename T, typename... Ts> struct AlignedCharArrayUnion {
++-  alignas(Ts...) char buffer[std::max({sizeof(Ts)...})];
+++  // Work around "internal compiler error: Segmentation fault" with GCC 7.5,
+++  // apparently caused by alignas(Ts...).
+++  static constexpr std::size_t Align = std::max({alignof(T), alignof(Ts)...});
+++  alignas(Align) char buffer[std::max({sizeof(T), sizeof(Ts)...})];
++ };
++ 
++ } // end namespace llvm
++diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h b/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
++index 8a984db5e681c3e513fbd0b929f64efe2ef4918c..a769f9ed63685a2badd017a50e4bc9edb1d970b5 100644
++--- a/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
+++++ b/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
++@@ -18,7 +18,6 @@
++ #include "llvm/ADT/StringExtras.h"
++ #include "llvm/ADT/Twine.h"
++ #include "llvm/Config/abi-breaking.h"
++-#include "llvm/Support/AlignOf.h"
++ #include "llvm/Support/Compiler.h"
++ #include "llvm/Support/Debug.h"
++ #include "llvm/Support/ErrorHandling.h"
++@@ -669,22 +668,22 @@ private:
++ 
++   storage_type *getStorage() {
++     assert(!HasError && "Cannot get value when an error exists!");
++-    return reinterpret_cast<storage_type *>(&TStorage);
+++    return &TStorage;
++   }
++ 
++   const storage_type *getStorage() const {
++     assert(!HasError && "Cannot get value when an error exists!");
++-    return reinterpret_cast<const storage_type *>(&TStorage);
+++    return &TStorage;
++   }
++ 
++   error_type *getErrorStorage() {
++     assert(HasError && "Cannot get error when a value exists!");
++-    return reinterpret_cast<error_type *>(&ErrorStorage);
+++    return &ErrorStorage;
++   }
++ 
++   const error_type *getErrorStorage() const {
++     assert(HasError && "Cannot get error when a value exists!");
++-    return reinterpret_cast<const error_type *>(&ErrorStorage);
+++    return &ErrorStorage;
++   }
++ 
++   // Used by ExpectedAsOutParameter to reset the checked flag.
++@@ -716,8 +715,8 @@ private:
++   }
++ 
++   union {
++-    AlignedCharArrayUnion<storage_type> TStorage;
++-    AlignedCharArrayUnion<error_type> ErrorStorage;
+++    storage_type TStorage;
+++    error_type ErrorStorage;
++   };
++   bool HasError : 1;
++ #if LLVM_ENABLE_ABI_BREAKING_CHECKS
++diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h b/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h
++index b654c9c9c43bef57aae69c28ff92b88743a22738..7a2722aa7b831a81507bbd97b1b2bbdda1f85848 100644
++--- a/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h
+++++ b/third_party/llvm-16.0/llvm/include/llvm/Support/ErrorOr.h
++@@ -15,7 +15,6 @@
++ #ifndef LLVM_SUPPORT_ERROROR_H
++ #define LLVM_SUPPORT_ERROROR_H
++ 
++-#include "llvm/Support/AlignOf.h"
++ #include <cassert>
++ #include <system_error>
++ #include <type_traits>
++@@ -235,26 +234,27 @@ private:
++ 
++   storage_type *getStorage() {
++     assert(!HasError && "Cannot get value when an error exists!");
++-    return reinterpret_cast<storage_type *>(&TStorage);
+++    return &TStorage;
++   }
++ 
++   const storage_type *getStorage() const {
++     assert(!HasError && "Cannot get value when an error exists!");
++-    return reinterpret_cast<const storage_type *>(&TStorage);
+++    return &TStorage;
++   }
++ 
++   std::error_code *getErrorStorage() {
++     assert(HasError && "Cannot get error when a value exists!");
++-    return reinterpret_cast<std::error_code *>(&ErrorStorage);
+++    return &ErrorStorage;
++   }
++ 
++   const std::error_code *getErrorStorage() const {
++-    return const_cast<ErrorOr<T> *>(this)->getErrorStorage();
+++    assert(HasError && "Cannot get error when a value exists!");
+++    return &ErrorStorage;
++   }
++ 
++   union {
++-    AlignedCharArrayUnion<storage_type> TStorage;
++-    AlignedCharArrayUnion<std::error_code> ErrorStorage;
+++    storage_type TStorage;
+++    std::error_code ErrorStorage;
++   };
++   bool HasError : 1;
++ };
++diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h b/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h
++index f9e711a5dc177f2fa617b4a3f516bae4b46ee855..cdc1c5f3ffa7dc2c6b4ebf6943eeddf0fc5e5366 100644
++--- a/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h
+++++ b/third_party/llvm-16.0/llvm/include/llvm/Support/TrailingObjects.h
++@@ -46,7 +46,6 @@
++ #ifndef LLVM_SUPPORT_TRAILINGOBJECTS_H
++ #define LLVM_SUPPORT_TRAILINGOBJECTS_H
++ 
++-#include "llvm/Support/AlignOf.h"
++ #include "llvm/Support/Alignment.h"
++ #include "llvm/Support/Compiler.h"
++ #include "llvm/Support/MathExtras.h"

@@ -14,8 +14,11 @@ export SRC_PATH="$ROOT_PATH/src"
 # Path to the build output directory
 export OUT_PATH="$SRC_PATH/out/Release"
 
+# Electron repository
+export ELECTRON_REPO="https://github.com/electron/electron.git"
+
 # The version to build
-export ELECTRON_VERSION="34.5.4"
+export ELECTRON_VERSION="35.4.0"
 
 # Path to the release output directory
 export RELEASE_PATH="$ROOT_PATH/release/$ELECTRON_VERSION"
