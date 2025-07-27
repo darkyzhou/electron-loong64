@@ -21,7 +21,7 @@ on:
 
 jobs:
   libgcc:
-    runs-on: [self-hosted, ryustation]
+    runs-on: [self-hosted]
     container:
       image: ghcr.io/darkyzhou/electron-build-runner:latest
     steps:
