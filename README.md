@@ -56,7 +56,7 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 ./scripts/sync.sh
 ```
 
-4. Launch a `ghcr.io/darkyzhou/electron-builder:deepin-23-glibc-238` container. All subsequent steps should be executed inside this container.
+4. Launch a `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-20-rustc-188` container. All subsequent steps should be executed inside this container.
 5. Run following scripts in sequence.
 
 ```bash
@@ -72,48 +72,31 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 ./scripts/package.sh
 ```
 
-### Updating Chromium Patches
+### Updating Patches
 
-1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
+1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container.
 
 2. Update versions and sync sources:
    - Edit `ELECTRON_VERSION` to point to the new version to build in `env.sh`.
-   - Run `scripts/update.sh`
+   - Run `scripts/update.sh`.
 
 3. Update dependencies:
-   - Run `npx e sync` in `$BUILD_ROOT/src`. This will apply all original patches from the Electron repository
+   - Run `scripts/sync.sh`. This will apply all original patches from the Electron repository.
 
-4. Apply patches:
-   - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`
-   - Resolve any conflicts if they occur
+4. Apply Chromium patches:
+   - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`.
+   - Resolve any conflicts if any.
 
-5. Manage patches using `npx e patches` command:
-   > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`
+5. Export Chromium patches using `npx e patches` command:
+   > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`.
 
-   1. Commit changes in both the main repository and affected submodules
-   2. Use `npx e patches <name>` in `$BUILD_ROOT/src` to update patches in `$BUILD_ROOT/src/electron`
-   3. The `<name>` parameter should match entries in `$BUILD_ROOT/src/electron/patches/config.json`
-   
-        > In `config.json`, all the items should be a valid git repository. So if the patches modified a folder in `$BUILD_ROOT/src/third_party` but the folder itself is NOT a git repository, the modification will be collected in the main `chromium` item.
+   1. Run `scripts/export.sh` to commit changes for both chromium and submodule changes.
+   2. Run `npx e patches $NAME` to export patches for submodule commits.
+   3. Export changes in `$BUILD_ROOT/src/electron` to `patches/`.
 
-   Following commands help demonstrate the process:
-   ```sh
-   cd $BUILD_ROOT/src
-   git add .
-   # Exclude submodules since electron build tools might ignore them
-   git restore --staged $(git submodule status | cut -d' ' -f2)
-   git commit -m "loong64 support
+6. Apply Electron patches from `patches/electron.patch`.
 
-   Co-authored-by: Jiajie Chen <c@jia.je>"
-   npx e patches chromium
-
-   # We do the same thing for the submodules
-   # List the submodules that has changes
-   git submodule foreach git status
-   # ...
-   ```
-
-6. Run `npx e sync` again to sync the sources and apply our new patches.
+7. Run `scripts/sync.sh` again to sync the sources and apply all patches.
 
 ### Troubleshooting
 

@@ -86,11 +86,9 @@ function chromedriver() {
 function nodejs() {
     pushd "$ROOT_PATH"/src
 
-    # FIXME:
-    # FileNotFoundError: [Errno 2] No such file or directory: '/home/builduser/buildroot/src/out/Testing/gen/config.gypi'
-    # echo ">>> Build Node.js headers <<<"
-    # ninja -C "$OUT_PATH" electron:node_headers
-    # mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
+    echo ">>> Build Node.js headers <<<"
+    ELECTRON_OUT_DIR=Release ninja -C "$OUT_PATH" electron:node_headers
+    mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
 
     popd
     ffmpeg
@@ -98,14 +96,12 @@ function nodejs() {
 
 function ffmpeg() {
     pushd "$ROOT_PATH"/src
-    # FIXME:
-    # ninja: error: '../../../../../../../usr/lib/clang/20/lib/linux/libclang_rt.builtins-loongarch64.a', needed by 'obj/third_party/opus/libopus.a', missing and no known rule to make it
-    # echo ">>> Build ffmpeg <<<"
 
-    # export CC=clang CXX=clang++ AR=ar NM=nm RUSTC_BOOTSTRAP=1
-    # gn gen "$OUT_PATH"/ffmpeg --args="import(\"//electron/build/args/ffmpeg.gn\")" --script-executable=/usr/bin/python3
-    # ninja -C "$OUT_PATH"/ffmpeg electron:electron_ffmpeg_zip
-    # mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
+    echo ">>> Build ffmpeg <<<"
+    gn gen "$OUT_PATH"/ffmpeg --args="import(\"//electron/build/args/ffmpeg.gn\")" --script-executable=/usr/bin/python3
+    ninja -C "$OUT_PATH"/ffmpeg electron:electron_ffmpeg_zip
+    mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
+    
     popd
     hunspell
 }

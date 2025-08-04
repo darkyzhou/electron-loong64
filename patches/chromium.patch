@@ -9,19 +9,19 @@ index 9dffabe3d9..981c833dd6 100644
 +loong64_support.patch
 diff --git a/patches/boringssl/loong64_support.patch b/patches/boringssl/loong64_support.patch
 new file mode 100644
-index 0000000000..83781283ad
+index 0000000000..f80c4c316b
 --- /dev/null
 +++ b/patches/boringssl/loong64_support.patch
 @@ -0,0 +1,20 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:34:18 +0000
++Date: Sun, 3 Aug 2025 08:42:43 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/include/openssl/target.h b/include/openssl/target.h
-+index 147ab31fe0e3ba75a2d9fe531da7616e3dd1e584..22cdbbc3e9b6c62583dfc4bd72d82b5fb1a8a77d 100644
++index 8d4763d0b3d62adde571fccd77f50fb9a799089a..9b40e9581f85fcc82939fbbbae455131cfba2ecf 100644
 +--- a/include/openssl/target.h
 ++++ b/include/openssl/target.h
 +@@ -54,6 +54,8 @@
@@ -34,122 +34,27 @@ index 0000000000..83781283ad
 + // The list above enumerates the platforms that BoringSSL supports. For these
 + // platforms we keep a reasonable bar of not breaking them: automated test
 diff --git a/patches/chromium/.patches b/patches/chromium/.patches
-index f66e610510..e20f5ac641 100644
+index 31f914b813..96101543a9 100644
 --- a/patches/chromium/.patches
 +++ b/patches/chromium/.patches
-@@ -151,3 +151,4 @@ windows_retrieve_primary_monitor_information_early.patch
- do_not_check_the_order_of_display_id_order_on_windows.patch
- add_linux_window_controls_menu.patch
- make_focus_methods_in_webcontentsviewchildframe_notimplemented.patch
+@@ -142,3 +142,4 @@ fix_linter_error.patch
+ chore_grandfather_in_electron_views_and_delegates.patch
+ refactor_patch_electron_permissiontypes_into_blink.patch
+ fix_add_macos_memory_query_fallback_to_avoid_crash.patch
 +loong64_support.patch
 diff --git a/patches/chromium/loong64_support.patch b/patches/chromium/loong64_support.patch
 new file mode 100644
-index 0000000000..f3dac69013
+index 0000000000..edd78c037e
 --- /dev/null
 +++ b/patches/chromium/loong64_support.patch
-@@ -0,0 +1,3694 @@
+@@ -0,0 +1,3815 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:32:14 +0000
++Date: Sun, 3 Aug 2025 08:29:52 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
-+diff --git a/base/allocator/partition_allocator/partition_alloc.gni b/base/allocator/partition_allocator/partition_alloc.gni
-+index f2a5edc535cb2d31813a2d70430331f2d7220fa9..97fc8865d02dbcb08148d05250e9feeebea18b7d 100644
-+--- a/base/allocator/partition_allocator/partition_alloc.gni
-++++ b/base/allocator/partition_allocator/partition_alloc.gni
-+@@ -362,7 +362,7 @@ declare_args() {
-+ 
-+ stack_scan_supported =
-+     current_cpu == "x64" || current_cpu == "x86" || current_cpu == "arm" ||
-+-    current_cpu == "arm64" || current_cpu == "riscv64"
-++    current_cpu == "arm64" || current_cpu == "riscv64" || current_cpu == "loong64"
-+ 
-+ # We want to provide assertions that guard against inconsistent build
-+ # args, but there is no point in having them fire if we're not building
-+diff --git a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+index 7f443128f758d91b7cfb526ee3795f036703ec01..5e540c7845b785a89d6d96d726d2af4153db861e 100644
-+--- a/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-++++ b/base/allocator/partition_allocator/src/partition_alloc/BUILD.gn
-+@@ -502,6 +502,9 @@ if (is_clang_or_gcc) {
-+     } else if (current_cpu == "riscv64") {
-+       assert(stack_scan_supported)
-+       sources += [ "stack/asm/riscv64/push_registers_asm.cc" ]
-++    } else if (current_cpu == "loong64") {
-++      assert(stack_scan_supported)
-++      sources += [ "stack/asm/loong64/push_registers_asm.cc" ]
-+     } else {
-+       # To support a trampoline for another arch, please refer to v8/src/heap/base.
-+       assert(!stack_scan_supported)
-+diff --git a/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc b/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc
-+new file mode 100644
-+index 0000000000000000000000000000000000000000..574c9ea846e0707f634600bb4de358b7ba65f674
-+--- /dev/null
-++++ b/base/allocator/partition_allocator/src/partition_alloc/stack/asm/loong64/push_registers_asm.cc
-+@@ -0,0 +1,49 @@
-++// Copyright 2023 The Chromium Authors
-++// Use of this source code is governed by a BSD-style license that can be
-++// found in the LICENSE file.
-++
-++// Push all callee-saved registers to get them on the stack for conservative
-++// stack scanning.
-++//
-++// See asm/x64/push_registers_asm.cc for why the function is not generated
-++// using clang.
-++//
-++// Calling convention source:
-++// https://loongson.github.io/LoongArch-Documentation/LoongArch-ELF-ABI-EN.html
-++asm(".global PAPushAllRegistersAndIterateStack             \n"
-++    ".type PAPushAllRegistersAndIterateStack, %function    \n"
-++    ".hidden PAPushAllRegistersAndIterateStack             \n"
-++    "PAPushAllRegistersAndIterateStack:                    \n"
-++    // Push all callee-saved registers and save return address.
-++    "  addi.d $sp, $sp, -96                              \n"
-++    // Save return address.
-++    "  st.d $ra, $sp, 88                                 \n"
-++    // sp is callee-saved.
-++    "  st.d $sp, $sp, 80                                 \n"
-++    // s0-s9(fp) are callee-saved.
-++    "  st.d $fp, $sp, 72                                 \n"
-++    "  st.d $s8, $sp, 64                                 \n"
-++    "  st.d $s7, $sp, 56                                 \n"
-++    "  st.d $s6, $sp, 48                                 \n"
-++    "  st.d $s5, $sp, 40                                 \n"
-++    "  st.d $s4, $sp, 32                                 \n"
-++    "  st.d $s3, $sp, 24                                 \n"
-++    "  st.d $s2, $sp, 16                                 \n"
-++    "  st.d $s1, $sp, 8                                  \n"
-++    "  st.d $s0, $sp, 0                                  \n"
-++    // Maintain frame pointer(fp is s9).
-++    "  move $fp, $sp                                     \n"
-++    // Pass 1st parameter (a0) unchanged (Stack*).
-++    // Pass 2nd parameter (a1) unchanged (StackVisitor*).
-++    // Save 3rd parameter (a2; IterateStackCallback) to a3.
-++    "  move $a3, $a2                                     \n"
-++    // Pass 3rd parameter as sp (stack pointer).
-++    "  move $a2, $sp                                     \n"
-++    // Call the callback.
-++    "  jirl $ra, $a3, 0                                  \n"
-++    // Load return address.
-++    "  ld.d $ra, $sp, 88                                 \n"
-++    // Restore frame pointer.
-++    "  ld.d $fp, $sp, 72                                 \n"
-++    "  addi.d $sp, $sp, 96                               \n"
-++    "  jr $ra                                            \n");
-+diff --git a/base/process/launch.h b/base/process/launch.h
-+index e0322f879d8e961d568b8349ee4587f7da0d4811..bb60d00f0615b6a321b13007e26f99ffccc3bff9 100644
-+--- a/base/process/launch.h
-++++ b/base/process/launch.h
-+@@ -55,7 +55,7 @@ namespace base {
-+ // defined as a constant.
-+ 
-+ // These constants are borrowed from glibc’s (arch)/bits/pthread_stack_min.h.
-+-#if defined(ARCH_CPU_ARM64)
-++#if defined(ARCH_CPU_ARM64) || defined(ARCH_CPU_LOONGARCH64)
-+ #define PTHREAD_STACK_MIN_CONST \
-+   (__builtin_constant_p(PTHREAD_STACK_MIN) ? PTHREAD_STACK_MIN : 131072)
-+ #else
 +diff --git a/base/system/sys_info.cc b/base/system/sys_info.cc
 +index 000604bcb883cebde672d452673c1ae69196218a..8b08fcc46c571ef95a52d741f7e6128271c5bc49 100644
 +--- a/base/system/sys_info.cc
@@ -164,12 +69,12 @@ index 0000000000..f3dac69013
 +   return std::string();
 + #endif
 +diff --git a/build/config/clang/BUILD.gn b/build/config/clang/BUILD.gn
-+index f27d52c3b6812c1cc7ca47fc20d2b7385d22062e..df314f53a007f77c578be99739a3eae52813c57b 100644
++index 8c03235f5d141d14d97d122210e5e2fa5d7fe04f..493a45824cad574f6e42ae7fb9dc382b6323e764 100644
 +--- a/build/config/clang/BUILD.gn
 ++++ b/build/config/clang/BUILD.gn
-+@@ -166,14 +166,15 @@ template("clang_lib") {
-+       } else if (is_apple) {
-+         _dir = "darwin"
++@@ -208,16 +208,17 @@ template("clang_lib") {
++           assert(false)  # Unhandled cpu type
++         }
 +       } else if (is_linux || is_chromeos) {
 ++        _dir = "linux"
 +         if (current_cpu == "x64") {
@@ -177,30 +82,19 @@ index 0000000000..f3dac69013
 ++          _suffix = "-x86_64"
 +         } else if (current_cpu == "x86") {
 +-          _dir = "i386-unknown-linux-gnu"
-+-        } else if (current_cpu == "arm") {
-+-          _dir = "armv7-unknown-linux-gnueabihf"
 ++          _suffix = "-i386"
++         } else if (current_cpu == "arm") {
++-          _dir = "armv7-unknown-linux-gnueabihf"
+++          _suffix = "-armv7"
 +         } else if (current_cpu == "arm64") {
 +-          _dir = "aarch64-unknown-linux-gnu"
 ++          _suffix = "-aarch64"
-++        } else if (current_cpu == "loong64") {
++         } else if (current_cpu == "loong64") {
++-          _dir = "loongarch64-unknown-linux-gnu"
 ++          _suffix = "-loongarch64"
 +         } else {
 +           assert(false)  # Unhandled cpu type
 +         }
-+diff --git a/build/config/compiler/BUILD.gn b/build/config/compiler/BUILD.gn
-+index ffbd381f00929465e5fd02d75c43e93476dbf0ab..dd0cc90a74964d94da1c57cefae26462feb78055 100644
-+--- a/build/config/compiler/BUILD.gn
-++++ b/build/config/compiler/BUILD.gn
-+@@ -631,7 +631,7 @@ config("compiler") {
-+     # TODO(crbug.com/376278218): This causes segfault on Linux ARM builds.
-+     if (is_linux && !llvm_android_mainline && current_cpu != "arm" &&
-+         default_toolchain != "//build/toolchain/cros:target") {
-+-      cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-++      # cflags += [ "-Wa,--crel,--allow-experimental-crel" ]
-+     }
-+   }
-+ 
 +diff --git a/build/config/loongarch64.gni b/build/config/loongarch64.gni
 +index 9a95ec915137e84fa418a86cfab893f2cb18a291..a9dc9d28dbeb45de1dfe32cf13222be3e82cc043 100644
 +--- a/build/config/loongarch64.gni
@@ -214,29 +108,6 @@ index 0000000000..f3dac69013
 +     loongarch64_use_lasx = false
 +   }
 + }
-+diff --git a/build/config/rust.gni b/build/config/rust.gni
-+index 5b9e3e1e65b8d08f926fdf76133b72795ca34ebb..e71e4083943cb420a0aec087e29c89a110055abc 100644
-+--- a/build/config/rust.gni
-++++ b/build/config/rust.gni
-+@@ -199,6 +199,9 @@ if (is_linux || is_chromeos) {
-+   } else if (current_cpu == "riscv64") {
-+     rust_abi_target = "riscv64gc-unknown-linux-gnu"
-+     cargo_target_abi = ""
-++  } else if (current_cpu == "loong64") {
-++    rust_abi_target = "loongarch64-unknown-linux-gnu"
-++    cargo_target_abi = ""
-+   } else {
-+     # Best guess for other future platforms.
-+     rust_abi_target = current_cpu + "-unknown-linux-gnu"
-+@@ -319,6 +322,8 @@ if (current_cpu == "x86") {
-+   rust_target_arch = "powerpc64"
-+ } else if (current_cpu == "riscv64") {
-+   rust_target_arch = "riscv64"
-++} else if (current_cpu == "loong64") {
-++  rust_target_arch = "loongarch64"
-+ }
-+ 
-+ assert(!toolchain_has_rust || rust_target_arch != "")
 +diff --git a/build/nocompile.gni b/build/nocompile.gni
 +index 2d9991bee00ae27419e97db8e50f810efced189a..bd3fa29bad0a7b69366c88baba622db805d5b8e7 100644
 +--- a/build/nocompile.gni
@@ -257,10 +128,10 @@ index 0000000000..f3dac69013
 +         # No need to generate an object file for nocompile tests.
 +         "-Xclang",
 +diff --git a/build/rust/rust_target.gni b/build/rust/rust_target.gni
-+index 1a2f96337d43619b3facf74ff4f252e6ba3511cc..5450c592fd28f2c0f3bcaf104217b9374be3d4f8 100644
++index f400a023cb1385e85a833ff825825a4d817bbc74..31e4ef2185a3ab535c51848556eee45a7d548e7e 100644
 +--- a/build/rust/rust_target.gni
 ++++ b/build/rust/rust_target.gni
-+@@ -434,6 +434,9 @@ template("rust_target") {
++@@ -439,6 +439,9 @@ template("rust_target") {
 +       if (_rustc_metadata != "") {
 +         rustflags += [ "-Cmetadata=${_rustc_metadata}" ]
 +       }
@@ -270,19 +141,41 @@ index 0000000000..f3dac69013
 +       rustenv = _rustenv
 + 
 +       if (_generate_crate_root) {
-+diff --git a/build/rust/std/BUILD.gn b/build/rust/std/BUILD.gn
-+index 6b996aa1fe3865187d02c017e56c0918bcc9b8f4..68b085be200fa4f116aa709b9157c4d2efdf7d6a 100644
-+--- a/build/rust/std/BUILD.gn
-++++ b/build/rust/std/BUILD.gn
-+@@ -89,7 +89,7 @@ if (toolchain_has_rust) {
-+     # These are no longer present in the Windows toolchain.
-+     stdlib_files += [
-+       "addr2line",
-+-      "adler2",
-++      "adler",
-+       "gimli",
-+       "libc",
-+       "memchr",
++diff --git a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
++index 2adceab85406e28ad66379e5d9d8f301cf3b520d..255b7844cbb141ef98a92bd1c7281520ed7ec061 100644
++--- a/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
+++++ b/chrome/browser/extensions/api/runtime/chrome_runtime_api_delegate.cc
++@@ -346,6 +346,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
++     info->arch = extensions::api::runtime::PlatformArch::kMips;
++   } else if (strcmp(arch, "mips64el") == 0) {
++     info->arch = extensions::api::runtime::PlatformArch::kMips64;
+++  } else if (strcmp(arch, "loongarch64") == 0) {
+++    info->arch = extensions::api::runtime::PlatformArch::kLoongarch64;
++   } else {
++     NOTREACHED();
++   }
++@@ -361,6 +363,8 @@ bool ChromeRuntimeAPIDelegate::GetPlatformInfo(PlatformInfo* info) {
++     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips;
++   } else if (strcmp(nacl_arch, "mips64") == 0) {
++     info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kMips64;
+++  } else if (strcmp(nacl_arch, "loongarch64") == 0) {
+++    info->nacl_arch = extensions::api::runtime::PlatformNaclArch::kLoongarch64;
++   } else {
++     NOTREACHED();
++   }
++diff --git a/components/embedder_support/user_agent_utils.cc b/components/embedder_support/user_agent_utils.cc
++index 47abbd2835a36325b068c997ba8c2029e5885743..86a7904267e4d254ffcf5b918c13d1af2a0147bb 100644
++--- a/components/embedder_support/user_agent_utils.cc
+++++ b/components/embedder_support/user_agent_utils.cc
++@@ -757,6 +757,8 @@ std::string GetCpuArchitecture() {
++               cpu_info.substr(2, 2) == "86") ||
++              base::StartsWith(cpu_info, "x86")) {
++     return "x86";
+++  } else if (base::StartsWith(cpu_info, "loong")) {
+++    return "loongarch";
++   }
++ #elif BUILDFLAG(IS_FUCHSIA)
++   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
 +diff --git a/components/media_router/common/providers/cast/channel/enum_table.h b/components/media_router/common/providers/cast/channel/enum_table.h
 +index fdf8941c32236231cd166be3e9fad94a72473f2c..9340ba285738c0d6b0a5748b786eb21f8d2fc90b 100644
 +--- a/components/media_router/common/providers/cast/channel/enum_table.h
@@ -306,10 +199,10 @@ index 0000000000..f3dac69013
 +       std::initializer_list<Entry> data_;
 +   bool is_sorted_;
 +diff --git a/components/metrics/debug/metrics_internals_utils.cc b/components/metrics/debug/metrics_internals_utils.cc
-+index 69d3709fcd41bd9e4f6847c8b49371d9233fd917..654f7ee0e37c8a786296acc8490ebb2d5d23ff88 100644
++index aa534aac33d6340bd0b0391a08166a059853a234..8f9215cc566dff2c494173fbeeed9f2c043386e6 100644
 +--- a/components/metrics/debug/metrics_internals_utils.cc
 ++++ b/components/metrics/debug/metrics_internals_utils.cc
-+@@ -69,6 +69,8 @@ std::string CpuArchitectureToString(
++@@ -72,6 +72,8 @@ std::string CpuArchitectureToString(
 +       return "arm32";
 +     case variations::Study::TRANSLATED_X86_64:
 +       return "translated_x86_64";
@@ -319,7 +212,7 @@ index 0000000000..f3dac69013
 +   NOTREACHED();
 + }
 +diff --git a/components/variations/proto/study.proto b/components/variations/proto/study.proto
-+index 7ef5eb238e1a286902547bdfe722a11129009741..f2d1708e6c1cfc847fb1987b90e32c219d53761f 100644
++index 0c642d82c72bb28786f39652adfc469c76302e23..f20e3d2611936f72ec7c427045f3845189e45721 100644
 +--- a/components/variations/proto/study.proto
 ++++ b/components/variations/proto/study.proto
 +@@ -262,6 +262,8 @@ message Study {
@@ -332,10 +225,10 @@ index 0000000000..f3dac69013
 + 
 +   // Enum to pass as optional bool.
 +diff --git a/components/variations/service/variations_field_trial_creator_base.cc b/components/variations/service/variations_field_trial_creator_base.cc
-+index e91cfc139cd5bd875b0feedbedc58dcc88a7dc06..a80d868ccb84cf9029b8c743b99d43a20519444b 100644
++index 4d71cf267b23a64e6d7640332829d502ca6e30bb..84641e3378f11289f899678636eacee08fbcb0ae 100644
 +--- a/components/variations/service/variations_field_trial_creator_base.cc
 ++++ b/components/variations/service/variations_field_trial_creator_base.cc
-+@@ -112,6 +112,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
++@@ -114,6 +114,9 @@ Study::CpuArchitecture GetCurrentCpuArchitecture() {
 +   if (process_arch == "ARM") {
 +     return Study::ARM32;
 +   }
@@ -345,32 +238,63 @@ index 0000000000..f3dac69013
 +   if (process_arch == "x86") {
 +     return Study::X86_32;
 +   }
-+diff --git a/content/common/user_agent.cc b/content/common/user_agent.cc
-+index 761d0650f514b71c7a0de32254ac39dc711253e1..cba042949bfd8baf14a263fcd19c3f7338faaad8 100644
-+--- a/content/common/user_agent.cc
-++++ b/content/common/user_agent.cc
-+@@ -179,6 +179,8 @@ std::string GetCpuArchitecture() {
-+               cpu_info.substr(2, 2) == "86") ||
-+              base::StartsWith(cpu_info, "x86")) {
-+     return "x86";
-++  } else if (base::StartsWith(cpu_info, "loong")) {
-++    return "loongarch";
-+   }
-+ #elif BUILDFLAG(IS_FUCHSIA)
-+   std::string cpu_arch = base::SysInfo::ProcessCPUArchitecture();
++diff --git a/extensions/common/api/runtime.json b/extensions/common/api/runtime.json
++index 723850ef9a1b7cb156f36311dd1e46b13991d152..8ea579f6c6481f082705bda4683ae44132bf1995 100644
++--- a/extensions/common/api/runtime.json
+++++ b/extensions/common/api/runtime.json
++@@ -98,7 +98,8 @@
++             {"name": "x86-32", "description": "Specifies the processer architecture as x86-32."},
++             {"name": "x86-64", "description": "Specifies the processer architecture as x86-64."},
++             {"name": "mips", "description": "Specifies the processer architecture as mips."},
++-            {"name": "mips64", "description": "Specifies the processer architecture as mips64."}
+++            {"name": "mips64", "description": "Specifies the processer architecture as mips64."},
+++            {"name": "loongarch64", "description": "Specifies the processer architecture as loongarch64."}
++          ],
++         "description": "The machine's processor architecture."
++       },
++@@ -111,7 +112,8 @@
++           {"name": "x86-32", "description": "Specifies the native client architecture as x86-32."},
++           {"name": "x86-64", "description": "Specifies the native client architecture as x86-64."},
++           {"name": "mips", "description": "Specifies the native client architecture as mips."},
++-          {"name": "mips64", "description": "Specifies the native client architecture as mips64."}
+++          {"name": "mips64", "description": "Specifies the native client architecture as mips64."},
+++          {"name": "loongarch64", "description": "Specifies the native client architecture as loongarch64."}
++         ]
++       },
++       {
++diff --git a/gpu/config/software_rendering_list.json b/gpu/config/software_rendering_list.json
++index 88bd6d59dcf721fda435826802d0d76309c462ed..8102ae67f3b9f2c67be17a6e47bef8cd7650f132 100644
++--- a/gpu/config/software_rendering_list.json
+++++ b/gpu/config/software_rendering_list.json
++@@ -1463,6 +1463,18 @@
++       "features": [
++         "skia_graphite"
++       ]
+++    },
+++    {
+++      "id": 185,
+++      "description": "Corrupted webpage rendering on Loongson LG100/110 graphics with 2D acceleration enabled",
+++      "os": {
+++        "type" : "linux"
+++      },
+++      "vendor_id": "0x0014",
+++      "device_id": [ "0x7a36" ],
+++      "features": [
+++        "accelerated_2d_canvas"
+++      ]
++     }
++   ]
++ }
 +diff --git a/sandbox/features.gni b/sandbox/features.gni
-+index 8434144118b49c33a60fa455153a0e2d498a08a7..189bb35f8e4dadb6565f38a1a2fb70007f3ea680 100644
++index 8c5db2c6fa6cf772a1329be016ba00a82e4d69e4..32a49bea4541e4bb41edb1ae54a405bf3406f044 100644
 +--- a/sandbox/features.gni
 ++++ b/sandbox/features.gni
-+@@ -9,7 +9,7 @@
++@@ -9,4 +9,4 @@
 + use_seccomp_bpf = (is_linux || is_chromeos || is_android) &&
 +                   (current_cpu == "x86" || current_cpu == "x64" ||
 +                    current_cpu == "arm" || current_cpu == "arm64" ||
 +-                   current_cpu == "mipsel" || current_cpu == "mips64el")
 ++                   current_cpu == "mipsel" || current_cpu == "mips64el" || current_cpu == "loong64")
-+ 
-+ # SSBD (Speculative Store Bypass Disable) is a mitigation of Spectre Variant 4.
-+ # As Spectre Variant 4 can be mitigated by site isolation, opt-out SSBD on site
 +diff --git a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h b/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
 +index 1d0590b7dd6ce003c20d45b3b108261182bb841a..92f0a6245ff9640894fb8515de34792b5fccfd35 100644
 +--- a/sandbox/linux/bpf_dsl/linux_syscall_ranges.h
@@ -442,10 +366,10 @@ index 0000000000..f3dac69013
 + #error Unsupported target platform
 + 
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-+index 7bde501115bdf9ad91c8c907a128a6c9e183f7a0..5745a8da7e50538484b489fec35332d1c8ab6872 100644
++index 81877f27f5897672163e66456f13f356c3b4709e..67ffd38dbbc25f744c19ed6b90aff13966584f9c 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/baseline_policy.cc
-+@@ -193,7 +193,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -197,7 +197,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +     return RestrictFcntlCommands();
 + #endif
 + 
@@ -454,7 +378,7 @@ index 0000000000..f3dac69013
 +   // fork() is never used as a system call (clone() is used instead), but we
 +   // have seen it in fallback code on Android.
 +   if (sysno == __NR_fork) {
-+@@ -255,7 +255,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -259,7 +259,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +   }
 + 
 + #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -463,7 +387,7 @@ index 0000000000..f3dac69013
 +   if (sysno == __NR_mmap)
 +     return RestrictMmapFlags();
 + #endif
-+@@ -276,7 +276,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -280,7 +280,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +     return RestrictPrctl();
 + 
 + #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
@@ -472,7 +396,7 @@ index 0000000000..f3dac69013
 +   if (sysno == __NR_socketpair) {
 +     // Only allow AF_UNIX, PF_UNIX. Crash if anything else is seen.
 +     static_assert(AF_UNIX == PF_UNIX,
-+@@ -302,6 +302,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -306,6 +306,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +     return Allow();
 +   }
 + 
@@ -480,7 +404,7 @@ index 0000000000..f3dac69013
 +   // The fstatat syscalls are file system syscalls, which will be denied below
 +   // with fs_denied_errno. However some allowed fstat syscalls are rewritten by
 +   // libc implementations to fstatat syscalls, and we need to rewrite them back.
-+@@ -319,6 +320,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -323,6 +324,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +     return If(mask == STATX_BASIC_STATS, Error(ENOSYS))
 +         .Else(Error(fs_denied_errno));
 +   }
@@ -488,7 +412,7 @@ index 0000000000..f3dac69013
 + 
 +   if (SyscallSets::IsFileSystem(sysno) ||
 +       SyscallSets::IsCurrentDirectory(sysno)) {
-+@@ -366,7 +368,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
++@@ -370,7 +372,7 @@ ResultExpr EvaluateSyscallImpl(int fs_denied_errno,
 +   // Allow creating pipes, but don't allow weird flags to pipe2().
 +   // O_NOTIFICATION_PIPE (== O_EXCL) can be used to create
 +   // "notification pipes", which are rarely used.
@@ -518,28 +442,19 @@ index 0000000000..f3dac69013
 +   CrashSIGSYS_Handler(args, fs_denied_errno);
 + 
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-+index 83b855384d285a328758c3a17769a6551e34c815..9b5a89a58bde4862f85bcaa0a2d25da4a81e10be 100644
++index 4c3bd57aef455e73ecbf90c234929ee5822cf703..af41dfea86eb7d9cef9d8decade971ee3dabaee1 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_parameters_restrictions.cc
-+@@ -37,7 +37,7 @@
++@@ -39,7 +39,7 @@
++ #include "sandbox/linux/system_headers/linux_time.h"
 + 
-+ #if (BUILDFLAG(IS_LINUX) || BUILDFLAG(IS_CHROMEOS_LACROS)) && \
-+     !defined(__arm__) && !defined(__aarch64__) &&             \
++ #if BUILDFLAG(IS_LINUX) && !defined(__arm__) && !defined(__aarch64__) && \
 +-    !defined(PTRACE_GET_THREAD_AREA)
 ++    !defined(PTRACE_GET_THREAD_AREA) && !defined(__loongarch__)
 + // Also include asm/ptrace-abi.h since ptrace.h in older libc (for instance
 + // the one in Ubuntu 16.04 LTS) is missing PTRACE_GET_THREAD_AREA.
 + // asm/ptrace-abi.h doesn't exist on arm32 and PTRACE_GET_THREAD_AREA isn't
-+@@ -346,7 +346,7 @@ ResultExpr RestrictFutex() {
-+       .Cases({FUTEX_WAIT, FUTEX_WAKE, FUTEX_REQUEUE, FUTEX_CMP_REQUEUE,
-+ #if BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
-+               // Enable priority-inheritance operations.
-+-              FUTEX_LOCK_PI, FUTEX_UNLOCK_PI, FUTEX_TRYLOCK_PI,
-++              FUTEX_LOCK_PI, FUTEX_LOCK_PI2, FUTEX_UNLOCK_PI, FUTEX_TRYLOCK_PI,
-+               FUTEX_WAIT_REQUEUE_PI, FUTEX_CMP_REQUEUE_PI,
-+ #endif  // BUILDFLAG(ENABLE_MUTEX_PRIORITY_INHERITANCE)
-+               FUTEX_WAKE_OP, FUTEX_WAIT_BITSET, FUTEX_WAKE_BITSET},
-+@@ -462,8 +462,11 @@ ResultExpr RestrictPtrace() {
++@@ -476,8 +476,11 @@ ResultExpr RestrictPtrace() {
 +   return Switch(request)
 +       .Cases({
 + #if !defined(__aarch64__)
@@ -552,8 +467,17 @@ index 0000000000..f3dac69013
 + #endif
 + #if defined(__arm__)
 +                  PTRACE_GETVFPREGS,
++@@ -521,7 +524,7 @@ SANDBOX_EXPORT bpf_dsl::ResultExpr RestrictSockSendFlags(int sysno) {
++       break;
++ #endif
++ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
++-    defined(__mips__) || defined(__aarch64__)
+++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
++     case __NR_sendto:  // Could specify destination.
++       argIndex = 3;
++       break;
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
-+index 4f56b6e0d10db3f1822abb0d2b0df89fdaad53de..b8f7cabf7e32e5255187b0a3b935e4fe7974c928 100644
++index 8fba4bb88739a1309b8b3f83866709fe0d359c50..9e533b98da186fd2510d071aa28712d37720c804 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.cc
 +@@ -103,7 +103,7 @@ bool SyscallSets::IsUmask(int sysno) {
@@ -709,16 +633,25 @@ index 0000000000..f3dac69013
 +     case __NR_recvfrom:  // Could specify source.
 +     case __NR_recvmsg:   // Could specify source.
 + #endif
-+@@ -623,7 +631,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
++@@ -639,7 +647,7 @@ bool SyscallSets::IsAllowedGeneralIo(int sysno) {
 +     case __NR_send:
 + #endif
-+ #if defined(__x86_64__) || defined(__arm__) || defined(__mips__) || \
-+-    defined(__aarch64__)
-++    defined(__aarch64__) || defined(__loongarch__)
++ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
++-    defined(__mips__) || defined(__aarch64__)
+++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
 +     case __NR_sendmsg:  // Could specify destination.
 +     case __NR_sendto:   // Could specify destination.
 + #endif
-+@@ -672,7 +680,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
++@@ -656,7 +664,7 @@ bool SyscallSets::IsSockSendOneMsg(int sysno) {
++     case __NR_send:
++ #endif
++ #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
++-    defined(__mips__) || defined(__aarch64__)
+++    defined(__mips__) || defined(__aarch64__) || defined(__loongarch__)
++     case __NR_sendmsg:  // Could specify destination.
++     case __NR_sendto:   // Could specify destination.
++ #endif
++@@ -690,7 +698,7 @@ bool SyscallSets::IsSeccomp(int sysno) {
 + bool SyscallSets::IsAllowedBasicScheduler(int sysno) {
 +   switch (sysno) {
 +     case __NR_sched_yield:
@@ -727,7 +660,7 @@ index 0000000000..f3dac69013
 +     case __NR_pause:
 + #endif
 +     case __NR_nanosleep:
-+@@ -756,7 +764,7 @@ bool SyscallSets::IsNuma(int sysno) {
++@@ -774,7 +782,7 @@ bool SyscallSets::IsNuma(int sysno) {
 +     case __NR_getcpu:
 +     case __NR_mbind:
 + #if defined(__i386__) || defined(__x86_64__) || defined(__mips__) || \
@@ -736,7 +669,7 @@ index 0000000000..f3dac69013
 +     case __NR_migrate_pages:
 + #endif
 +     case __NR_move_pages:
-+@@ -804,7 +812,9 @@ bool SyscallSets::IsGlobalProcessEnvironment(int sysno) {
++@@ -822,7 +830,9 @@ bool SyscallSets::IsGlobalProcessEnvironment(int sysno) {
 +     case __NR_getrusage:
 +     case __NR_personality:  // Can change its personality as well.
 +     case __NR_prlimit64:    // Like setrlimit / getrlimit.
@@ -746,7 +679,7 @@ index 0000000000..f3dac69013
 +     case __NR_times:
 +       return true;
 +     default:
-+@@ -826,7 +836,7 @@ bool SyscallSets::IsDebug(int sysno) {
++@@ -844,7 +854,7 @@ bool SyscallSets::IsDebug(int sysno) {
 + 
 + bool SyscallSets::IsGlobalSystemStatus(int sysno) {
 +   switch (sysno) {
@@ -755,7 +688,7 @@ index 0000000000..f3dac69013
 +     case __NR__sysctl:
 +     case __NR_sysfs:
 + #endif
-+@@ -844,7 +854,7 @@ bool SyscallSets::IsGlobalSystemStatus(int sysno) {
++@@ -862,7 +872,7 @@ bool SyscallSets::IsGlobalSystemStatus(int sysno) {
 + 
 + bool SyscallSets::IsEventFd(int sysno) {
 +   switch (sysno) {
@@ -764,7 +697,7 @@ index 0000000000..f3dac69013
 +     case __NR_eventfd:
 + #endif
 +     case __NR_eventfd2:
-+@@ -896,7 +906,7 @@ bool SyscallSets::IsKeyManagement(int sysno) {
++@@ -914,7 +924,7 @@ bool SyscallSets::IsKeyManagement(int sysno) {
 + }
 + 
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -773,7 +706,7 @@ index 0000000000..f3dac69013
 + bool SyscallSets::IsSystemVSemaphores(int sysno) {
 +   switch (sysno) {
 +     case __NR_semctl:
-+@@ -916,7 +926,7 @@ bool SyscallSets::IsSystemVSemaphores(int sysno) {
++@@ -934,7 +944,7 @@ bool SyscallSets::IsSystemVSemaphores(int sysno) {
 + 
 + #if defined(__i386__) || defined(__x86_64__) || defined(__arm__) || \
 +     defined(__aarch64__) ||                                         \
@@ -782,7 +715,7 @@ index 0000000000..f3dac69013
 + // These give a lot of ambient authority and bypass the setuid sandbox.
 + bool SyscallSets::IsSystemVSharedMemory(int sysno) {
 +   switch (sysno) {
-+@@ -932,7 +942,7 @@ bool SyscallSets::IsSystemVSharedMemory(int sysno) {
++@@ -950,7 +960,7 @@ bool SyscallSets::IsSystemVSharedMemory(int sysno) {
 + #endif
 + 
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -791,7 +724,7 @@ index 0000000000..f3dac69013
 + bool SyscallSets::IsSystemVMessageQueue(int sysno) {
 +   switch (sysno) {
 +     case __NR_msgctl:
-+@@ -963,7 +973,7 @@ bool SyscallSets::IsSystemVIpc(int sysno) {
++@@ -981,7 +991,7 @@ bool SyscallSets::IsSystemVIpc(int sysno) {
 + 
 + bool SyscallSets::IsAnySystemV(int sysno) {
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -800,7 +733,7 @@ index 0000000000..f3dac69013
 +   return IsSystemVMessageQueue(sysno) || IsSystemVSemaphores(sysno) ||
 +          IsSystemVSharedMemory(sysno);
 + #elif defined(__i386__) || \
-+@@ -1000,7 +1010,7 @@ bool SyscallSets::IsAdvancedScheduler(int sysno) {
++@@ -1018,7 +1028,7 @@ bool SyscallSets::IsAdvancedScheduler(int sysno) {
 + bool SyscallSets::IsInotify(int sysno) {
 +   switch (sysno) {
 +     case __NR_inotify_add_watch:
@@ -809,7 +742,7 @@ index 0000000000..f3dac69013
 +     case __NR_inotify_init:
 + #endif
 +     case __NR_inotify_init1:
-+@@ -1135,7 +1145,7 @@ bool SyscallSets::IsMisc(int sysno) {
++@@ -1153,7 +1163,7 @@ bool SyscallSets::IsMisc(int sysno) {
 + #if defined(__x86_64__)
 +     case __NR_tuxcall:
 + #endif
@@ -819,10 +752,10 @@ index 0000000000..f3dac69013
 + #endif
 +       return true;
 +diff --git a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
-+index 9be7b03ec4377efa7ead49d190a91a194c45494e..39522700467a64527e06e2c3afcb755e384e9db3 100644
++index fa49942cb8a9e91e2190b8ce5f42546bd923d0d9..b44034f803f427f6003624bfcb04d8b61234e794 100644
 +--- a/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
 ++++ b/sandbox/linux/seccomp-bpf-helpers/syscall_sets.h
-+@@ -79,18 +79,18 @@ class SANDBOX_EXPORT SyscallSets {
++@@ -80,18 +80,18 @@ class SANDBOX_EXPORT SyscallSets {
 +   static bool IsAsyncIo(int sysno);
 +   static bool IsKeyManagement(int sysno);
 + #if defined(__x86_64__) || defined(__arm__) || defined(__aarch64__) || \
@@ -845,10 +778,10 @@ index 0000000000..f3dac69013
 + #endif
 + 
 +diff --git a/sandbox/linux/seccomp-bpf/syscall.cc b/sandbox/linux/seccomp-bpf/syscall.cc
-+index 6b772c563c7fd4401ba1b0dd549205c2116f2df4..7e1a2277b319d049c4b289ee6872b3cb1f100e20 100644
++index b0cdc71b8f9721c2ba944e53f7bfa4b9370ddb77..5eb6307e290312b08d8dfd91b3d3627c5132b8b0 100644
 +--- a/sandbox/linux/seccomp-bpf/syscall.cc
 ++++ b/sandbox/linux/seccomp-bpf/syscall.cc
-+@@ -23,7 +23,7 @@ namespace sandbox {
++@@ -19,7 +19,7 @@ namespace sandbox {
 + namespace {
 + 
 + #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
@@ -857,7 +790,7 @@ index 0000000000..f3dac69013
 + // Number that's not currently used by any Linux kernel ABIs.
 + const int kInvalidSyscallNumber = 0x351d3;
 + #else
-+@@ -313,6 +313,27 @@ asm(// We need to be able to tell the kernel exactly where we made a
++@@ -309,6 +309,27 @@ asm(// We need to be able to tell the kernel exactly where we made a
 +     "2:ret\n"
 +     ".cfi_endproc\n"
 +     ".size SyscallAsm, .-SyscallAsm\n"
@@ -885,7 +818,7 @@ index 0000000000..f3dac69013
 + #endif
 +     );  // asm
 + 
-+@@ -430,6 +451,18 @@ intptr_t Syscall::Call(int nr,
++@@ -426,6 +447,18 @@ intptr_t Syscall::Call(int nr,
 +     ret = inout;
 +   }
 + 
@@ -905,10 +838,10 @@ index 0000000000..f3dac69013
 + #error "Unimplemented architecture"
 + #endif
 +diff --git a/sandbox/linux/services/credentials.cc b/sandbox/linux/services/credentials.cc
-+index 1dc91d70aa39e0f668c10360f4c3abf01e2f075f..806f2ea6e6a3cd1938e17b001db0b77d62ca2d5f 100644
++index 033f22ab2ac3859eb4907498156868674e1cbf47..d7a0a6a660c14ca037780f72cef95729cfb7e6e6 100644
 +--- a/sandbox/linux/services/credentials.cc
 ++++ b/sandbox/linux/services/credentials.cc
-+@@ -87,7 +87,7 @@ bool ChrootToSafeEmptyDir() {
++@@ -90,7 +90,7 @@ bool ChrootToSafeEmptyDir() {
 +   alignas(16) char stack_buf[PTHREAD_STACK_MIN_CONST];
 + 
 + #if defined(ARCH_CPU_X86_FAMILY) || defined(ARCH_CPU_ARM_FAMILY) || \
@@ -918,7 +851,7 @@ index 0000000000..f3dac69013
 +   void* stack = stack_buf + sizeof(stack_buf);
 + #else
 +diff --git a/sandbox/linux/services/syscall_wrappers.cc b/sandbox/linux/services/syscall_wrappers.cc
-+index df4a991be825abaf1a732544683d5c99bf7d6b56..e0105db6a8a3ff893a0c32ae62e2d24ba579b5c6 100644
++index 4d12e51c422b66360f122cd70dbf2ecd411dc048..26b50374e82e6191787cc1d5c813f8c8f64abe3c 100644
 +--- a/sandbox/linux/services/syscall_wrappers.cc
 ++++ b/sandbox/linux/services/syscall_wrappers.cc
 +@@ -10,6 +10,7 @@
@@ -1008,7 +941,7 @@ index 0000000000..f3dac69013
 + #else
 +   res = syscall(__NR_lstat, path, stat_buf);
 +diff --git a/sandbox/linux/services/syscall_wrappers.h b/sandbox/linux/services/syscall_wrappers.h
-+index a6b22eb5387eb56b7cd524daa1c985483a6f061a..824be9def67e3941f8736b14eb4b133994d462c3 100644
++index d591dbce44dd19cf332b35569d720c80d62324d5..c599979c4ce7d1e7cf229329bf5b4b695cb15087 100644
 +--- a/sandbox/linux/services/syscall_wrappers.h
 ++++ b/sandbox/linux/services/syscall_wrappers.h
 +@@ -19,6 +19,7 @@ struct cap_hdr;
@@ -1128,10 +1061,10 @@ index 0000000000..f3dac69013
 +       if (!message->ReadString(&requested_filename)) {
 +         return false;
 +diff --git a/sandbox/linux/syscall_broker/broker_process.cc b/sandbox/linux/syscall_broker/broker_process.cc
-+index 049f72232e4790cec1b7e6dc2e3dec406b1681cd..bd544528363e118750d10bfe3943e84e21aa4bb3 100644
++index 9845f875091c6d6c681b8763ed0a38947a7e2f80..ae8448b047df5156ce9d427a7f70fcbca9807812 100644
 +--- a/sandbox/linux/syscall_broker/broker_process.cc
 ++++ b/sandbox/linux/syscall_broker/broker_process.cc
-+@@ -121,44 +121,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -120,44 +120,46 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 +   // and are default disabled in Android. So, we should refuse to broker them
 +   // to be consistent with the platform's restrictions.
 +   switch (sysno) {
@@ -1185,7 +1118,7 @@ index 0000000000..f3dac69013
 +     case __NR_stat:
 +     case __NR_lstat:
 + #endif
-+@@ -168,6 +170,9 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -167,6 +169,9 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 + #if defined(__NR_fstatat64)
 +     case __NR_fstatat64:
 + #endif
@@ -1195,7 +1128,7 @@ index 0000000000..f3dac69013
 + #if defined(__x86_64__) || defined(__aarch64__)
 +     case __NR_newfstatat:
 + #endif
-+@@ -183,7 +188,7 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
++@@ -182,7 +187,7 @@ bool BrokerProcess::IsSyscallBrokerable(int sysno, bool fast_check) const {
 +       return !fast_check || policy_->allowed_command_set.test(COMMAND_STAT);
 + #endif
 + 
@@ -1205,10 +1138,19 @@ index 0000000000..f3dac69013
 +       return !fast_check || policy_->allowed_command_set.test(COMMAND_UNLINK);
 + #endif
 +diff --git a/sandbox/linux/syscall_broker/syscall_dispatcher.cc b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-+index a0de94badee68269516ab3800dd238611f9db47d..1c5c354a3390d3592eae80befea20b2274f4d1dc 100644
++index a2f91bff3fda04c30aa73dd8351b7eac18625eb6..13d4b3e4d200eb93a566b28f68b9c3468a371a9c 100644
 +--- a/sandbox/linux/syscall_broker/syscall_dispatcher.cc
 ++++ b/sandbox/linux/syscall_broker/syscall_dispatcher.cc
-+@@ -174,6 +174,19 @@ int SyscallDispatcher::DispatchSyscall(const arch_seccomp_data& args) {
++@@ -27,6 +27,8 @@ int SyscallDispatcher::DefaultStatForTesting(const char* pathname,
++   return Stat64(pathname, follow_links, sb);
++ #elif defined(__NR_newfstatat)
++   return Stat(pathname, follow_links, sb);
+++#elif defined(__NR_statx)
+++  return Statx(pathname, follow_links, sb);
++ #endif
++ }
++ 
++@@ -170,6 +172,19 @@ int SyscallDispatcher::DispatchSyscall(const arch_seccomp_data& args) {
 +       return Stat64(reinterpret_cast<const char*>(args.args[0]), true,
 +                     reinterpret_cast<struct kernel_stat64*>(args.args[1]));
 + #endif
@@ -2608,10 +2550,10 @@ index 0000000000..f3dac69013
 +     case __NR_stat:
 + #endif
 +diff --git a/sandbox/policy/linux/bpf_gpu_policy_linux.cc b/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-+index 35ccbb7a7f82b13164a2e30a04a35a5c0ed76138..94023dc1376e84e071179c503e06efcb64cd5ab1 100644
++index 793545da95f7f21d2d2edae668c9af97752f559b..d3d318107145690eafb99477cca3ddd3c9ed0cbc 100644
 +--- a/sandbox/policy/linux/bpf_gpu_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_gpu_policy_linux.cc
-+@@ -73,7 +73,7 @@ ResultExpr GpuProcessPolicy::EvaluateSyscall(int sysno) const {
++@@ -72,7 +72,7 @@ ResultExpr GpuProcessPolicy::EvaluateSyscall(int sysno) const {
 +     (defined(ARCH_CPU_MIPS_FAMILY) && defined(ARCH_CPU_32_BITS))
 +     case __NR_ftruncate64:
 + #endif
@@ -2621,7 +2563,7 @@ index 0000000000..f3dac69013
 + #endif
 +     case __NR_getdents64:
 +diff --git a/sandbox/policy/linux/bpf_network_policy_linux.cc b/sandbox/policy/linux/bpf_network_policy_linux.cc
-+index c2ee245dd208d4628ae4bf3e0dda8287421c8803..04584d4243019ec02b4bb1b7523f3c93cb3eb1c7 100644
++index b6240695269724ce1fbd0a4546293eee9032ad8a..218b162989cb51265f89379384685a68e6c5a0ae 100644
 +--- a/sandbox/policy/linux/bpf_network_policy_linux.cc
 ++++ b/sandbox/policy/linux/bpf_network_policy_linux.cc
 +@@ -260,7 +260,7 @@ ResultExpr NetworkProcessPolicy::EvaluateSyscall(int sysno) const {
@@ -2647,10 +2589,10 @@ index 0000000000..f3dac69013
 +               Allow())
 +           // Sending ENOSYS tells the Futex backend to use another approach if
 +diff --git a/sandbox/policy/linux/sandbox_linux.cc b/sandbox/policy/linux/sandbox_linux.cc
-+index 6249a61685332eab7cb56fd09dc0a6a52cd86c4a..71fdd83ada5f87112acf6c3979b12067b8f33aeb 100644
++index ac0c77b44f065b6def75152284764c6e6ace2ca3..5f000f97c2d9099966f36c7dc13a7f9c74d586ad 100644
 +--- a/sandbox/policy/linux/sandbox_linux.cc
 ++++ b/sandbox/policy/linux/sandbox_linux.cc
-+@@ -584,6 +584,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
++@@ -579,6 +579,7 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
 +   const bpf_dsl::ResultExpr handle_via_broker =
 +       bpf_dsl::Trap(syscall_broker::BrokerClient::SIGSYS_Handler,
 +                     broker_process_->GetBrokerClientSignalBased());
@@ -2658,7 +2600,7 @@ index 0000000000..f3dac69013
 +   if (sysno == __NR_fstatat_default) {
 +     // This may be an fstatat(fd, "", stat_buf, AT_EMPTY_PATH), which should be
 +     // rewritten as fstat(fd, stat_buf). This should be consistent with how the
-+@@ -594,6 +595,18 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
++@@ -589,6 +590,18 @@ bpf_dsl::ResultExpr SandboxLinux::HandleViaBroker(int sysno) const {
 +     return bpf_dsl::If((flags & AT_EMPTY_PATH) == AT_EMPTY_PATH,
 +                        RewriteFstatatSIGSYS(BPFBasePolicy::GetFSDeniedErrno()))
 +         .Else(handle_via_broker);
@@ -3742,18 +3684,198 @@ index 0000000000..f3dac69013
 ++
 ++#define TRIM_DSP_FUNCTIONS 1
 ++
++diff --git a/third_party/xnnpack/BUILD.gn b/third_party/xnnpack/BUILD.gn
++index 152366ce9c74e1cf88847b96b55bdbdfdaab817f..02a190b9cfb7f1f4bba1cafa33849d01d5b1fb0d 100644
++--- a/third_party/xnnpack/BUILD.gn
+++++ b/third_party/xnnpack/BUILD.gn
++@@ -1494,6 +1494,16 @@ if (current_cpu == "x64" || current_cpu == "x86") {
++     ":xx-pad_arm64_standalone",
++     ":xx-transposev_arm64_standalone",
++   ]
+++} else if (current_cpu == "loong64") {
+++  xnnpack_deps = [
+++    ":configs_loong64",
+++    ":enums_loong64",
+++  ]
+++
+++  xnnpack_standalone_deps = [
+++    ":configs_loong64_standalone",
+++    ":enums_loong64_standalone",
+++  ]
++ } else {
++   xnnpack_deps = []
++   xnnpack_standalone_deps = []
++@@ -42052,3 +42062,157 @@ if (current_cpu == "arm64") {
++     }
++   }
++ }
+++
+++if (current_cpu == "loong64") {
+++  source_set("configs_loong64") {
+++    cflags = []
+++
+++    sources = [
+++      "src/include/xnnpack.h",
+++      "src/src/configs/argmaxpool-config.c",
+++      "src/src/configs/avgpool-config.c",
+++      "src/src/configs/binary-elementwise-config.c",
+++      "src/src/configs/cmul-config.c",
+++      "src/src/configs/conv-hwc2chw-config.c",
+++      "src/src/configs/dwconv-config.c",
+++      "src/src/configs/dwconv2d-chw-config.c",
+++      "src/src/configs/gemm-config.c",
+++      "src/src/configs/hardware-config.c",
+++      "src/src/configs/ibilinear-chw-config.c",
+++      "src/src/configs/ibilinear-config.c",
+++      "src/src/configs/lut32norm-config.c",
+++      "src/src/configs/maxpool-config.c",
+++      "src/src/configs/pack-lh-config.c",
+++      "src/src/configs/raddstoreexpminusmax-config.c",
+++      "src/src/configs/reduce-config.c",
+++      "src/src/configs/spmm-config.c",
+++      "src/src/configs/transpose-config.c",
+++      "src/src/configs/unary-elementwise-config.c",
+++      "src/src/configs/unpool-config.c",
+++      "src/src/configs/vmulcaddc-config.c",
+++      "src/src/configs/x8-lut-config.c",
+++      "src/src/configs/xx-fill-config.c",
+++      "src/src/configs/xx-pad-config.c",
+++    ]
+++
+++    configs -= [ "//build/config/compiler:chromium_code" ]
+++    configs += [ "//build/config/compiler:no_chromium_code" ]
+++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+++
+++    deps = [
+++      "//third_party/cpuinfo",
+++      "//third_party/fp16",
+++      "//third_party/fxdiv",
+++      "//third_party/pthreadpool",
+++    ]
+++
+++    public_configs = [ ":xnnpack_config" ]
+++  }
+++
+++  # This is a target that cannot depend on //base.
+++  source_set("configs_loong64_standalone") {
+++    cflags = []
+++
+++    sources = [
+++      "src/include/xnnpack.h",
+++      "src/src/configs/argmaxpool-config.c",
+++      "src/src/configs/avgpool-config.c",
+++      "src/src/configs/binary-elementwise-config.c",
+++      "src/src/configs/cmul-config.c",
+++      "src/src/configs/conv-hwc2chw-config.c",
+++      "src/src/configs/dwconv-config.c",
+++      "src/src/configs/dwconv2d-chw-config.c",
+++      "src/src/configs/gemm-config.c",
+++      "src/src/configs/hardware-config.c",
+++      "src/src/configs/ibilinear-chw-config.c",
+++      "src/src/configs/ibilinear-config.c",
+++      "src/src/configs/lut32norm-config.c",
+++      "src/src/configs/maxpool-config.c",
+++      "src/src/configs/pack-lh-config.c",
+++      "src/src/configs/raddstoreexpminusmax-config.c",
+++      "src/src/configs/reduce-config.c",
+++      "src/src/configs/spmm-config.c",
+++      "src/src/configs/transpose-config.c",
+++      "src/src/configs/unary-elementwise-config.c",
+++      "src/src/configs/unpool-config.c",
+++      "src/src/configs/vmulcaddc-config.c",
+++      "src/src/configs/x8-lut-config.c",
+++      "src/src/configs/xx-fill-config.c",
+++      "src/src/configs/xx-pad-config.c",
+++    ]
+++
+++    configs -= [ "//build/config/compiler:chromium_code" ]
+++    configs += [ "//build/config/compiler:no_chromium_code" ]
+++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+++
+++    deps = [
+++      "//third_party/cpuinfo",
+++      "//third_party/fp16",
+++      "//third_party/fxdiv",
+++      "//third_party/pthreadpool:pthreadpool_standalone",
+++    ]
+++
+++    public_configs = [ ":xnnpack_config" ]
+++
+++    if (!(is_android && use_order_profiling)) {
+++      assert_no_deps = [ "//base" ]
+++    }
+++  }
+++
+++  source_set("enums_loong64") {
+++    cflags = []
+++
+++    sources = [
+++      "src/include/xnnpack.h",
+++      "src/src/enums/allocation-type.c",
+++      "src/src/enums/datatype-strings.c",
+++      "src/src/enums/microkernel-type.c",
+++      "src/src/enums/node-type.c",
+++      "src/src/enums/operator-type.c",
+++    ]
+++
+++    configs -= [ "//build/config/compiler:chromium_code" ]
+++    configs += [ "//build/config/compiler:no_chromium_code" ]
+++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+++
+++    deps = [
+++      "//third_party/cpuinfo",
+++      "//third_party/fp16",
+++      "//third_party/fxdiv",
+++      "//third_party/pthreadpool",
+++    ]
+++
+++    public_configs = [ ":xnnpack_config" ]
+++  }
+++
+++  # This is a target that cannot depend on //base.
+++  source_set("enums_loong64_standalone") {
+++    cflags = []
+++
+++    sources = [
+++      "src/include/xnnpack.h",
+++      "src/src/enums/allocation-type.c",
+++      "src/src/enums/datatype-strings.c",
+++      "src/src/enums/microkernel-type.c",
+++      "src/src/enums/node-type.c",
+++      "src/src/enums/operator-type.c",
+++    ]
+++
+++    configs -= [ "//build/config/compiler:chromium_code" ]
+++    configs += [ "//build/config/compiler:no_chromium_code" ]
+++    configs += [ "//build/config/sanitizers:cfi_icall_generalize_pointers" ]
+++
+++    deps = [
+++      "//third_party/cpuinfo",
+++      "//third_party/fp16",
+++      "//third_party/fxdiv",
+++      "//third_party/pthreadpool:pthreadpool_standalone",
+++    ]
+++
+++    public_configs = [ ":xnnpack_config" ]
+++
+++    if (!(is_android && use_order_profiling)) {
+++      assert_no_deps = [ "//base" ]
+++    }
+++  }
+++}
 diff --git a/patches/config.json b/patches/config.json
-index 8d297c0fd3..1db1fde541 100644
+index 8d297c0fd3..566515a8b1 100644
 --- a/patches/config.json
 +++ b/patches/config.json
-@@ -12,5 +12,7 @@
+@@ -12,5 +12,8 @@
    { "patch_dir": "src/electron/patches/ReactiveObjC", "repo": "src/third_party/squirrel.mac/vendor/ReactiveObjC" },
    { "patch_dir": "src/electron/patches/webrtc", "repo": "src/third_party/webrtc" },
    { "patch_dir": "src/electron/patches/reclient-configs", "repo": "src/third_party/engflow-reclient-configs" },
 -  { "patch_dir": "src/electron/patches/sqlite", "repo": "src/third_party/sqlite/src" }
 +  { "patch_dir": "src/electron/patches/sqlite", "repo": "src/third_party/sqlite/src" },
 +  { "patch_dir": "src/electron/patches/skia", "repo": "src/third_party/skia" },
-+  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" }
++  { "patch_dir": "src/electron/patches/swiftshader", "repo": "src/third_party/swiftshader" },
++  { "patch_dir": "src/electron/patches/xnnpack", "repo": "src/third_party/xnnpack/src" }
  ]
 diff --git a/patches/devtools_frontend/.patches b/patches/devtools_frontend/.patches
 index 3cf8d9fc4a..55569bfe8e 100644
@@ -3764,19 +3886,19 @@ index 3cf8d9fc4a..55569bfe8e 100644
 +loong64_support.patch
 diff --git a/patches/devtools_frontend/loong64_support.patch b/patches/devtools_frontend/loong64_support.patch
 new file mode 100644
-index 0000000000..52c5876355
+index 0000000000..7aa8d55e75
 --- /dev/null
 +++ b/patches/devtools_frontend/loong64_support.patch
 @@ -0,0 +1,20 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:35:22 +0000
++Date: Sun, 3 Aug 2025 08:42:48 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/scripts/build/rollup.config.mjs b/scripts/build/rollup.config.mjs
-+index 3cf10ad38cf8a4e9fb0abd047839b5cfe4da4fe6..71e4f898567d406d2343cd51b5b2ded86a03388a 100644
++index b85411dc7139360630d736b6c64148e28b5a7983..ac54145c3b623959d2e0078741a379c2f886a110 100644
 +--- a/scripts/build/rollup.config.mjs
 ++++ b/scripts/build/rollup.config.mjs
 +@@ -19,7 +19,7 @@ export default commandLineArgs => ({
@@ -3797,13 +3919,13 @@ index 31dc878c5b..f96d1acc1d 100644
 +loong64_support.patch
 diff --git a/patches/ffmpeg/loong64_support.patch b/patches/ffmpeg/loong64_support.patch
 new file mode 100644
-index 0000000000..e8894b573f
+index 0000000000..c10f17f63a
 --- /dev/null
 +++ b/patches/ffmpeg/loong64_support.patch
 @@ -0,0 +1,6238 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:36:02 +0000
++Date: Sun, 3 Aug 2025 08:42:50 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
@@ -10008,18 +10130,18 @@ index 0000000000..e8894b573f
 ++#define FFMPEG_VERSION "n5.0.1"
 ++#endif /* AVUTIL_FFVERSION_H */
 +diff --git a/ffmpeg_generated.gni b/ffmpeg_generated.gni
-+index a392f50cbd08d41f383585e02e855497b2d31e9c..4836d5686adf15e9aa2ee8161d709665ec406b58 100644
++index 651c4fe81913d94d0b275f64298a7156d73c2fc9..40b438d28374f03916347abb31580b508aeddc35 100644
 +--- a/ffmpeg_generated.gni
 ++++ b/ffmpeg_generated.gni
-+@@ -253,6 +253,7 @@ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
-+ 
-+ if ((current_cpu == "arm64" && ffmpeg_branding == "Chrome") ||
++@@ -258,6 +258,7 @@ if (((current_cpu == "arm64" || current_cpu == "arm64e") &&
++ if (((current_cpu == "arm64" || current_cpu == "arm64e") &&
++      ffmpeg_branding == "Chrome") ||
 +     (current_cpu == "x64" && ffmpeg_branding == "Chrome") ||
 ++    (current_cpu == "loong64" && ffmpeg_branding == "Chrome") ||
 +     (is_android && current_cpu == "arm" && arm_use_neon &&
 +      ffmpeg_branding == "Chrome") ||
 +     (is_android && current_cpu == "x86" && ffmpeg_branding == "Chrome") ||
-+@@ -382,6 +383,19 @@ if (current_cpu == "x64" || (is_android && current_cpu == "x86") ||
++@@ -390,6 +391,19 @@ if (current_cpu == "arm64" || current_cpu == "arm64e") {
 +   ]
 + }
 + 
@@ -10048,22 +10170,22 @@ index 0000000000..ea62e0c740
 +loong64_support.patch
 diff --git a/patches/skia/loong64_support.patch b/patches/skia/loong64_support.patch
 new file mode 100644
-index 0000000000..ec237c0f99
+index 0000000000..dabed4669a
 --- /dev/null
 +++ b/patches/skia/loong64_support.patch
 @@ -0,0 +1,23 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:44:09 +0000
++Date: Sun, 3 Aug 2025 08:43:01 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
 +
 +diff --git a/src/opts/SkOpts_SetTarget.h b/src/opts/SkOpts_SetTarget.h
-+index 525cfcb862ae96bf8573d00b67dc9e5e23c10d22..5f72a27db99d2b1e1ef6f7c54198f7bbfb9380e3 100644
++index f2debc0444cb8f5b80a0e99a2214bceaab3960c1..48c0b9de83d082e265ffb4ed433bf8b1b72dad5e 100644
 +--- a/src/opts/SkOpts_SetTarget.h
 ++++ b/src/opts/SkOpts_SetTarget.h
-+@@ -135,9 +135,10 @@
++@@ -136,9 +136,10 @@
 +         #define SK_OPTS_NS lasx
 +         // The intrinsic from lasxintrin.h is wrapped by the __loongarch_asx macro, so we need to define it.
 +         #define __loongarch_asx
@@ -10084,13 +10206,13 @@ index 0000000000..ea62e0c740
 +loong64_support.patch
 diff --git a/patches/swiftshader/loong64_support.patch b/patches/swiftshader/loong64_support.patch
 new file mode 100644
-index 0000000000..7c2926c327
+index 0000000000..558d32bccf
 --- /dev/null
 +++ b/patches/swiftshader/loong64_support.patch
-@@ -0,0 +1,301 @@
+@@ -0,0 +1,273 @@
 +From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 +From: darkyzhou <me@zqy.io>
-+Date: Sat, 24 May 2025 07:45:03 +0000
++Date: Sun, 3 Aug 2025 08:43:03 +0000
 +Subject: loong64 support
 +
 +Co-authored-by: Jiajie Chen <c@jia.je>
@@ -10112,18 +10234,6 @@ index 0000000000..7c2926c327
 + 
 +     deps = [
 +       ":swiftshader_reactor_base",
-+diff --git a/src/Vulkan/BUILD.gn b/src/Vulkan/BUILD.gn
-+index 852068cade0a9d3f400bd18cce29e909193fc8d6..fb6618f9d3a9c983a397196c726823f2c400a72d 100644
-+--- a/src/Vulkan/BUILD.gn
-++++ b/src/Vulkan/BUILD.gn
-+@@ -229,6 +229,7 @@ swiftshader_shared_library("swiftshader_libvulkan") {
-+   }
-+ 
-+   deps = [ ":_swiftshader_libvulkan" ]
-++  libs = [ "m" ]
-+ }
-+ 
-+ swiftshader_static_library("swiftshader_libvulkan_static") {
 +diff --git a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def b/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
 +index 2af3e28e82fe48cb804afb1da775524b49f086d9..521454bdff8cc87d2521e08a2d87c5d74257a14f 100644
 +--- a/third_party/llvm-16.0/configs/linux/include/llvm/Config/AsmParsers.def
@@ -10265,22 +10375,6 @@ index 0000000000..7c2926c327
 + #else
 + #error "unknown architecture"
 + #endif
-+diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h b/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
-+index a8c45785c461d9881a724e056179b11723148cf0..4f02e81dba151e01f48f3f7eacfa264f7143d6b7 100644
-+--- a/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
-++++ b/third_party/llvm-16.0/llvm/include/llvm/Support/AlignOf.h
-+@@ -20,7 +20,10 @@ namespace llvm {
-+ /// A suitably aligned and sized character array member which can hold elements
-+ /// of any type.
-+ template <typename T, typename... Ts> struct AlignedCharArrayUnion {
-+-  alignas(Ts...) char buffer[std::max({sizeof(Ts)...})];
-++  // Work around "internal compiler error: Segmentation fault" with GCC 7.5,
-++  // apparently caused by alignas(Ts...).
-++  static constexpr std::size_t Align = std::max({alignof(T), alignof(Ts)...});
-++  alignas(Align) char buffer[std::max({sizeof(T), sizeof(Ts)...})];
-+ };
-+ 
-+ } // end namespace llvm
 +diff --git a/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h b/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
 +index 8a984db5e681c3e513fbd0b929f64efe2ef4918c..a769f9ed63685a2badd017a50e4bc9edb1d970b5 100644
 +--- a/third_party/llvm-16.0/llvm/include/llvm/Support/Error.h
@@ -10389,3 +10483,55 @@ index 0000000000..7c2926c327
 + #include "llvm/Support/Alignment.h"
 + #include "llvm/Support/Compiler.h"
 + #include "llvm/Support/MathExtras.h"
+diff --git a/patches/xnnpack/.patches b/patches/xnnpack/.patches
+new file mode 100644
+index 0000000000..ea62e0c740
+--- /dev/null
++++ b/patches/xnnpack/.patches
+@@ -0,0 +1 @@
++loong64_support.patch
+diff --git a/patches/xnnpack/loong64_support.patch b/patches/xnnpack/loong64_support.patch
+new file mode 100644
+index 0000000000..46ea8e9278
+--- /dev/null
++++ b/patches/xnnpack/loong64_support.patch
+@@ -0,0 +1,39 @@
++From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
++From: darkyzhou <me@zqy.io>
++Date: Sun, 3 Aug 2025 08:43:03 +0000
++Subject: loong64 support
++
++Co-authored-by: Jiajie Chen <c@jia.je>
++
++diff --git a/src/xnnpack/common.h b/src/xnnpack/common.h
++index f2dab73303..893028521d 100644
++--- a/src/xnnpack/common.h
+++++ b/src/xnnpack/common.h
++@@ -79,6 +79,12 @@
++ #define XNN_ARCH_WASMRELAXEDSIMD 0
++ #endif
++ 
+++#if defined(__loongarch__)
+++#define XNN_ARCH_LOONGARCH 1
+++#else
+++#define XNN_ARCH_LOONGARCH 0
+++#endif
+++
++ // Define platform identification macros
++ 
++ #if defined(__ANDROID__)
++diff --git a/src/xnnpack/hardware-config.h b/src/xnnpack/hardware-config.h
++index d81f040f33..6057db2a75 100644
++--- a/src/xnnpack/hardware-config.h
+++++ b/src/xnnpack/hardware-config.h
++@@ -77,6 +77,10 @@ enum xnn_arch_flags {
++ #if XNN_ARCH_HEXAGON
++   xnn_arch_hvx = 1 << 0,
++ #endif  // XNN_ARCH_HEXAGON
+++#if XNN_ARCH_LOONGARCH
+++  xnn_arch_lsx = 1 << 0,
+++  xnn_arch_lasx = 1 << 1,
+++#endif  // XNN_ARCH_LOONGARCH
++ };
++ 
++ struct xnn_hardware_config {

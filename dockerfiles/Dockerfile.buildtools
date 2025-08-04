@@ -14,7 +14,7 @@ RUN apt-get update && \
         nano \
         fish
 
-RUN curl --silent --location https://deb.nodesource.com/setup_20.x | bash - && \
+RUN curl --silent --location https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get update && \
     apt-get install -y nodejs && \
     npm install -g npm@latest node-gyp yarn

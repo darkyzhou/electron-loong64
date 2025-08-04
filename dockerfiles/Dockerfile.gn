@@ -1,0 +1,25 @@
+FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+
+ARG GN_REVISION="ebc8f16ca7b0d36a3e532ee90896f9eb48e5423b"
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        git \
+        build-essential \
+        clang-18 \
+        python3 \
+        ninja-build && \
+    update-alternatives --install /usr/bin/clang clang /usr/bin/clang-18 100 && \
+    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-18 100
+
+WORKDIR /root
+RUN git clone https://gn.googlesource.com/gn && \
+    git checkout ${GN_REVISION} && \
+    cd gn && \
+    python build/gen.py && \
+    ninja -C out && \
+    tar czf libffi.tar.gz --directory=.libs .

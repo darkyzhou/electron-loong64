@@ -1,0 +1,35 @@
+FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+
+ARG NODEJS_VERSION="22.11.0"
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        build-essential \
+        pkg-config \
+        libicu-dev \
+        libssl-dev \
+        zlib1g-dev \
+        python3
+
+WORKDIR /root
+ADD https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}.tar.xz .
+ENV NOLTO=1
+RUN tar xf node-v${NODEJS_VERSION}.tar.xz && \
+    cd node-v${NODEJS_VERSION} && \
+    ./configure \
+        --prefix=/usr \
+        --shared-openssl \
+        --shared-zlib \
+        --with-intl=system-icu && \
+    make -j32 && \
+    make install DESTDIR=/root/targets && \
+    install -Dvm755 \
+        /root/targets/usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp \
+        /root/targets/usr/bin/node-gyp
+    sed -e 's|"`dirname "$0"`/../../|"`dirname "$0"`/../lib/node_modules/npm/|' \
+        -i /root/targets/usr/bin/node-gyp && \
+    tar -czf /root/targets/nodejs.tar.gz -C /root/targets usr

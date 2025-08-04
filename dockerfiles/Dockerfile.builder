@@ -1,6 +1,4 @@
-FROM linuxdeepin/deepin:beige-loong64-v1.4.0
-
-ARG NODE_VERSION=20.16.0
+FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
 
 RUN groupadd --gid 1000 builduser && \
     useradd --uid 1000 --gid builduser --shell /bin/bash --create-home builduser
@@ -34,7 +32,6 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         bison \
         python3-dbusmock \
         openjdk-8-jre \
-        generate-ninja \
         ninja-build \
         build-essential \
         libnotify-bin \
@@ -173,39 +170,42 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libxkbcommon-x11-dev \
         libdav1d-dev \
         libyuv-dev \
-        mesa-common-dev && \
-    apt-get install -y deepin-unstable-source && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends \
-        clang-19 \
-        llvm-19 \
-        lld-19 \
-        llvm-19-dev \
-        libclang-19-dev \
-        libclang-rt-19-dev
+        mesa-common-dev \
 
-RUN update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100 && \
-    update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100 && \
-    update-alternatives --install /usr/bin/clang-cpp clang-cpp /usr/bin/clang-cpp-19 100 && \
-    update-alternatives --install /usr/bin/lld lld /usr/bin/lld-19 100 && \
-    update-alternatives --install /usr/bin/lld-link lld-link /usr/bin/lld-link-19 100 && \
-    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-19 100
+        # LLVM
+        libxml2 \
+        libedit2 \
+        libffi8
 
-RUN curl -L -O https://unofficial-builds.nodejs.org/download/release/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-loong64.tar.gz && \
-    tar -xzf node-v${NODE_VERSION}-linux-loong64.tar.gz && \
-    cp -R node-v${NODE_VERSION}-linux-loong64/* /usr/local/ && \
-    rm -rf node-v${NODE_VERSION}-linux-loong64* && \
-    npm i -g yarn @esbuild/linux-loong64@0.24.0
+# LLVM
+ARG LLVM_NAME=llvm-20
+COPY llvm.tar.gz .
+RUN mkdir llvm && \
+    tar -xzvf llvm.tar.gz -C llvm && \
+    cp -aPv llvm/usr/* /usr/ && \
+    (cd /usr/bin; ln -sv ../lib/${LLVM_NAME}/bin/* .; cd -) && \
+    (cd /usr/lib; ln -sv ./${LLVM_NAME}/lib/clang .; cd -) && \
+    (cd /usr/lib/loongarch64-linux-gnu; ln -sv ../${LLVM_NAME}/lib/*.so.* .; cd -) && \
+    rm -rf llvm llvm.tar.gz && \
+    update-alternatives --install /usr/bin/cc cc /usr/bin/clang 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 
-ADD config.toml /root/.cargo/
+# GN
+COPY gn.tar.gz .
+RUN mkdir gn && \
+    tar -xzvf gn.tar.gz && \
+    chmod +x out/gn && \
+    mv out/gn /usr/bin/ && \
+    rm -rf gn gn.tar.gz
 
+# Node.js
+COPY nodejs.tar.gz .
+RUN tar -xzf nodejs.tar.gz -C / && \
+    rm nodejs.tar.gz && \
+    npm i -g yarn @esbuild/linux-loong64@0.25.1
+
+# Libraries
 COPY libgcc.tar.gz libffi.tar.gz .
-ADD --checksum=sha256:3b4be9da1b9184af1b6301352294ec7fe21d90bb3bc273a2351f2e41c6a8a76e \
-    https://github.com/darkyzhou/rust/releases/download/1.85.0-loongarch/rust-1.85.0-loongarch64-unknown-linux-gnu.tar.xz .
-ADD --checksum=sha256:66d88c86dde9f9ecd2bb62b17b849df13e1fe4b7fb294eac41aede768d70c5ec \
-    https://github.com/rui314/mold/releases/download/v2.36.0/mold-2.36.0-loongarch64-linux.tar.gz .
-ENV CARGO_REGISTRIES_CRATES_IO_PROTOCOL=sparse
-
 RUN mkdir libgcc libffi && \
     # Replacing the crtbeginS.o is hacky, we might need to build the whole gcc instead
     tar -xzvf libgcc.tar.gz -C libgcc && \
@@ -213,17 +213,14 @@ RUN mkdir libgcc libffi && \
     # Replacing libffi: Also hacky here
     tar -xzvf libffi.tar.gz -C libffi && \
     cp libffi/libffi_convenience.a /usr/lib/loongarch64-linux-gnu/libffi_pic.a && \
-    # Install rust components
-    tar -xvf rust-*.tar.xz && \
-    bash rust-*/install.sh && \
-    # Install mold
-    tar -xzvf mold-*.tar.gz && \
-    cp -r mold-*/* /usr && \
     # Clean up
-    rm -rf *.tar.gz *.tar.xz libgcc libffi rust-* mold-*
+    rm -rf *.tar.gz libgcc libffi
 
-# Chromium seems to require that bindgen binary lives together with llvm
-RUN cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-19
+# Rust
+ENV CARGO_HOME=/usr/local RUSTUP_HOME=/usr/local
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.88.0 && \
+    # Chromium seems to require that bindgen binary lives together with llvm
+    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-20
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep
