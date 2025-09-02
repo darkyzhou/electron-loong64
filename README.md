@@ -1,4 +1,4 @@
-# Electron for Loong64
+# Electron for LoongArch (Loong64)
 
 This project aims to build a version of Electron that supports the Loong64 architecture.
 
