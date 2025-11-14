@@ -5,8 +5,24 @@ set -ex
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/env.sh"
 
+AUTO_CONTINUE=true
+
 function main() {
-    local function_name=${1:-package}
+    local function_name="package"
+
+    # Parse command line arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --no-auto)
+                AUTO_CONTINUE=false
+                shift
+                ;;
+            *)
+                function_name=$1
+                shift
+                ;;
+        esac
+    done
 
     if [[ "$(type -t ${function_name})" != "function" ]]; then
         echo "Error: Function '${function_name}' not found"
@@ -42,7 +58,9 @@ function package() {
 
     popd
 
-    build_mksnapshot
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        build_mksnapshot
+    fi
 }
 
 function build_mksnapshot() {
@@ -65,7 +83,9 @@ function build_mksnapshot() {
 
     popd
 
-    chromedriver
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        chromedriver
+    fi
 }
 
 function chromedriver() {
@@ -80,7 +100,10 @@ function chromedriver() {
     mv "$OUT_PATH"/chromedriver.zip "$RELEASE_PATH"/chromedriver-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
-    nodejs
+
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        nodejs
+    fi
 }
 
 function nodejs() {
@@ -91,7 +114,10 @@ function nodejs() {
     mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
 
     popd
-    ffmpeg
+
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        ffmpeg
+    fi
 }
 
 function ffmpeg() {
@@ -103,7 +129,10 @@ function ffmpeg() {
     mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
     
     popd
-    hunspell
+
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        hunspell
+    fi
 }
 
 function hunspell() {
@@ -114,7 +143,10 @@ function hunspell() {
     mv "$OUT_PATH"/hunspell_dictionaries.zip "$RELEASE_PATH"/hunspell-dictionaries.zip
     
     popd
-    libcxx
+
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        libcxx
+    fi
 }
 
 function libcxx() {
@@ -129,7 +161,10 @@ function libcxx() {
     mv "$OUT_PATH"/libcxx_objects.zip "$RELEASE_PATH"/libcxx-objects-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
-    shasum256
+
+    if [[ "$AUTO_CONTINUE" == "true" ]]; then
+        shasum256
+    fi
 }
 
 function shasum256() {
