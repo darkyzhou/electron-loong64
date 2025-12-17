@@ -1,6 +1,6 @@
 FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
 
-ARG LLVM_TAG="llvmorg-20.1.5"
+ARG LLVM_TAG="llvmorg-21.1.5" LLVM_NAME="llvm-21"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
@@ -10,26 +10,34 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         curl \
         make \
         pkg-config \
-        ninja \
+        ninja-build \
         libffi-dev \
         build-essential \
         cmake \
         binutils-dev \
         libxml2 \
         libedit2 \
-        libffi8
+        libffi8 \
+        python3 \
+        zlib1g \
+        zlib1g-dev \
+        clang-18 && \
+    update-alternatives --install /usr/bin/cc cc /usr/bin/clang-18 100 && \
+    update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-18 100
 
 WORKDIR /root
 ENV CPP_TRIPLE=loongarch64-linux-gnu CFLAGS="-target loongarch64-linux-gnu -mcmodel=medium" CXXFLAGS="-target loongarch64-linux-gnu -mcmodel=medium"
 ADD https://github.com/llvm/llvm-project/archive/refs/tags/${LLVM_TAG}.tar.gz .
 RUN tar xf ${LLVM_TAG}.tar.gz && \
-    cmake /root/llvm-project/llvm \
+    mv llvm-project-${LLVM_TAG} llvm-project && \
+    cmake -G Ninja /root/llvm-project/llvm \
         -DCMAKE_BUILD_TYPE=Release \
         -DLLVM_BUILD_LLVM_DYLIB=ON \
         -DLLVM_DYLIB_EXPORT_ALL=ON \
         -DLLVM_LINK_LLVM_DYLIB=ON \
         -DLLVM_ENABLE_RTTI=ON \
         -DLLVM_ENABLE_FFI=ON \
+        -DLLVM_ENABLE_ZLIB=FORCE_ON \
         -DLLVM_BUILD_DOCS=OFF \
         -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
         -DFFI_INCLUDE_DIR="$(pkg-config --variable=includedir libffi)" \
@@ -39,14 +47,14 @@ RUN tar xf ${LLVM_TAG}.tar.gz && \
         -DLIBOMPTARGET_ENABLE_DEBUG=ON \
         -DOPENMP_ENABLE_LIBOMP_PROFILING=ON \
         -DLLVM_ENABLE_PROJECTS="clang;lld;lldb;clang-tools-extra;mlir;bolt;flang;libclc" \
-        -DLLVM_ENABLE_RUNTIMES="libunwind;libcxx;libcxxabi;compiler-rt;offload;openmp;pstl" \
+        -DLLVM_ENABLE_RUNTIMES="libunwind;libcxx;libcxxabi;compiler-rt;offload;openmp" \
         -DLLVM_USE_LINKER=bfd \
         -DLLVM_PARALLEL_LINK_JOBS=2 \
-        -DCMAKE_INSTALL_PREFIX=/usr/lib/llvm-20 \
+        -DCMAKE_INSTALL_PREFIX=/usr/lib/${LLVM_NAME} \
         -DLLVM_DEFAULT_TARGET_TRIPLE=${CPP_TRIPLE} \
         -DLLVM_HOST_TRIPLE=${CPP_TRIPLE} \
         -DCMAKE_SKIP_RPATH=NO \
         -DCMAKE_SKIP_INSTALL_RPATH=NO && \
-    make && \
-    make install DESTDIR=/root/llvm-project/llvm-targets && \
-    tar -czf llvm-targets/llvm.tar.gz -C llvm-targets usr
+    ninja -j32 && \
+    DESTDIR=/root/llvm-targets ninja install && \
+    tar -czf /root/llvm.tar.gz -C /root/llvm-targets usr

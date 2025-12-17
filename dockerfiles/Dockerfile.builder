@@ -178,8 +178,8 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libffi8
 
 # LLVM
-ARG LLVM_NAME=llvm-20
-COPY llvm.tar.gz .
+ARG LLVM_NAME=llvm-21
+COPY --from=llvm-21 /root/llvm.tar.gz .
 RUN mkdir llvm && \
     tar -xzvf llvm.tar.gz -C llvm && \
     cp -aPv llvm/usr/* /usr/ && \
@@ -191,12 +191,11 @@ RUN mkdir llvm && \
     update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 
 # GN
-COPY gn.tar.gz .
-RUN mkdir gn && \
-    tar -xzvf gn.tar.gz && \
-    chmod +x out/gn && \
-    mv out/gn /usr/bin/ && \
-    rm -rf gn gn.tar.gz
+COPY --from=gn-2285 /root/gn.tar.gz .
+RUN tar -xzvf gn.tar.gz && \
+    chmod +x gn && \
+    mv gn /usr/bin/ && \
+    rm -rf gn.tar.gz
 
 # Node.js
 COPY nodejs.tar.gz .
@@ -217,10 +216,11 @@ RUN mkdir libgcc libffi && \
     rm -rf *.tar.gz libgcc libffi
 
 # Rust
+ARG RUST_VERSION="1.92.0-beta.3" BINDGEN_VERSION="0.70.1"
 ENV CARGO_HOME=/usr/local RUSTUP_HOME=/usr/local
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain 1.88.0 && \
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION} && \
     # Chromium seems to require that bindgen binary lives together with llvm
-    cargo install bindgen-cli@0.69.1 --root /usr/lib/llvm-20
+    cargo install bindgen-cli@${BINDGEN_VERSION} --root /usr/lib/${LLVM_NAME}
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep

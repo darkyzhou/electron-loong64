@@ -32,29 +32,29 @@ function main() {
     ${function_name}
 }
 
+# https://github.com/riscv-forks/electron-riscv-releases/blob/main/.github/workflows/release.yml
 function package() {
     pushd "$ROOT_PATH"/src
-    echo ">>> Package Debug Symbols and Strip Binaries <<<"
+    
+    echo ">>> Package Debug Symbols <<<"
 
     rm -rf "$OUT_PATH"/breakpad_symbols
+    ninja -C "$OUT_PATH" electron:electron_symbols
 
-    electron/script/copy-debug-symbols.py -d "$OUT_PATH" --out-dir="$OUT_PATH"/debug --compress
-    electron/script/strip-binaries.py -d "$OUT_PATH" --verbose
-    electron/script/add-debug-link.py -d "$OUT_PATH" --debug-dir="$OUT_PATH"/debug
+    echo ">>> Package Electron <<<"
+
+    rm -rf "$RELEASE_PATH"
+    mkdir -p "$RELEASE_PATH"
+
+    ninja -C "$OUT_PATH" electron:electron_dist_zip
+    mv "$OUT_PATH"/dist.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64.zip
 
     ninja -C "$OUT_PATH" electron:licenses
     ninja -C "$OUT_PATH" electron:electron_version_file
     DELETE_DSYMS_AFTER_ZIP=1 electron/script/zip-symbols.py -b "$OUT_PATH"
 
-    rm -rf "$RELEASE_PATH"
-    mkdir -p "$RELEASE_PATH"
     mv "$OUT_PATH"/debug.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-debug.zip
     mv "$OUT_PATH"/symbols.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-symbols.zip
-
-    echo ">>> Package Electron <<<"
-
-    ninja -C "$OUT_PATH" electron:electron_dist_zip
-    mv "$OUT_PATH"/dist.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64.zip
 
     popd
 
@@ -73,8 +73,7 @@ function build_mksnapshot() {
     # Remove unused args from mksnapshot_args
     sed -i '/.*builtins-pgo/d' "$OUT_PATH"/mksnapshot_args
     sed -i '/--turbo-profiling-input/d' "$OUT_PATH"/mksnapshot_args
-    electron/script/strip-binaries.py --file "$OUT_PATH"/mksnapshot --verbose
-    electron/script/strip-binaries.py --file "$OUT_PATH"/v8_context_snapshot_generator --verbose
+    sed -i '/The gn arg use_goma=true .*/d' "$OUT_PATH"/mksnapshot_args
 
     ninja -C "$OUT_PATH" electron:electron_mksnapshot_zip
     cd "$OUT_PATH"
@@ -90,12 +89,8 @@ function build_mksnapshot() {
 
 function chromedriver() {
     pushd "$ROOT_PATH"/src
-    echo ">>> Build Chromedriver <<<"
-    EU_STRIP_PATH="$ROOT_PATH"/src/buildtools/third_party/eu-strip/bin/eu-strip
-    rm -rf "$EU_STRIP_PATH"
-    ln -sv `which eu-strip` "$EU_STRIP_PATH"
 
-    ninja -C "$OUT_PATH" electron:electron_chromedriver
+    echo ">>> Build Chromedriver <<<"
     ninja -C "$OUT_PATH" electron:electron_chromedriver_zip
     mv "$OUT_PATH"/chromedriver.zip "$RELEASE_PATH"/chromedriver-v$ELECTRON_VERSION-linux-loong64.zip
 
@@ -110,6 +105,7 @@ function nodejs() {
     pushd "$ROOT_PATH"/src
 
     echo ">>> Build Node.js headers <<<"
+
     ELECTRON_OUT_DIR=Release ninja -C "$OUT_PATH" electron:node_headers
     mv "$OUT_PATH"/gen/node_headers.tar.gz "$RELEASE_PATH"/node-v$ELECTRON_VERSION-headers.tar.gz
 
@@ -124,7 +120,6 @@ function ffmpeg() {
     pushd "$ROOT_PATH"/src
 
     echo ">>> Build ffmpeg <<<"
-    gn gen "$OUT_PATH"/ffmpeg --args="import(\"//electron/build/args/ffmpeg.gn\")" --script-executable=/usr/bin/python3
     ninja -C "$OUT_PATH"/ffmpeg electron:electron_ffmpeg_zip
     mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
     

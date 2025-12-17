@@ -20,14 +20,13 @@ You may also refer to [darkyzhou/electron-builder-loong64](https://github.com/da
 - `dev`: The development branch, containing the latest patches and build scripts.
 - `X.Y.Z`: The release branches, corresponding to the release versions of Electron.
 
+## Electron Patches
+
+See [darkyzhou/electron](https://github.com/darkyzhou/electron).
+
 ## Acknowledgments
 
 Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their invaluable Chromium patches in [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64), which make this project possible.
-
-## How This Project Works
-
-1. This project builds upon the official Electron repository by applying custom patches. See `electron.patch` for details.
-2. The build process runs in a dedicated container environment that includes all necessary build tools and dependencies. See `Dockerfile.builder` for details.
 
 ## Development
 
@@ -37,6 +36,11 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 - Docker with [docker-buildx](https://github.com/docker/buildx) installed
 - [LATX](https://github.com/deuso/latx-build) version 1.4.4 (required for running `ghcr.io/darkyzhou/electron-buildtools` image)
 - System resources: minimum 32GiB RAM and 200GiB free disk space
+
+### Available Builder Images
+
+- `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-20-rustc-188`: for `37.x.x`
+- `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-21-rustc-192`: for `39.x.x`
 
 ### Building from Source
 
@@ -56,7 +60,8 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 ./scripts/sync.sh
 ```
 
-4. Launch a `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-20-rustc-188` container. All subsequent steps should be executed inside this container.
+4. Launch a container with the corresponding builder image listed above. All subsequent steps should be executed inside this container.
+
 5. Run following scripts in sequence.
 
 ```bash
@@ -74,29 +79,20 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 
 ### Updating Patches
 
-1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container.
+1. Launch a `ghcr.io/darkyzhou/electron-buildtools` container. All subsequent steps should be executed inside this container
 
 2. Update versions and sync sources:
-   - Edit `ELECTRON_VERSION` to point to the new version to build in `env.sh`.
-   - Run `scripts/update.sh`.
+   - Edit `ELECTRON_VERSION` to point to the new version to build in `env.sh`
+   - Run `scripts/update.sh`
 
 3. Update dependencies:
-   - Run `scripts/sync.sh`. This will apply all original patches from the Electron repository.
+   - Run `scripts/sync.sh` to install dependencies
 
-4. Apply Chromium patches:
-   - Apply the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) to `$BUILD_ROOT/src`.
-   - Resolve any conflicts if any.
-
-5. Export Chromium patches using `npx e patches` command:
-   > Note: `$BUILD_ROOT/src` is a git repository containing submodules, including `$BUILD_ROOT/src/electron` and *a few folders* in `$BUILD_ROOT/src/third_party`.
-
-   1. Run `scripts/export.sh` to commit changes for both chromium and submodule changes.
-   2. Run `npx e patches $NAME` to export patches for submodule commits.
-   3. Export changes in `$BUILD_ROOT/src/electron` to `patches/`.
-
-6. Apply Electron patches from `patches/electron.patch`.
-
-7. Run `scripts/sync.sh` again to sync the sources and apply all patches.
+4. Update Chromium patches:
+   1. Prepare the consolidated Chromium patch file (e.g., `chromium-131.0.6778.85.diff`) from [AOSC-Dev/chromium-loongarch64](https://github.com/AOSC-Dev/chromium-loongarch64)
+   2. Run `scripts/apply.sh chromium-131.0.6778.85.diff` to apply the patches
+   3. Resolve any conflicts if any
+   4. Run `scripts/export.sh` to export patches for Chromium and submodule commits
 
 ### Troubleshooting
 

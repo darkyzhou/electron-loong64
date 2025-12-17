@@ -15,15 +15,18 @@ export SRC_PATH="$ROOT_PATH/src"
 export OUT_PATH="$SRC_PATH/out/Release"
 
 # Electron repository
-export ELECTRON_REPO="https://github.com/electron/electron.git"
+export ELECTRON_REPO="https://github.com/darkyzhou/electron.git"
+
+export ELECTRON_BRANCH="v39.2.3-loong64"
 
 # The version to build
-export ELECTRON_VERSION="37.2.5"
+export ELECTRON_VERSION="39.2.3"
 
 # Path to the release output directory
 export RELEASE_PATH="$ROOT_PATH/release/$ELECTRON_VERSION"
 
 # The rollup version to use in rollup.sh
+# See third_party/devtools-frontend/src/package-lock.json
 export ROLLUP_VERSION="4.32.0"
 
 # For compiling electron
