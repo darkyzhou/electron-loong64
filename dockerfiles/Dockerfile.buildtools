@@ -14,7 +14,9 @@ RUN apt-get update && \
         nano \
         fish \
         patch \
-        jq
+        jq \
+        build-essential \
+        clang
 
 RUN curl --silent --location https://deb.nodesource.com/setup_22.x | bash - && \
     apt-get update && \

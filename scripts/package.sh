@@ -39,7 +39,7 @@ function package() {
     echo ">>> Package Debug Symbols <<<"
 
     rm -rf "$OUT_PATH"/breakpad_symbols
-    ninja -C "$OUT_PATH" electron:electron_symbols
+    ninja -C "$OUT_PATH" electron:electron_symbols || echo "Failed to run electron:electron_symbols"
 
     echo ">>> Package Electron <<<"
 
@@ -53,8 +53,8 @@ function package() {
     ninja -C "$OUT_PATH" electron:electron_version_file
     DELETE_DSYMS_AFTER_ZIP=1 electron/script/zip-symbols.py -b "$OUT_PATH"
 
-    mv "$OUT_PATH"/debug.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-debug.zip
-    mv "$OUT_PATH"/symbols.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-symbols.zip
+    [ -f "$OUT_PATH"/debug.zip ] && mv "$OUT_PATH"/debug.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-debug.zip
+    [ -f "$OUT_PATH"/symbols.zip ] && mv "$OUT_PATH"/symbols.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64-symbols.zip
 
     popd
 

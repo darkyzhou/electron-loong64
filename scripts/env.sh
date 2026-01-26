@@ -17,10 +17,10 @@ export OUT_PATH="$SRC_PATH/out/Release"
 # Electron repository
 export ELECTRON_REPO="https://github.com/darkyzhou/electron.git"
 
-export ELECTRON_BRANCH="v39.2.3-loong64"
+export ELECTRON_BRANCH="v39.2.7-loong64"
 
 # The version to build
-export ELECTRON_VERSION="39.2.3"
+export ELECTRON_VERSION="39.2.7"
 
 # Path to the release output directory
 export RELEASE_PATH="$ROOT_PATH/release/$ELECTRON_VERSION"

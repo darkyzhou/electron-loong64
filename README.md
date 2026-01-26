@@ -52,9 +52,6 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 # Clone or update the local electron repository
 ./scripts/update.sh
 
-# Apply patches from electron-loong64
-./scripts/patch.sh
-
 # Fetch or update the dependencies of electron
 # Note: This could take a really long time, grab your coffee or take a sleep!
 ./scripts/sync.sh
