@@ -2,7 +2,7 @@
 
 This project aims to build a version of Electron that supports the Loong64 architecture.
 
-**Note:** The Electron binaries require `glibc >= 2.38`.
+**Note:** The Electron binaries require `glibc >= 2.38` (i.e. [New-World LoongArch](https://areweloongyet.com/docs/old-and-new-worlds/)).
 
 ## Usage
 
