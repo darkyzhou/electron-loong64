@@ -1,9 +1,9 @@
-FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
-ARG LLVM_TAG="llvmorg-21.1.5" LLVM_NAME="llvm-21"
+ARG LLVM_TAG="llvmorg-23-init" LLVM_NAME="llvm-23"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -11,13 +11,11 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         make \
         pkg-config \
         ninja-build \
-        libffi-dev \
         build-essential \
         cmake \
-        binutils-dev \
-        libxml2 \
-        libedit2 \
-        libffi8 \
+        libxml2-dev \
+        libzstd-dev \
+        lld-18 \
         python3 \
         zlib1g \
         zlib1g-dev \
@@ -26,33 +24,40 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
     update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-18 100
 
 WORKDIR /root
-ENV CPP_TRIPLE=loongarch64-linux-gnu CFLAGS="-target loongarch64-linux-gnu -mcmodel=medium" CXXFLAGS="-target loongarch64-linux-gnu -mcmodel=medium"
+ENV CPP_TRIPLE=loongarch64-linux-gnu \
+    LLVM_DEFAULT_TRIPLE=loongarch64-unknown-linux-gnu \
+    CFLAGS="-target loongarch64-linux-gnu -mcmodel=medium" \
+    CXXFLAGS="-target loongarch64-linux-gnu -mcmodel=medium"
 ADD https://github.com/llvm/llvm-project/archive/refs/tags/${LLVM_TAG}.tar.gz .
 RUN tar xf ${LLVM_TAG}.tar.gz && \
     mv llvm-project-${LLVM_TAG} llvm-project && \
     cmake -G Ninja /root/llvm-project/llvm \
         -DCMAKE_BUILD_TYPE=Release \
-        -DLLVM_BUILD_LLVM_DYLIB=ON \
-        -DLLVM_DYLIB_EXPORT_ALL=ON \
-        -DLLVM_LINK_LLVM_DYLIB=ON \
-        -DLLVM_ENABLE_RTTI=ON \
-        -DLLVM_ENABLE_FFI=ON \
-        -DLLVM_ENABLE_ZLIB=FORCE_ON \
-        -DLLVM_BUILD_DOCS=OFF \
-        -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
-        -DFFI_INCLUDE_DIR="$(pkg-config --variable=includedir libffi)" \
-        -DLLVM_BINUTILS_INCDIR=/usr/include \
+        -DLLVM_ENABLE_ASSERTIONS=ON \
+        -DLLVM_ENABLE_IO_SANDBOX=OFF \
+        -DLLVM_ENABLE_PROJECTS="clang;lld;clang-tools-extra" \
+        -DLLVM_ENABLE_RUNTIMES="compiler-rt" \
+        -DLLVM_TARGETS_TO_BUILD="AArch64;ARM;LoongArch;Mips;PowerPC;RISCV;SystemZ;WebAssembly;X86" \
+        -DLLVM_ENABLE_PIC=ON \
+        -DLLVM_ENABLE_Z3_SOLVER=OFF \
+        -DCLANG_PLUGIN_SUPPORT=OFF \
+        -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
+        -DCLANG_ENABLE_ARCMT=OFF \
+        -DLLVM_ENABLE_DIA_SDK=OFF \
+        -DLLVM_ENABLE_LLD=ON \
+        -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=ON \
+        -DLLVM_ENABLE_CURL=OFF \
+        -DLIBCLANG_BUILD_STATIC=ON \
         -DLLVM_INSTALL_UTILS=ON \
+        -DLLVM_ENABLE_ZSTD=ON \
+        -DLLVM_ENABLE_ZLIB=FORCE_ON \
+        -DLLVM_ENABLE_LIBXML2=FORCE_ON \
+        -DCLANG_ENABLE_LIBXML2=NO \
+        -DLLVM_ENABLE_UNWIND_TABLES=OFF \
+        -DLLVM_BUILD_DOCS=OFF \
         -DLLVM_INCLUDE_TESTS=OFF \
-        -DLIBOMPTARGET_ENABLE_DEBUG=ON \
-        -DOPENMP_ENABLE_LIBOMP_PROFILING=ON \
-        -DLLVM_ENABLE_PROJECTS="clang;lld;lldb;clang-tools-extra;mlir;bolt;flang;libclc" \
-        -DLLVM_ENABLE_RUNTIMES="libunwind;libcxx;libcxxabi;compiler-rt;offload;openmp" \
-        -DLLVM_USE_LINKER=bfd \
-        -DLLVM_PARALLEL_LINK_JOBS=2 \
         -DCMAKE_INSTALL_PREFIX=/usr/lib/${LLVM_NAME} \
-        -DLLVM_DEFAULT_TARGET_TRIPLE=${CPP_TRIPLE} \
-        -DLLVM_HOST_TRIPLE=${CPP_TRIPLE} \
+        -DLLVM_DEFAULT_TARGET_TRIPLE=${LLVM_DEFAULT_TRIPLE} \
         -DCMAKE_SKIP_RPATH=NO \
         -DCMAKE_SKIP_INSTALL_RPATH=NO && \
     ninja -j32 && \

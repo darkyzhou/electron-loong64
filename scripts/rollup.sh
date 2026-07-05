@@ -9,7 +9,7 @@ source "$SCRIPT_DIR/env.sh"
 
 pushd "$ROOT_PATH"/src/third_party/node
   sed -i -e 's/@rollup/rollup/' -e "s/'wasm-node',//" node_modules.py
-  jq ".dependencies.rollup=\"$ROLLUP_VERSION\"" package.json > package.json.new
+  jq ".dependencies.rollup=\"$ROLLUP_VERSION\" | .dependencies.\"@rollup/rollup-linux-loongarch64-gnu\"=\"$ROLLUP_VERSION\"" package.json > package.json.new
   mv package.json{.new,}
   ./update_npm_deps
 popd

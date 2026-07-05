@@ -39,6 +39,10 @@ function package() {
     echo ">>> Package Debug Symbols <<<"
 
     rm -rf "$OUT_PATH"/breakpad_symbols
+    rm -f \
+        "$OUT_PATH"/gen/electron/egl_symbols.stamp \
+        "$OUT_PATH"/gen/electron/gles_symbols.stamp \
+        "$OUT_PATH"/gen/electron/electron_app_symbols.stamp
     ninja -C "$OUT_PATH" electron:electron_symbols || echo "Failed to run electron:electron_symbols"
 
     echo ">>> Package Electron <<<"
@@ -46,6 +50,7 @@ function package() {
     rm -rf "$RELEASE_PATH"
     mkdir -p "$RELEASE_PATH"
 
+    rm -f "$OUT_PATH"/dist.zip
     ninja -C "$OUT_PATH" electron:electron_dist_zip
     mv "$OUT_PATH"/dist.zip "$RELEASE_PATH"/electron-v$ELECTRON_VERSION-linux-loong64.zip
 
@@ -120,8 +125,8 @@ function ffmpeg() {
     pushd "$ROOT_PATH"/src
 
     echo ">>> Build ffmpeg <<<"
-    ninja -C "$OUT_PATH"/ffmpeg electron:electron_ffmpeg_zip
-    mv "$OUT_PATH"/ffmpeg/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
+    ninja -C "$OUT_PATH" electron:electron_ffmpeg_zip
+    mv "$OUT_PATH"/ffmpeg.zip "$RELEASE_PATH"/ffmpeg-v$ELECTRON_VERSION-linux-loong64.zip
     
     popd
 

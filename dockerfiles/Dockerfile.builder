@@ -1,4 +1,4 @@
-FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
 RUN groupadd --gid 1000 builduser && \
     useradd --uid 1000 --gid builduser --shell /bin/bash --create-home builduser
@@ -8,7 +8,7 @@ RUN chmod a+rwx /tmp
 
 # Omitted lighttpd, rpm, xcompmgr and xcb as deepin doesn't offer them. Fortunately we could compile without them somehow.
 ENV DEBIAN_FRONTEND=noninteractive
-RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -45,11 +45,9 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libxtst-dev \
         libxss1 \
         libnss3-dev \
-
         # Tools needed by our scripts
         jq \
         rsync \
-
         # From https://chromium.googlesource.com/chromium/src/+/HEAD/build/install-build-deps.py
         binutils \
         bison \
@@ -142,7 +140,6 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libsqlite3-0 \
         libuuid1 \
         libwayland-egl1 \
-        libwayland-egl1-mesa \
         libx11-6 \
         libx11-xcb1 \
         libxau6 \
@@ -163,7 +160,6 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         xserver-xorg-video-dummy \
         xvfb \
         zlib1g \
-
         # From compilation errors
         libx11-xcb-dev \
         libxcb-xkb-dev \
@@ -171,15 +167,15 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
         libdav1d-dev \
         libyuv-dev \
         mesa-common-dev \
-
         # LLVM
         libxml2 \
         libedit2 \
-        libffi8
+        libffi8 \
+        libzstd1
 
 # LLVM
-ARG LLVM_NAME=llvm-21
-COPY --from=llvm-21 /root/llvm.tar.gz .
+ARG LLVM_NAME=llvm-23
+COPY llvm.tar.gz .
 RUN mkdir llvm && \
     tar -xzvf llvm.tar.gz -C llvm && \
     cp -aPv llvm/usr/* /usr/ && \
@@ -191,7 +187,7 @@ RUN mkdir llvm && \
     update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 100
 
 # GN
-COPY --from=gn-2285 /root/gn.tar.gz .
+COPY gn.tar.gz .
 RUN tar -xzvf gn.tar.gz && \
     chmod +x gn && \
     mv gn /usr/bin/ && \
@@ -216,11 +212,17 @@ RUN mkdir libgcc libffi && \
     rm -rf *.tar.gz libgcc libffi
 
 # Rust
-ARG RUST_VERSION="1.92.0-beta.3" BINDGEN_VERSION="0.70.1"
+ARG RUST_VERSION="nightly-2026-02-28" BINDGEN_VERSION="0.72.1"
 ENV CARGO_HOME=/usr/local RUSTUP_HOME=/usr/local
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION} && \
-    # Chromium seems to require that bindgen binary lives together with llvm
-    cargo install bindgen-cli@${BINDGEN_VERSION} --root /usr/lib/${LLVM_NAME}
+    rustup component add rustfmt clippy && \
+    # Chromium expects bindgen and some Rust tools next to LLVM when
+    # rust_bindgen_root points at /usr/lib/${LLVM_NAME}.
+    cargo install bindgen-cli@${BINDGEN_VERSION} --root /usr/lib/${LLVM_NAME} && \
+    ln -sv /usr/lib/${LLVM_NAME}/bin/bindgen /usr/bin/bindgen && \
+    for tool in cargo cargo-clippy clippy-driver rustc rustdoc rustfmt rustup; do \
+        ln -sv /usr/local/bin/${tool} /usr/lib/${LLVM_NAME}/bin/${tool}; \
+    done
 
 RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser && \
     echo 'Defaults    env_keep += "DEBIAN_FRONTEND"' >> /etc/sudoers.d/env_keep

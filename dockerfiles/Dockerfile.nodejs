@@ -1,9 +1,9 @@
-FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
-ARG NODEJS_VERSION="22.11.0"
+ARG NODEJS_VERSION="24.12.0"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
@@ -17,7 +17,13 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial com
 
 WORKDIR /root
 ADD https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}.tar.xz .
-ENV NOLTO=1
+# Highway disables EMU128 on GCC < 14 by default and falls back to scalar.
+# V8's JSON stringifier uses FixedTag<..., 16>, which fails to compile with
+# scalar's single lane backend on LoongArch. Deepin crimson only has GCC 12, so
+# keep EMU128 enabled explicitly.
+ENV NOLTO=1 \
+    CFLAGS="-DHWY_BROKEN_EMU128=0" \
+    CXXFLAGS="-DHWY_BROKEN_EMU128=0"
 RUN tar xf node-v${NODEJS_VERSION}.tar.xz && \
     cd node-v${NODEJS_VERSION} && \
     ./configure \
@@ -25,11 +31,11 @@ RUN tar xf node-v${NODEJS_VERSION}.tar.xz && \
         --shared-openssl \
         --shared-zlib \
         --with-intl=system-icu && \
-    make -j32 && \
-    make install DESTDIR=/root/targets && \
+    make -j32 > /tmp/node-build.log 2>&1 || (tail -200 /tmp/node-build.log; false) && \
+    make install DESTDIR=/root/targets > /tmp/node-install.log 2>&1 || (tail -200 /tmp/node-install.log; false) && \
     install -Dvm755 \
         /root/targets/usr/lib/node_modules/npm/bin/node-gyp-bin/node-gyp \
-        /root/targets/usr/bin/node-gyp
+        /root/targets/usr/bin/node-gyp && \
     sed -e 's|"`dirname "$0"`/../../|"`dirname "$0"`/../lib/node_modules/npm/|' \
         -i /root/targets/usr/bin/node-gyp && \
     tar -czf /root/targets/nodejs.tar.gz -C /root/targets usr

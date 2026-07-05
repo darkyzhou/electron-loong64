@@ -1,10 +1,10 @@
-FROM linuxdeepin/deepin:beige-25-loong64-v1.5.0
+FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
-# 2285
-ARG GN_REVISION="81b24e01531ecf0eff12ec9359a555ec3944ec4e"
+# Chromium 148 / Electron 42.3.0
+ARG GN_REVISION="6e8dcdebbadf4f8aa75e6a4b6e0bdf89dce1513a"
 
 ENV DEBIAN_FRONTEND=noninteractive
-RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige beige main commercial community' > /etc/apt/sources.list && \
+RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates \
