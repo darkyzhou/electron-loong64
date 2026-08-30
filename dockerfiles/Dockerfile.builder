@@ -45,6 +45,8 @@ RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial c
         libxtst-dev \
         libxss1 \
         libnss3-dev \
+        # remoting/host/linux (Chromium 150) needs this for pkg-config at gn gen time
+        libpipewire-0.3-dev \
         # Tools needed by our scripts
         jq \
         rsync \
@@ -197,7 +199,9 @@ RUN tar -xzvf gn.tar.gz && \
 COPY nodejs.tar.gz .
 RUN tar -xzf nodejs.tar.gz -C / && \
     rm nodejs.tar.gz && \
-    npm i -g yarn @esbuild/linux-loong64@0.25.1
+    # DevTools (Chromium 150) requires npm >= 11.10.0; node 24.12.0 ships 11.6.2.
+    # npm 12 requires node >= 24.15, so stay on the newest npm 11.
+    npm i -g npm@11.19.1 yarn @esbuild/linux-loong64@0.25.1
 
 # Libraries
 COPY libgcc.tar.gz libffi.tar.gz .
@@ -212,7 +216,7 @@ RUN mkdir libgcc libffi && \
     rm -rf *.tar.gz libgcc libffi
 
 # Rust
-ARG RUST_VERSION="nightly-2026-02-28" BINDGEN_VERSION="0.72.1"
+ARG RUST_VERSION="nightly-2026-04-10" BINDGEN_VERSION="0.72.1"
 ENV CARGO_HOME=/usr/local RUSTUP_HOME=/usr/local
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION} && \
     rustup component add rustfmt clippy && \

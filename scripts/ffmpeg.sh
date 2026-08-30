@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/env.sh"
 
-IMAGE="${FFMPEG_LOONG64_IMAGE:-electron-builder:crimson-llvm-23-rustc-195}"
+IMAGE="${FFMPEG_LOONG64_IMAGE:-electron-builder:crimson-llvm-23-rustc-196}"
 HOST_WORKSPACE="${FFMPEG_LOONG64_WORKSPACE:-/mnt/data/build/electron-loong64}"
 KEEP_BUILD_DIR=false
 RUN_DOCKER=false
@@ -61,6 +61,9 @@ if [[ "$RUN_DOCKER" == true ]]; then
   tmp_os_release="$(mktemp)"
   trap 'rm -f "$tmp_os_release"' EXIT
   printf 'ID=debian\nNAME="Debian GNU/Linux"\n' > "$tmp_os_release"
+  # The container runs as builduser; mktemp defaults to 600, so make the
+  # file world-readable or /etc/os-release will be unreadable inside.
+  chmod 644 "$tmp_os_release"
 
   docker_bin="docker"
   if ! docker info >/dev/null 2>&1; then

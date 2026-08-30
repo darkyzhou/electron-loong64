@@ -1,7 +1,7 @@
 FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
-# Chromium 148 / Electron 42.3.0
-ARG GN_REVISION="6e8dcdebbadf4f8aa75e6a4b6e0bdf89dce1513a"
+# Chromium 150 / Electron 43.4.1
+ARG GN_REVISION="3357c4f51b1a9e676378c695dd9c7e9911c35ee6"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \

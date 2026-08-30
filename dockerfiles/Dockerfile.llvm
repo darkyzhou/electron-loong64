@@ -1,6 +1,6 @@
 FROM linuxdeepin/deepin:crimson-loong64-v1.6.0
 
-ARG LLVM_TAG="llvmorg-23-init" LLVM_NAME="llvm-23"
+ARG LLVM_COMMIT="20b6ec66967ac2a8f932863c1abf251e5b17a843" LLVM_NAME="llvm-23"
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN echo 'deb https://mirrors.ustc.edu.cn/deepin/beige crimson main commercial community' > /etc/apt/sources.list && \
@@ -28,9 +28,9 @@ ENV CPP_TRIPLE=loongarch64-linux-gnu \
     LLVM_DEFAULT_TRIPLE=loongarch64-unknown-linux-gnu \
     CFLAGS="-target loongarch64-linux-gnu -mcmodel=medium" \
     CXXFLAGS="-target loongarch64-linux-gnu -mcmodel=medium"
-ADD https://github.com/llvm/llvm-project/archive/refs/tags/${LLVM_TAG}.tar.gz .
-RUN tar xf ${LLVM_TAG}.tar.gz && \
-    mv llvm-project-${LLVM_TAG} llvm-project && \
+ADD https://github.com/llvm/llvm-project/archive/${LLVM_COMMIT}.tar.gz .
+RUN tar xf ${LLVM_COMMIT}.tar.gz && \
+    mv llvm-project-${LLVM_COMMIT} llvm-project && \
     cmake -G Ninja /root/llvm-project/llvm \
         -DCMAKE_BUILD_TYPE=Release \
         -DLLVM_ENABLE_ASSERTIONS=ON \

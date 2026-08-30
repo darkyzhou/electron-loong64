@@ -1,3 +1,5 @@
 .DS_Store
 *.tar.gz
 .test/
+AGENTS.md
+worklog-*.md
