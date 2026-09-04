@@ -41,11 +41,12 @@ Special thanks to [@jiegec](https://github.com/jiegec) and AOSC team for their i
 
 Current local images:
 
-- `ghcr.io/darkyzhou/electron-buildtools:crimson-node-24`: native Loong64 buildtools image for Electron 42 / Node.js 24, based on Deepin crimson.
-- `ghcr.io/darkyzhou/electron-builder:crimson-llvm-23-rustc-195`: native Loong64 builder image for Electron 42 / Chromium 148, based on Deepin crimson with LLVM 23, Rust 1.95 nightly, Node.js 24.15.0, and the Chromium 148 GN revision.
+- `ghcr.io/darkyzhou/electron-buildtools:crimson-node-24`: native Loong64 buildtools image for Electron 42/43 / Node.js 24, based on Deepin crimson.
+- `ghcr.io/darkyzhou/electron-builder:crimson-llvm-23-rustc-196`: native Loong64 builder image for Electron 43 / Chromium 150, based on Deepin crimson with LLVM 23, Rust 1.96 nightly, Node.js 24.12.0, and the Chromium 150 GN revision.
 
 Older published builder images:
 
+- `ghcr.io/darkyzhou/electron-builder:crimson-llvm-23-rustc-195`: for `42.x.x`
 - `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-20-rustc-188`: for `37.x.x`
 - `ghcr.io/darkyzhou/electron-builder:deepin-25-llvm-21-rustc-192`: for `39.x.x`
 
@@ -64,7 +65,7 @@ Older published builder images:
 ./scripts/sync.sh
 ```
 
-4. Launch a container with the corresponding builder image listed above, for example `electron-builder:crimson-llvm-23-rustc-195` for Electron 42. All subsequent build/package steps should be executed inside this container.
+4. Launch a container with the corresponding builder image listed above, for example `electron-builder:crimson-llvm-23-rustc-196` for Electron 43. All subsequent build/package steps should be executed inside this container.
 
 5. Run following scripts in sequence.
 
