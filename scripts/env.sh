@@ -5,6 +5,11 @@ export REPO_PATH="/home/builduser/electron-loong64"
 # `.electron_build_tools` directory will by default locates at the home directory
 export DEPOT_PATH="/home/builduser/.electron_build_tools/third_party/depot_tools"
 
+# Newer build-tools loads @electron-internal/extract-zip at startup, but that
+# package does not publish a LoongArch64 binding. Pin the working JS version;
+# this variable also disables build-tools' automatic updates.
+export BUILD_TOOLS_SHA="9d8151efd2c8175c05b79eca46e73bbc9a02ef4a"
+
 # Path to the build root directory
 export ROOT_PATH="/home/builduser/buildroot"
 
@@ -17,10 +22,10 @@ export OUT_PATH="$SRC_PATH/out/Release"
 # Electron repository
 export ELECTRON_REPO="https://github.com/darkyzhou/electron.git"
 
-export ELECTRON_BRANCH="v43.4.1-loong64"
+export ELECTRON_BRANCH="v43.7.7-loong64"
 
 # The version to build
-export ELECTRON_VERSION="43.4.1"
+export ELECTRON_VERSION="43.7.7"
 
 # Path to the release output directory
 export RELEASE_PATH="$ROOT_PATH/release/$ELECTRON_VERSION"

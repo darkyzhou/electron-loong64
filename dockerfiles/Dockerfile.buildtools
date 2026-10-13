@@ -38,4 +38,7 @@ RUN echo 'builduser ALL=NOPASSWD: ALL' >> /etc/sudoers.d/50-builduser
 
 USER builduser
 WORKDIR /home/builduser
+# Keep fresh images compatible with LoongArch64 too; the installer checks out
+# BUILD_TOOLS_SHA, and the dispatcher skips automatic updates when it is set.
+ENV BUILD_TOOLS_SHA=9d8151efd2c8175c05b79eca46e73bbc9a02ef4a
 RUN npm install @electron/build-tools

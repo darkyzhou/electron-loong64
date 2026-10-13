@@ -5,6 +5,18 @@ set -ex
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/env.sh"
 
+# Keep the build-tools source and compiled dispatcher on the pinned revision.
+# An existing checkout may already have auto-updated before the pin was set.
+BUILD_TOOLS_PATH="$(dirname "$(dirname "$DEPOT_PATH")")"
+if [ "$(git -C "$BUILD_TOOLS_PATH" rev-parse HEAD)" != "$BUILD_TOOLS_SHA" ]; then
+  git -C "$BUILD_TOOLS_PATH" fetch origin "$BUILD_TOOLS_SHA"
+  git -C "$BUILD_TOOLS_PATH" checkout --detach "$BUILD_TOOLS_SHA"
+  pushd "$BUILD_TOOLS_PATH"
+    node .yarn/releases/yarn-4.10.3.cjs install --immutable
+    node .yarn/releases/yarn-4.10.3.cjs build
+  popd
+fi
+
 pushd "$ROOT_PATH"
   git -C "$DEPOT_PATH" fetch origin main
   git -C "$DEPOT_PATH" reset --hard origin/main
